@@ -89,6 +89,13 @@
   .task-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
   .task-check.done { background: var(--accent); border-color: var(--accent); color: white; }
   .task-text.done { color: var(--text-muted); text-decoration: line-through; }
+  .task-due { font-size: 11px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+  .task-priority { font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500; margin-left: 8px; }
+  .priority-high { background: #ffebee; color: #c62828; }
+  .priority-medium { background: #fff8e1; color: #f57f17; }
+  .priority-low { background: #e8f5e9; color: #2e7d32; }
+  .task-row { display: flex; align-items: center; flex: 1; min-width: 0; }
+
   .meetings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
   .meeting-card { background: var(--card-bg); border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 4px var(--shadow); transition: background 0.3s; }
   .meeting-date { background: var(--accent); color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 8px; }
@@ -152,7 +159,7 @@
     <div class="form-group"><label>当前节点</label><input type="text" id="editNode"></div>
     <div class="form-group"><label>截止日期</label><input type="text" id="editDeadline"></div>
     <div class="form-group"><label>当前问题</label><textarea id="editIssues"></textarea></div>
-    <div class="form-group"><label>子任务（每行一个）</label><textarea id="editTasks" placeholder="每行一个任务，已完成的在前面加✅"></textarea></div>
+    <div class="form-group"><label>子任务（每行一个）</label><textarea id="editTasks" placeholder="每行一个任务，格式：✅ 任务描述 [#high] [@2026-04-03]&#10;☑ = 已完成，#high/#medium/#low = 优先级，@日期 = 截止日期"></textarea></div>
     <div class="modal-btns">
       <button class="btn btn-secondary" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="saveProject()">保存</button>
@@ -217,7 +224,7 @@ function render() {
           const done = t.done ? 'done' : '';
           const check = t.done ? 'done' : '';
           const text = t.text.replace(/'/g, "\\'");
-          html += '<div class="task" onclick="editSingleTask(\'' + group + '\',\'' + p.id + '\',\'' + text + '\')"><div class="task-check ' + check + '">' + (t.done ? '✓' : '') + '</div><span class="task-text ' + done + '">' + t.text.replace('✅ ','') + '</span></div>';
+          html += '<div class="task" onclick="editSingleTask(\'' + group + '\',\'' + p.id + '\',\'' + text + '\')"><div class="task-check ' + check + '">' + (t.done ? '✓' : '') + '</div><div class="task-row"><span class="task-text ' + done + '">' + t.text.replace('✅ ','') + '</span><span class="task-priority priority-' + (t.priority || 'medium') + '">' + (t.priority === 'high' ? '高' : t.priority === 'low' ? '低' : '中') + '</span><span class="task-due">' + (t.due || '') + '</span></div></div>';
         });
         html += '</div></div>';
       });
@@ -240,7 +247,7 @@ function editProject(group, id) {
   document.getElementById('editNode').value = p.node || '';
   document.getElementById('editDeadline').value = p.deadline || '';
   document.getElementById('editIssues').value = p.issues || '';
-  document.getElementById('editTasks').value = (p.tasks || []).map(t => (t.done ? '✅ ' : '☐ ') + t.text).join('\n');
+  document.getElementById('editTasks').value = (p.tasks || []).map(t => { let s = (t.done ? '✅ ' : '☐ ') + t.text; if(t.due) s += ' @' + t.due; if(t.priority && t.priority !== 'medium') s += ' [#' + t.priority + ']'; return s; }).join('\n');
   document.getElementById('editModal').classList.add('show');
 }
 
@@ -250,13 +257,24 @@ function editSingleTask(group, id, text) {
   if (!p) return;
   const t = p.tasks.find(x => x.text === text);
   if (!t) return;
-  // 创建一个简单的编辑对话框
   const newText = prompt('修改任务描述:', t.text);
   if (newText && newText.trim() && newText !== t.text) {
     t.text = newText.trim();
-    saveToServer();
-    render();
   }
+  const newDue = prompt('截止日期 (如: 2026-04-03):', t.due || '');
+  if (newDue !== null) {
+    t.due = newDue.trim();
+  }
+  const priorities = ['low', 'medium', 'high'];
+  const priorityLabels = { low: '低', medium: '中', high: '高' };
+  const currentP = t.priority || 'medium';
+  const currentIdx = priorities.indexOf(currentP);
+  const newP = prompt('优先级 (low/medium/high):', currentP);
+  if (newP && priorities.includes(newP)) {
+    t.priority = newP;
+  }
+  saveToServer();
+  render();
 }
 
 async function toggleTask(group, id, text) {
@@ -280,7 +298,18 @@ async function saveProject() {
     node: document.getElementById('editNode').value,
     deadline: document.getElementById('editDeadline').value,
     issues: document.getElementById('editIssues').value,
-    tasks: tasksText.split('\n').filter(t => t.trim()).map(t => ({ text: t.replace('✅ ','').replace('☐ ',''), done: t.includes('✅') }))
+    tasks: tasksText.split('\n').filter(t => t.trim()).map(t => {
+    const done = t.includes('✅');
+    const text = t.replace('✅ ','').replace('☐ ','').split('|')[0].trim();
+    const dueMatch = t.match(/@(\d{4}-\d{2}-\d{2})/);
+    const priorityMatch = t.match(/\[#(high|medium|low)\]/);
+    return {
+      text,
+      done,
+      due: dueMatch ? dueMatch[1] : '',
+      priority: priorityMatch ? priorityMatch[1] : 'medium'
+    };
+  })
   };
   const idx = data[group].findIndex(x => x.id === id);
   if (idx >= 0) data[group][idx] = project;
