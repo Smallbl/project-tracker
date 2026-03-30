@@ -83,18 +83,29 @@
   .field-label { color: var(--text-muted); min-width: 72px; }
   .field-value { color: var(--text-secondary); flex: 1; }
   .tasks { margin-top: 10px; }
-  .task { font-size: 13px; padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text); }
-  .task:last-child { border-bottom: none; }
-  .task:hover { color: var(--accent); }
-  .task-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+  .task-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .task-table th { text-align: left; padding: 8px 6px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 500; font-size: 12px; }
+  .task-table th.col-due { text-align: center; }
+  .task-table th.col-priority { text-align: center; }
+  .task-table th.col-done { width: 40px; text-align: center; }
+  .task-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .task-table tr:last-child td { border-bottom: none; }
+  .task-table tr:hover td { background: var(--bg); }
+  .task-check-cell { text-align: center; }
+  .task-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--border); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.2s; }
   .task-check.done { background: var(--accent); border-color: var(--accent); color: white; }
+  .task-text { cursor: pointer; }
+  .task-text:hover { color: var(--accent); }
   .task-text.done { color: var(--text-muted); text-decoration: line-through; }
-  .task-due { font-size: 11px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
-  .task-priority { font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500; margin-left: 8px; }
-  .priority-high { background: #ffebee; color: #c62828; }
-  .priority-medium { background: #fff8e1; color: #f57f17; }
-  .priority-low { background: #e8f5e9; color: #2e7d32; }
-  .task-row { display: flex; align-items: center; flex: 1; min-width: 0; }
+  .task-text-cell { min-width: 200px; }
+  .priority-cell { text-align: center; }
+  .priority-btn { font-size: 10px; padding: 3px 8px; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; transition: all 0.2s; }
+  .priority-btn:hover { opacity: 0.8; }
+  .priority-btn.high { background: #ffebee; color: #c62828; }
+  .priority-btn.medium { background: #fff8e1; color: #f57f17; }
+  .priority-btn.low { background: #e8f5e9; color: #2e7d32; }
+  .due-cell { text-align: center; min-width: 90px; }
+  .due-input { font-size: 12px; padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--input-bg); color: var(--text); width: 90px; text-align: center; }
 
   .meetings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
   .meeting-card { background: var(--card-bg); border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 4px var(--shadow); transition: background 0.3s; }
@@ -247,12 +258,12 @@ function editProject(group, id) {
   document.getElementById('editNode').value = p.node || '';
   document.getElementById('editDeadline').value = p.deadline || '';
   document.getElementById('editIssues').value = p.issues || '';
-  document.getElementById('editTasks').value = (p.tasks || []).map(t => { let s = (t.done ? '✅ ' : '☐ ') + t.text; if(t.due) s += ' @' + t.due; if(t.priority && t.priority !== 'medium') s += ' [#' + t.priority + ']'; return s; }).join('\n');
+  document.getElementById('editTasks').value = (p.tasks || []).map(t => { let s = (t.done ? '✅ ' : '☐ ') + t.text; return s; }).join('\n');
   document.getElementById('editModal').classList.add('show');
 }
 
 
-function editSingleTask(group, id, text) {
+function editSingleTaskText(group, id, text) {
   const p = data[group].find(x => x.id === id);
   if (!p) return;
   const t = p.tasks.find(x => x.text === text);
@@ -260,19 +271,31 @@ function editSingleTask(group, id, text) {
   const newText = prompt('修改任务描述:', t.text);
   if (newText && newText.trim() && newText !== t.text) {
     t.text = newText.trim();
+    saveToServer();
+    render();
   }
-  const newDue = prompt('截止日期 (如: 2026-04-03):', t.due || '');
-  if (newDue !== null) {
-    t.due = newDue.trim();
-  }
+}
+
+function editSingleTaskPriority(group, id, text) {
+  const p = data[group].find(x => x.id === id);
+  if (!p) return;
+  const t = p.tasks.find(x => x.text === text);
+  if (!t) return;
   const priorities = ['low', 'medium', 'high'];
-  const priorityLabels = { low: '低', medium: '中', high: '高' };
   const currentP = t.priority || 'medium';
   const currentIdx = priorities.indexOf(currentP);
-  const newP = prompt('优先级 (low/medium/high):', currentP);
-  if (newP && priorities.includes(newP)) {
-    t.priority = newP;
-  }
+  const nextIdx = (currentIdx + 1) % priorities.length;
+  t.priority = priorities[nextIdx];
+  saveToServer();
+  render();
+}
+
+function editSingleTaskDue(group, id, text, newDue) {
+  const p = data[group].find(x => x.id === id);
+  if (!p) return;
+  const t = p.tasks.find(x => x.text === text);
+  if (!t) return;
+  t.due = newDue;
   saveToServer();
   render();
 }
