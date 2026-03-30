@@ -16,7 +16,6 @@ PROJECTS_FILE = os.path.join(DATA_DIR, 'projects.json')
 
 
 def load_data():
-    """加载项目数据"""
     os.makedirs(DATA_DIR, exist_ok=True)
     if os.path.exists(PROJECTS_FILE):
         with open(PROJECTS_FILE, 'r', encoding='utf-8') as f:
@@ -25,7 +24,6 @@ def load_data():
 
 
 def save_data(data):
-    """保存项目数据"""
     os.makedirs(DATA_DIR, exist_ok=True)
     with open(PROJECTS_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -33,17 +31,17 @@ def save_data(data):
 
 @app.route('/')
 def index():
-    """主页"""
     data = load_data()
     return render_template('index.html', 
                            projects=data,
                            active_tab=request.args.get('tab', 'all'))
 
 
-@app.route('/toggle_task/<group>/<project_id>', methods=['POST'])
-def toggle_task(group, project_id):
-    """切换任务完成状态"""
+@app.route('/toggle_task', methods=['POST'])
+def toggle_task():
     data = load_data()
+    group = request.form.get('group', '')
+    project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     
     for p in data.get(group, []):
@@ -58,10 +56,11 @@ def toggle_task(group, project_id):
     return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
 
 
-@app.route('/update_priority/<group>/<project_id>', methods=['POST'])
-def update_priority(group, project_id):
-    """更新任务优先级"""
+@app.route('/update_priority', methods=['POST'])
+def update_priority():
     data = load_data()
+    group = request.form.get('group', '')
+    project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     
     for p in data.get(group, []):
@@ -79,10 +78,11 @@ def update_priority(group, project_id):
     return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
 
 
-@app.route('/update_due/<group>/<project_id>', methods=['POST'])
-def update_due(group, project_id):
-    """更新任务截止日期"""
+@app.route('/update_due', methods=['POST'])
+def update_due():
     data = load_data()
+    group = request.form.get('group', '')
+    project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     new_due = request.form.get('due', '')
     
@@ -98,10 +98,11 @@ def update_due(group, project_id):
     return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
 
 
-@app.route('/update_project/<group>/<project_id>', methods=['POST'])
-def update_project(group, project_id):
-    """更新项目信息"""
+@app.route('/update_project', methods=['POST'])
+def update_project():
     data = load_data()
+    group = request.form.get('group', '')
+    project_id = request.form.get('project_id', '')
     
     for i, p in enumerate(data.get(group, [])):
         if p.get('id') == project_id:
@@ -111,7 +112,6 @@ def update_project(group, project_id):
             p['deadline'] = request.form.get('deadline', p.get('deadline', ''))
             p['issues'] = request.form.get('issues', p.get('issues', ''))
             
-            # 更新任务
             tasks_text = request.form.get('tasks', '')
             tasks = []
             for line in tasks_text.split('\n'):
@@ -121,6 +121,26 @@ def update_project(group, project_id):
                     text = line.replace('✅', '').replace('☐', '').strip()
                     tasks.append({'text': text, 'done': done, 'priority': 'medium', 'due': ''})
             p['tasks'] = tasks
+            break
+    
+    save_data(data)
+    return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
+
+
+@app.route('/update_task_name', methods=['POST'])
+def update_task_name():
+    data = load_data()
+    group = request.form.get('group', '')
+    project_id = request.form.get('project_id', '')
+    old_text = request.form.get('old_text', '')
+    new_text = request.form.get('new_text', '')
+    
+    for p in data.get(group, []):
+        if p.get('id') == project_id:
+            for t in p.get('tasks', []):
+                if t.get('text') == old_text:
+                    t['text'] = new_text
+                    break
             break
     
     save_data(data)
