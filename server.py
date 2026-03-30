@@ -38,16 +38,28 @@ class Handler(SimpleHTTPRequestHandler):
                 self.wfile.write(content.encode())
                 return
         
-        # Static files
-        fpath = BASE_DIR / path.lstrip('/')
-        if fpath.is_file():
-            self.path = str(fpath)
-            return SimpleHTTPRequestHandler.do_GET(self)
-        
         # index.html fallback
         if path == '/' or path == '' or path == '/index.html':
-            self.path = str(INDEX_FILE)
-            return SimpleHTTPRequestHandler.do_GET(self)
+            with open(INDEX_FILE, 'r', encoding='utf-8') as f:
+                content = f.read()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Content-Length', len(content))
+            self.end_headers()
+            self.wfile.write(content.encode())
+            return
+        
+        # Other static files
+        fpath = BASE_DIR / path.lstrip('/')
+        if fpath.is_file():
+            with open(fpath, 'rb') as f:
+                content = f.read()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/octet-stream')
+            self.send_header('Content-Length', len(content))
+            self.end_headers()
+            self.wfile.write(content)
+            return
         
         self.send_error(404)
     
