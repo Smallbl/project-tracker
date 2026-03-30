@@ -1,0 +1,122 @@
+{
+  "四建": [
+    {
+      "id": "sijian-001",
+      "name": "智能审核系统优化",
+      "status": "进行中",
+      "node": "招标文件审核功能多项优化",
+      "deadline": "",
+      "issues": "① 错别字识别效果不佳 ② 版面还原丢失 ③ 词组空格干扰",
+      "tasks": [
+        {"text": "错别字模型更新（亚太也用，需确认同步）", "done": false},
+        {"text": "国家标准文件词库增量更新", "done": false},
+        {"text": "版面还原丢失信息修复", "done": false},
+        {"text": "词组空格导致识别问题优化", "done": false},
+        {"text": "国际标模板白名单入库（本周完成）", "done": false}
+      ]
+    },
+    {
+      "id": "sijian-002",
+      "name": "翻建智能问答（知识库Agent化）",
+      "status": "待评估",
+      "node": "RAG模式改Agent模式方案评估",
+      "deadline": "待定",
+      "issues": "RAG问答效果不佳，可能改Agent模式（改动大）",
+      "tasks": [
+        {"text": "完成资质入库", "done": false},
+        {"text": "Agent模式可行性评估", "done": false}
+      ]
+    }
+  ],
+  "亚太": [
+    {
+      "id": "yatai-001",
+      "name": "数字化综合管理平台信创升级",
+      "status": "本周上线",
+      "node": "大部分功能测试完成，待和综合确认后出通知",
+      "deadline": "2026-04-03",
+      "issues": "多个财务需求需和综合开会讨论确认",
+      "tasks": [
+        {"text": "项目实施计划/满意度/其他 → 本周上线", "done": true},
+        {"text": "新增问题收集功能 → 已上线", "done": true},
+        {"text": "音视频归档通知功能", "done": false},
+        {"text": "专家聘费报税打款（OCR识别发票）", "done": false},
+        {"text": "财务需求（培训费/分成权限/统计/外币等）→ 需开会", "done": false},
+        {"text": "PC首页待办消息刷新优化", "done": false},
+        {"text": "千里马数据关联对外投标立项", "done": false}
+      ]
+    },
+    {
+      "id": "yatai-002",
+      "name": "坚果云私有化部署",
+      "status": "两步走",
+      "node": "第一步替代网盘，第二步归档对接",
+      "deadline": "待定",
+      "issues": "需和综合开会讨论具体方案",
+      "tasks": [
+        {"text": "第一步：替代网盘", "done": false},
+        {"text": "第二步：归档系统对接", "done": false}
+      ]
+    },
+    {
+      "id": "yatai-003",
+      "name": "风险预警系统",
+      "status": "进行中",
+      "node": "招标文件查重 + 单机版开发",
+      "deadline": "本周",
+      "issues": "",
+      "tasks": [
+        {"text": "招标文件查重-证件比对（测试通过后上线）", "done": false},
+        {"text": "单机版加密狗集成开发（本周完成）", "done": false},
+        {"text": "测试单机版运行环境", "done": false}
+      ]
+    },
+    {
+      "id": "yatai-004",
+      "name": "风控专利申请",
+      "status": "待跟进",
+      "node": "算法、系统两个专利申请",
+      "deadline": "今年内",
+      "issues": "",
+      "tasks": [
+        {"text": "算法专利申请", "done": false},
+        {"text": "系统专利申请", "done": false}
+      ]
+    },
+    {
+      "id": "yatai-005",
+      "name": "总经理提出需求",
+      "status": "多项待跟进",
+      "node": "6项需求，多项需讨论可行性",
+      "deadline": "待定",
+      "issues": "多项需求需开会讨论",
+      "tasks": [
+        {"text": "聘费自动审批", "done": false},
+        {"text": "历史招标文件二次售卖（法律风险需评估）", "done": false},
+        {"text": "对外投标统计千里马关联", "done": false},
+        {"text": "国际标购标登记完善（本周上线）", "done": true},
+        {"text": "好软件推荐（需评估合规性）", "done": false},
+        {"text": "门户网站引流（待中招联合上线）", "done": false}
+      ]
+    },
+    {
+      "id": "yatai-006",
+      "name": "综合部提出需求",
+      "status": "待开会",
+      "node": "本周需安排会议和综合部沟通",
+      "deadline": "本周",
+      "issues": "待安排会议",
+      "tasks": [
+        {"text": "批量建项领取编号（考虑分包情况）", "done": false},
+        {"text": "合同脱敏需求", "done": false},
+        {"text": "外部注册功能需求", "done": false}
+      ]
+    }
+  ],
+  "meetings": [
+    {"date": "周二 03-31", "time": "09:30", "name": "新点AI产品介绍", "remark": ""},
+    {"date": "周三 04-01", "time": "09:30", "name": "巨一例会-招投标需求", "remark": ""},
+    {"date": "周四 04-02", "time": "09:30", "name": "中招联合-进度汇报", "remark": ""},
+    {"date": "本周待定", "time": "", "name": "和综合部沟通", "remark": "财务需求、坚果云、综合部需求"}
+  ]
+}

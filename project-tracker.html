@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📋 项目跟踪表 2026-03</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f7; color: #1d1d1f; padding: 20px; }
+  h1 { text-align: center; margin-bottom: 8px; font-size: 24px; }
+  .subtitle { text-align: center; color: #86868b; font-size: 13px; margin-bottom: 24px; }
+  
+  h2 { font-size: 16px; margin: 24px 0 12px 0; padding-left: 12px; border-left: 4px solid #007aff; }
+  
+  .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .card-title { font-size: 15px; font-weight: 600; }
+  .status { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .status-progress { background: #e8f5e9; color: #2e7d32; }
+  .status-warn { background: #fff8e1; color: #f57f17; }
+  .status-todo { background: #e3f2fd; color: #1565c0; }
+  
+  .field { display: flex; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+  .field-label { color: #86868b; min-width: 70px; }
+  .field-value { color: #1d1d1f; }
+  
+  .tasks { margin-top: 10px; }
+  .task { font-size: 13px; padding: 4px 0; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 6px; }
+  .task:last-child { border-bottom: none; }
+  .task-done { color: #34c759; }
+  .task-pending { color: #ff9500; }
+  
+  .section-title { font-size: 14px; font-weight: 600; margin: 16px 0 8px 0; color: #1d1d1f; }
+  .meeting-row { display: flex; background: white; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; align-items: center; gap: 12px; }
+  .meeting-date { background: #007aff; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; min-width: 70px; text-align: center; }
+  .meeting-info { font-size: 13px; }
+  .meeting-time { color: #86868b; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>📋 项目跟踪表</h1>
+<p class="subtitle">最后更新：2026-03-30</p>
+
+<h2>🤖 四建项目</h2>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">1. 智能审核系统优化</span>
+    <span class="status status-progress">🔄 进行中</span>
+  </div>
+  <div class="field"><span class="field-label">当前节点</span><span class="field-value">招标文件审核功能多项优化</span></div>
+  <div class="field"><span class="field-label">当前问题</span><span class="field-value">① 错别字识别效果不佳 ② 版面还原丢失 ③ 词组空格干扰</span></div>
+  <div class="tasks">
+    <div class="task task-pending">☐ 错别字模型更新（亚太也用，需确认同步）</div>
+    <div class="task task-pending">☐ 国家标准文件词库增量更新</div>
+    <div class="task task-pending">☐ 版面还原丢失信息修复</div>
+    <div class="task task-pending">☐ 词组空格导致识别问题优化</div>
+    <div class="task task-pending">☐ 国际标模板白名单入库（本周）</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">2. 翻建智能问答（知识库Agent化）</span>
+    <span class="status status-warn">⚠️ 待评估</span>
+  </div>
+  <div class="field"><span class="field-label">当前节点</span><span class="field-value">RAG模式改Agent模式方案评估</span></div>
+  <div class="field"><span class="field-label">当前问题</span><span class="field-value">RAG问答效果不佳，可能改Agent模式（改动大）</span></div>
+  <div class="tasks">
+    <div class="task task-pending">☐ 完成资质入库</div>
+    <div class="task task-pending">☐ Agent模式可行性评估</div>
+  </div>
+</div>
+
+<h2>🏢 亚太项目</h2>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">3. 数字化综合管理平台信创升级</span>
+    <span class="status status-progress">🔄 本周上线</span>
+  </div>
+  <div class="field"><span class="field-label">当前节点</span><span class="field-value">大部分功能测试完成，待和综合确认后出通知</span></div>
+  <div class="field"><span class="field-label">当前问题</span><span class="field-value">多个财务需求需和综合开会讨论确认</span></div>
+  <div class="tasks">
+    <div class="task task-done">✅ 项目实施计划/满意度/其他 → 本周上线</div>
+    <div class="task task-done">✅ 新增问题收集功能 → 已上线</div>
+    <div class="task task-pending">☐ 音视频归档通知功能</div>
+    <div class="task task-pending">☐ 专家聘费报税打款（OCR识别发票）</div>
+    <div class="task task-pending">☐ 财务需求（培训费/分成权限/统计/外币等）→ 需开会</div>
+    <div class="task task-pending">☐ PC首页待办消息刷新优化</div>
+    <div class="task task-pending">☐ 千里马数据关联对外投标立项</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">4. 坚果云私有化部署</span>
+    <span class="status status-progress">🔄 两步走</span>
+  </div>
+  <div class="field"><span class="field-label">当前节点</span><span class="field-value">第一步替代网盘，第二步归档对接</span></div>
+  <div class="field"><span class="field-label">当前问题</span><span class="field-value">需和综合开会讨论具体方案</span></div>
+  <div class="tasks">
+    <div class="task task-pending">☐ 第一步：替代网盘</div>
+    <div class="task task-pending">☐ 第二步：归档系统对接</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">5. 风险预警系统</span>
+    <span class="status status-progress">🔄 进行中</span>
+  </div>
+  <div class="field"><span class="field-label">当前节点</span><span class="field-value">招标文件查重 + 单机版开发</span></div>
+  <div class="tasks">
+    <div class="task task-pending">☐ 招标文件查重-证件比对（测试通过后上线）</div>
+    <div class="task task-pending">☐ 单机版加密狗集成开发（本周完成）</div>
+    <div class="task task-pending">☐ 测试单机版运行环境</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">6. 风控专利申请</span>
+    <span class="status status-todo">📋 待跟进</span>
+  </div>
+  <div class="field"><span class="field-label">当前节点</span><span class="field-value">算法、系统两个专利申请</span></div>
+  <div class="field"><span class="field-label">截止</span><span class="field-value">今年内完成</span></div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">7. 总经理提出需求</span>
+    <span class="status status-warn">⚠️ 多项待跟进</span>
+  </div>
+  <div class="tasks">
+    <div class="task task-pending">☐ 聘费自动审批</div>
+    <div class="task task-pending">☐ 历史招标文件二次售卖（法律风险需评估）</div>
+    <div class="task task-pending">☐ 对外投标统计千里马关联</div>
+    <div class="task task-done">✅ 国际标购标登记完善（本周上线）</div>
+    <div class="task task-pending">☐ 好软件推荐（需评估合规性）</div>
+    <div class="task task-pending">☐ 门户网站引流（待中招联合上线）</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">8. 综合部提出需求</span>
+    <span class="status status-progress">🔄 待开会</span>
+  </div>
+  <div class="field"><span class="field-label">当前节点</span><span class="field-value">本周需安排会议和综合部沟通</span></div>
+  <div class="tasks">
+    <div class="task task-pending">☐ 批量建项领取编号（考虑分包情况）</div>
+    <div class="task task-pending">☐ 合同脱敏需求</div>
+    <div class="task task-pending">☐ 外部注册功能需求</div>
+  </div>
+</div>
+
+<h2>📅 近期会议安排</h2>
+
+<div class="meeting-row">
+  <span class="meeting-date">周二 03-31</span>
+  <div class="meeting-info">
+    <div>新点AI产品介绍</div>
+    <div class="meeting-time">09:30</div>
+  </div>
+</div>
+<div class="meeting-row">
+  <span class="meeting-date">周三 04-01</span>
+  <div class="meeting-info">
+    <div>巨一例会-招投标需求</div>
+    <div class="meeting-time">09:30</div>
+  </div>
+</div>
+<div class="meeting-row">
+  <span class="meeting-date">周四 04-02</span>
+  <div class="meeting-info">
+    <div>中招联合-进度汇报</div>
+    <div class="meeting-time">09:30</div>
+  </div>
+</div>
+<div class="meeting-row">
+  <span class="meeting-date">本周待定</span>
+  <div class="meeting-info">
+    <div>和综合部沟通</div>
+    <div class="meeting-time">财务需求、坚果云、综合部需求</div>
+  </div>
+</div>
+
+</body>
+</html>
