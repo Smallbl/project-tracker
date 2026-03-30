@@ -266,7 +266,7 @@ async function saveProject() {
     deadline: document.getElementById('editDeadline').value,
     issues: document.getElementById('editIssues').value,
     tasks: tasksText.split('\n').filter(t => t.trim()).map(t => ({ text: t.replace('✅ ','').replace('☐ ',''), done: t.includes('✅') }))
-  )};
+  };
   const idx = data[group].findIndex(x => x.id === id);
   if (idx >= 0) data[group][idx] = project;
   else data[group].push(project);
