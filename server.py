@@ -7,7 +7,7 @@
 import json
 import os
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse
 from pathlib import Path
 
 PORT = 8765
@@ -15,283 +15,12 @@ BASE_DIR = Path(__file__).parent.resolve()
 DATA_DIR = BASE_DIR / "data"
 PROJECTS_FILE = DATA_DIR / "projects.json"
 
-HTML = """<!DOCTYPE html>
-<html lang="zh">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📋 项目跟踪系统</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f0f2f5; color: #1d1d1f; min-height: 100vh; }
-  
-  .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
-  .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .header p { font-size: 13px; opacity: 0.85; }
-  .header-right { float: right; margin-top: -40px; font-size: 12px; opacity: 0.7; }
-  
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
-  
-  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-  .tab { padding: 8px 20px; background: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; color: #666; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s; }
-  .tab:hover { background: #f5f5f7; }
-  .tab.active { background: #667eea; color: white; box-shadow: 0 2px 8px rgba(102,126,234,0.4); }
-  
-  .section-title { font-size: 16px; font-weight: 600; margin: 20px 0 12px 0; padding-left: 12px; border-left: 4px solid #667eea; display: flex; justify-content: space-between; align-items: center; }
-  
-  .card { background: white; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: all 0.2s; }
-  .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); transform: translateY(-1px); }
-  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-  .card-title { font-size: 15px; font-weight: 600; color: #1d1d1f; }
-  .status { font-size: 12px; padding: 3px 12px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
-  .status-progress { background: #e8f5e9; color: #2e7d32; }
-  .status-warn { background: #fff8e1; color: #f57f17; }
-  .status-todo { background: #e3f2fd; color: #1565c0; }
-  .status-done { background: #f3e5f5; color: #7b1fa2; }
-  
-  .field { display: flex; gap: 8px; margin-bottom: 6px; font-size: 13px; }
-  .field-label { color: #86868b; min-width: 72px; }
-  .field-value { color: #333; flex: 1; }
-  
-  .tasks { margin-top: 10px; }
-  .task { font-size: 13px; padding: 5px 0; border-bottom: 1px solid #f5f5f5; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  .task:last-child { border-bottom: none; }
-  .task:hover { color: #667eea; }
-  .task-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #ddd; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; }
-  .task-check.done { background: #667eea; border-color: #667eea; color: white; }
-  .task-text.done { color: #aaa; text-decoration: line-through; }
-  
-  .meetings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
-  .meeting-card { background: white; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  .meeting-date { background: #667eea; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 8px; }
-  .meeting-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-  .meeting-time { font-size: 12px; color: #888; }
-  
-  .edit-btn { background: #667eea; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
-  .edit-btn:hover { background: #5a6fd6; }
-  
-  .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-  .modal.show { display: flex; }
-  .modal-content { background: white; border-radius: 16px; padding: 28px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
-  .modal h2 { font-size: 18px; margin-bottom: 16px; }
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
-  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-  .form-group textarea { resize: vertical; min-height: 80px; }
-  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-  .btn { padding: 10px 20px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; }
-  .btn-primary { background: #667eea; color: white; }
-  .btn-secondary { background: #f0f0f0; color: #666; }
-  
-  .no-data { text-align: center; color: #999; padding: 40px; font-size: 14px; }
-</style>
-</head>
-<body>
-
-<div class="header">
-  <h1>📋 项目跟踪系统</h1>
-  <p>四建 & 亚太项目进度跟踪 · 招投标行业</p>
-  <div class="header-right" id="updateTime"></div>
-</div>
-
-<div class="container">
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="all">全部项目</button>
-    <button class="tab" data-tab="四建">🤖 四建</button>
-    <button class="tab" data-tab="亚太">🏢 亚太</button>
-    <button class="tab" data-tab="meetings">📅 会议</button>
-  </div>
-  
-  <div id="content"></div>
-</div>
-
-<div class="modal" id="editModal">
-  <div class="modal-content">
-    <h2 id="modalTitle">编辑项目</h2>
-    <input type="hidden" id="editId">
-    <input type="hidden" id="editGroup">
-    <div class="form-group">
-      <label>项目名称</label>
-      <input type="text" id="editName">
-    </div>
-    <div class="form-group">
-      <label>状态</label>
-      <select id="editStatus">
-        <option value="进行中">进行中</option>
-        <option value="待评估">待评估</option>
-        <option value="待跟进">待跟进</option>
-        <option value="待开会">待开会</option>
-        <option value="多项待跟进">多项待跟进</option>
-        <option value="两步走">两步走</option>
-        <option value="已完成">已完成</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>当前节点</label>
-      <input type="text" id="editNode">
-    </div>
-    <div class="form-group">
-      <label>截止日期</label>
-      <input type="text" id="editDeadline">
-    </div>
-    <div class="form-group">
-      <label>当前问题</label>
-      <textarea id="editIssues"></textarea>
-    </div>
-    <div class="form-group">
-      <label>子任务（每行一个）</label>
-      <textarea id="editTasks" placeholder="每行一个任务，已完成的在前面加✅"></textarea>
-    </div>
-    <div class="modal-btns">
-      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="saveProject()">保存</button>
-    </div>
-  </div>
-</div>
-
-<script>
-let data = {};
-let currentTab = 'all';
-
-async function loadData() {
-  const r = await fetch('/api/projects');
-  data = await r.json();
-  document.getElementById('updateTime').textContent = '最后更新: ' + new Date().toLocaleString('zh-CN');
-  render();
-}
-
-function render() {
-  const tabs = document.querySelectorAll('.tab');
-  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
-  
-  let html = '';
-  
-  if (currentTab === 'meetings') {
-    html = '<div class="meetings-grid">';
-    data.meetings?.forEach(m => {
-      html += `<div class="meeting-card">
-        <div class="meeting-date">${m.date}</div>
-        <div class="meeting-name">${m.name}</div>
-        <div class="meeting-time">${m.time} ${m.remark || ''}</div>
-      </div>`;
-    });
-    html += '</div>';
-  } else {
-    const groups = currentTab === 'all' ? ['四建', '亚太'] : [currentTab];
-    groups.forEach(group => {
-      if (!data[group]) return;
-      html += `<div class="section-title">${group === '四建' ? '🤖 四建项目' : '🏢 亚太项目'}</div>`;
-      data[group].forEach(p => {
-        const statusClass = p.status.includes('完成') || p.status === 'done' ? 'status-done' 
-          : p.status.includes('待') || p.status.includes('评估') ? 'status-warn' 
-          : p.status.includes('开会') ? 'status-todo' : 'status-progress';
-        html += `<div class="card">
-          <div class="card-header">
-            <div class="card-title">${p.name}</div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <span class="status ${statusClass}">${p.status}</span>
-              <button class="edit-btn" onclick="editProject('${group}', '${p.id}')">编辑</button>
-            </div>
-          </div>
-          ${p.node ? `<div class="field"><span class="field-label">当前节点</span><span class="field-value">${p.node}</span></div>` : ''}
-          ${p.deadline ? `<div class="field"><span class="field-label">截止日期</span><span class="field-value">${p.deadline}</span></div>` : ''}
-          ${p.issues ? `<div class="field"><span class="field-label">当前问题</span><span class="field-value">${p.issues}</span></div>` : ''}
-          <div class="tasks">
-            ${(p.tasks || []).map(t => `
-              <div class="task" onclick="toggleTask('${group}', '${p.id}', '${t.text}')">
-                <div class="task-check ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</div>
-                <span class="task-text ${t.done ? 'done' : ''}">${t.text.replace('✅ ','')}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>`;
-      });
-    });
-    if (!html) html = '<div class="no-data">暂无数据</div>';
-  }
-  
-  document.getElementById('content').innerHTML = html;
-}
-
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.onclick = () => { currentTab = tab.dataset.tab; render(); };
-});
-
-function editProject(group, id) {
-  const p = data[group].find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('modalTitle').textContent = '编辑项目';
-  document.getElementById('editId').value = id;
-  document.getElementById('editGroup').value = group;
-  document.getElementById('editName').value = p.name;
-  document.getElementById('editStatus').value = p.status;
-  document.getElementById('editNode').value = p.node || '';
-  document.getElementById('editDeadline').value = p.deadline || '';
-  document.getElementById('editIssues').value = p.issues || '';
-  document.getElementById('editTasks').value = (p.tasks || []).map(t => (t.done ? '✅ ' : '☐ ') + t.text).join('\n');
-  document.getElementById('editModal').classList.add('show');
-}
-
-async function toggleTask(group, id, text) {
-  const p = data[group].find(x => x.id === id);
-  if (!p) return;
-  const t = p.tasks.find(x => x.text === text);
-  if (!t) return;
-  t.done = !t.done;
-  await saveToServer();
-  render();
-}
-
-async function saveProject() {
-  const group = document.getElementById('editGroup').value;
-  const id = document.getElementById('editId').value;
-  const tasksText = document.getElementById('editTasks').value;
-  
-  const project = {
-    id,
-    name: document.getElementById('editName').value,
-    status: document.getElementById('editStatus').value,
-    node: document.getElementById('editNode').value,
-    deadline: document.getElementById('editDeadline').value,
-    issues: document.getElementById('editIssues').value,
-    tasks: tasksText.split('\n').filter(t => t.trim()).map(t => ({
-      text: t.replace('✅ ','').replace('☐ ',''),
-      done: t.includes('✅')
-    }))
-  };
-  
-  const idx = data[group].findIndex(x => x.id === id);
-  if (idx >= 0) data[group][idx] = project;
-  else data[group].push(project);
-  
-  await saveToServer();
-  closeModal();
-  render();
-}
-
-async function saveToServer() {
-  await fetch('/api/projects', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(data)
-  });
-}
-
-function closeModal() {
-  document.getElementById('editModal').classList.remove('show');
-}
-
-loadData();
-</script>
-</body>
-</html>"""
+INDEX_FILE = BASE_DIR / "index.html"
 
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlparse(self.path).path
-        if path == '/' or path == '/index.html':
-            path = '/index.html'
         
         # API
         if path.startswith('/api/'):
@@ -312,13 +41,13 @@ class Handler(SimpleHTTPRequestHandler):
         # Static files
         fpath = BASE_DIR / path.lstrip('/')
         if fpath.is_file():
-            return super().do_GET()
+            self.path = str(fpath)
+            return SimpleHTTPRequestHandler.do_GET(self)
         
         # index.html fallback
-        fpath = BASE_DIR / 'index.html'
-        if fpath.is_file():
-            self.path = '/index.html'
-            return super().do_GET()
+        if path == '/' or path == '' or path == '/index.html':
+            self.path = str(INDEX_FILE)
+            return SimpleHTTPRequestHandler.do_GET(self)
         
         self.send_error(404)
     
@@ -344,25 +73,14 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
     
-    def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        super().end_headers()
-    
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.end_headers()
+    def log_message(self, format, *args):
+        pass  # 静默日志
+
 
 def run():
-    global BASE_DIR
-    BASE_DIR = Path(__file__).parent.resolve()
     PROJECTS_FILE.parent.mkdir(parents=True, exist_ok=True)
     
-    # Write HTML file
-    html_path = BASE_DIR / 'index.html'
-    with open(html_path, 'w', encoding='utf-8') as f:
-        f.write(HTML)
-    
-    # Copy data file to data dir if not exists
+    # 如果数据文件不存在，创建默认数据
     if not PROJECTS_FILE.exists():
         default_data = {
             "四建": [], "亚太": [], "meetings": []
@@ -372,24 +90,23 @@ def run():
     
     os.chdir(BASE_DIR)
     server = HTTPServer(('0.0.0.0', PORT), Handler)
+    
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        lan_ip = s.getsockname()[0]
+        s.close()
+    except:
+        lan_ip = '127.0.0.1'
+    
     print(f"✅ 项目跟踪系统已启动!")
     print(f"📍 访问地址: http://localhost:{PORT}")
-    print(f"🌐 局域网: http://{get_lan_ip()}:{PORT}")
-    print(f"📁 数据文件: {PROJECTS_FILE}")
+    print(f"🌐 局域网: http://{lan_ip}:{PORT}")
+    print(f"📁 静态文件: {BASE_DIR}")
     print(f"\n按 Ctrl+C 停止服务")
     server.serve_forever()
 
-def get_lan_ip():
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
-    except:
-        ip = '127.0.0.1'
-    finally:
-        s.close()
-    return ip
 
 if __name__ == '__main__':
     run()
