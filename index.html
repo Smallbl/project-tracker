@@ -82,31 +82,23 @@
   .field { display: flex; gap: 8px; margin-bottom: 6px; font-size: 13px; }
   .field-label { color: var(--text-muted); min-width: 72px; }
   .field-value { color: var(--text-secondary); flex: 1; }
-  .tasks { margin-top: 10px; }
   .task-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .task-table th { text-align: left; padding: 8px 6px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 500; font-size: 12px; }
-  .task-table th.col-due { text-align: center; }
-  .task-table th.col-priority { text-align: center; }
-  .task-table th.col-done { width: 40px; text-align: center; }
   .task-table td { padding: 8px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   .task-table tr:last-child td { border-bottom: none; }
-  .task-table tr:hover td { background: var(--bg); }
-  .task-check-cell { text-align: center; }
+  .task-check-cell { text-align: center; width: 40px; }
   .task-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--border); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.2s; }
   .task-check.done { background: var(--accent); border-color: var(--accent); color: white; }
-  .task-text { cursor: pointer; }
-  .task-text:hover { color: var(--accent); }
+  .task-text { cursor: pointer; padding: 2px 4px; border-radius: 3px; }
+  .task-text:hover { background: var(--border); }
   .task-text.done { color: var(--text-muted); text-decoration: line-through; }
-  .task-text-cell { min-width: 200px; }
-  .priority-cell { text-align: center; }
-  .priority-btn { font-size: 10px; padding: 3px 8px; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; transition: all 0.2s; }
-  .priority-btn:hover { opacity: 0.8; }
+  .priority-cell { text-align: center; width: 70px; }
+  .priority-btn { font-size: 10px; padding: 3px 8px; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; }
   .priority-btn.high { background: #ffebee; color: #c62828; }
   .priority-btn.medium { background: #fff8e1; color: #f57f17; }
   .priority-btn.low { background: #e8f5e9; color: #2e7d32; }
-  .due-cell { text-align: center; min-width: 90px; }
-  .due-input { font-size: 12px; padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--input-bg); color: var(--text); width: 90px; text-align: center; }
-
+  .due-cell { text-align: center; width: 110px; }
+  .due-input { font-size: 12px; padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--input-bg); color: var(--text); width: 100px; text-align: center; }
   .meetings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
   .meeting-card { background: var(--card-bg); border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 4px var(--shadow); transition: background 0.3s; }
   .meeting-date { background: var(--accent); color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 8px; }
@@ -155,125 +147,121 @@
     <input type="hidden" id="editId">
     <input type="hidden" id="editGroup">
     <div class="form-group"><label>项目名称</label><input type="text" id="editName"></div>
-    <div class="form-group">
-      <label>状态</label>
-      <select id="editStatus">
-        <option value="进行中">进行中</option>
-        <option value="待评估">待评估</option>
-        <option value="待跟进">待跟进</option>
-        <option value="待开会">待开会</option>
-        <option value="多项待跟进">多项待跟进</option>
-        <option value="两步走">两步走</option>
-        <option value="已完成">已完成</option>
-      </select>
-    </div>
+    <div class="form-group"><label>状态</label><select id="editStatus"><option value="进行中">进行中</option><option value="待评估">待评估</option><option value="待跟进">待跟进</option><option value="待开会">待开会</option><option value="多项待跟进">多项待跟进</option><option value="两步走">两步走</option><option value="已完成">已完成</option></select></div>
     <div class="form-group"><label>当前节点</label><input type="text" id="editNode"></div>
     <div class="form-group"><label>截止日期</label><input type="text" id="editDeadline"></div>
     <div class="form-group"><label>当前问题</label><textarea id="editIssues"></textarea></div>
-    <div class="form-group"><label>子任务（每行一个）</label><textarea id="editTasks" placeholder="每行一个任务，格式：✅ 任务描述 [#high] [@2026-04-03]&#10;☑ = 已完成，#high/#medium/#low = 优先级，@日期 = 截止日期"></textarea></div>
-    <div class="modal-btns">
-      <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="saveProject()">保存</button>
-    </div>
+    <div class="form-group"><label>子任务</label><textarea id="editTasks"></textarea></div>
+    <div class="modal-btns"><button class="btn btn-secondary" id="cancelBtn">取消</button><button class="btn btn-primary" id="saveBtn">保存</button></div>
   </div>
 </div>
 <script>
 let data = {};
-let currentTab = 'all';
+let currentTab = "all";
 
 function initTheme() {
-  const saved = localStorage.getItem('theme');
+  var saved = localStorage.getItem("theme");
   if (saved) {
-    document.documentElement.setAttribute('data-theme', saved);
+    document.documentElement.setAttribute("data-theme", saved);
     updateThemeIcon(saved);
   }
 }
 
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
+  var current = document.documentElement.getAttribute("data-theme");
+  var next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
   updateThemeIcon(next);
 }
 
 function updateThemeIcon(theme) {
-  document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+  document.getElementById("themeToggle").textContent = theme === "dark" ? "☀️" : "🌙";
 }
 
-document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById("themeToggle").addEventListener("click", toggleTheme);
 
 async function loadData() {
-  const r = await fetch('/api/projects');
+  var r = await fetch("/api/projects");
   data = await r.json();
-  document.getElementById('updateTime').textContent = '最后更新: ' + new Date().toLocaleString('zh-CN');
+  document.getElementById("updateTime").textContent = "最后更新: " + new Date().toLocaleString("zh-CN");
   render();
 }
 
 function render() {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
-  let html = '';
-  if (currentTab === 'meetings') {
-    html = '<div class="meetings-grid">';
-    (data.meetings || []).forEach(m => {
-      html += '<div class="meeting-card"><div class="meeting-date">' + m.date + '</div><div class="meeting-name">' + m.name + '</div><div class="meeting-time">' + m.time + ' ' + (m.remark || '') + '</div></div>';
+  document.querySelectorAll(".tab").forEach(function(t) { t.classList.toggle("active", t.dataset.tab === currentTab); });
+  var html = "";
+  if (currentTab === "meetings") {
+    html = "<div class='meetings-grid'>";
+    (data.meetings || []).forEach(function(m) {
+      html += "<div class='meeting-card'><div class='meeting-date'>" + m.date + "</div><div class='meeting-name'>" + m.name + "</div><div class='meeting-time'>" + m.time + " " + (m.remark || "") + "</div></div>";
     });
-    html += '</div>';
+    html += "</div>";
   } else {
-    const groups = currentTab === 'all' ? ['四建', '亚太'] : [currentTab];
-    groups.forEach(group => {
+    var groups = currentTab === "all" ? ["四建", "亚太"] : [currentTab];
+    groups.forEach(function(group) {
       if (!data[group]) return;
-      html += '<div class="section-title">' + (group === '四建' ? '🤖 四建项目' : '🏢 亚太项目') + '</div>';
-      data[group].forEach(p => {
-        const sc = p.status.includes('完成') ? 'status-done' : p.status.includes('待') || p.status.includes('评估') ? 'status-warn' : p.status.includes('开会') ? 'status-todo' : 'status-progress';
-        html += '<div class="card"><div class="card-header"><div class="card-title">' + p.name + '</div><div style="display:flex;gap:8px;align-items:center"><span class="status ' + sc + '">' + p.status + '</span><button class="edit-btn" onclick="editProject(\'' + group + '\',\'' + p.id + '\')">编辑</button></div></div>';
-        if (p.node) html += '<div class="field"><span class="field-label">当前节点</span><span class="field-value">' + p.node + '</span></div>';
-        if (p.deadline) html += '<div class="field"><span class="field-label">截止日期</span><span class="field-value">' + p.deadline + '</span></div>';
-        if (p.issues) html += '<div class="field"><span class="field-label">当前问题</span><span class="field-value">' + p.issues + '</span></div>';
-        html += '<table class="task-table"><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止日期</th></tr></thead><tbody>';
-        (p.tasks || []).forEach(t => {
-          const done = t.done ? 'done' : '';
-          const text = t.text.replace(/'/g, "\\'");
-          const priority = t.priority || 'medium';
-          html += '<tr>';
-          html += '<td style="text-align:center"><div class="task-check ' + (t.done ? 'done' : '') + '" onclick="toggleTask(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\')">' + (t.done ? '✓' : '') + '</div></td>';
-          html += '<td><span class="task-text ' + done + '" onclick="editSingleTaskText(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\')">' + t.text.replace('✅ ','') + '</span></td>';
-          html += '<td style="text-align:center"><button class="priority-btn ' + priority + '" onclick="editSingleTaskPriority(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\')">' + (priority === 'high' ? '🔴高' : priority === 'low' ? '🟢低' : '🟡中') + '</button></td>';
-          html += '<td style="text-align:center"><input type="date" class="due-input" value="' + (t.due || '') + '" onchange="editSingleTaskDue(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\', this.value)"></td>';
-          html += '</tr>';
+      html += "<div class='section-title'>" + (group === "四建" ? "🤖 四建项目" : "🏢 亚太项目") + "</div>";
+      data[group].forEach(function(p) {
+        var sc = p.status.includes("完成") ? "status-done" : p.status.includes("待") || p.status.includes("评估") ? "status-warn" : p.status.includes("开会") ? "status-todo" : "status-progress";
+        html += "<div class='card'><div class='card-header'><div class='card-title'>" + p.name + "</div><div style='display:flex;gap:8px;align-items:center'><span class='status " + sc + "'>" + p.status + "</span><button class='edit-btn' onclick='editProject(\"" + group + "\",\"" + p.id + "\")'>编辑</button></div></div>";
+        if (p.node) html += "<div class='field'><span class='field-label'>当前节点</span><span class='field-value'>" + p.node + "</span></div>";
+        if (p.deadline) html += "<div class='field'><span class='field-label'>截止日期</span><span class='field-value'>" + p.deadline + "</span></div>";
+        if (p.issues) html += "<div class='field'><span class='field-label'>当前问题</span><span class='field-value'>" + p.issues + "</span></div>";
+        html += "<table class='task-table'><thead><tr><th></th><th>任务</th><th style='text-align:center'>优先级</th><th style='text-align:center'>截止日期</th></tr></thead><tbody>";
+        (p.tasks || []).forEach(function(t) {
+          var done = t.done ? "done" : "";
+          var textEsc = t.text.replace(/'/g, "\\'");
+          var priority = t.priority || "medium";
+          var priorityLabel = priority === "high" ? "🔴高" : priority === "low" ? "🟢低" : "🟡中";
+          html += "<tr>";
+          html += "<td class='task-check-cell'><div class='task-check " + (t.done ? "done" : "") + "' onclick='toggleTask(\"" + group + "\",\"" + p.id + "\",\"" + textEsc + "\")'>" + (t.done ? "✓" : "") + "</div></td>";
+          html += "<td><span class='task-text " + done + "' onclick='editSingleTaskText(\"" + group + "\",\"" + p.id + "\",\"" + textEsc + "\")'>" + t.text.replace("✅ ","") + "</span></td>";
+          html += "<td class='priority-cell'><button class='priority-btn " + priority + "' onclick='editSingleTaskPriority(\"" + group + "\",\"" + p.id + "\",\"" + textEsc + "\")'>" + priorityLabel + "</button></td>";
+          html += "<td class='due-cell'><input type='date' class='due-input' value='" + (t.due || "") + "' onchange='editSingleTaskDue(\"" + group + "\",\"" + p.id + "\",\"" + textEsc + "\",this.value)'></td>";
+          html += "</tr>";
         });
-        html += '</tbody></table>';
+        html += "</tbody></table></div>";
       });
     });
-    if (!html) html = '<div class="no-data">暂无数据</div>';
+    if (!html) html = "<div class='no-data'>暂无数据</div>";
   }
-  document.getElementById('content').innerHTML = html;
+  document.getElementById("content").innerHTML = html;
 }
 
-document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => { currentTab = tab.dataset.tab; render(); }));
+document.querySelectorAll(".tab").forEach(function(tab) { tab.addEventListener("click", function() { currentTab = tab.dataset.tab; render(); }); });
 
 function editProject(group, id) {
-  const p = data[group].find(x => x.id === id);
+  var p = data[group].find(function(x) { return x.id === id; });
   if (!p) return;
-  document.getElementById('modalTitle').textContent = '编辑项目';
-  document.getElementById('editId').value = id;
-  document.getElementById('editGroup').value = group;
-  document.getElementById('editName').value = p.name;
-  document.getElementById('editStatus').value = p.status;
-  document.getElementById('editNode').value = p.node || '';
-  document.getElementById('editDeadline').value = p.deadline || '';
-  document.getElementById('editIssues').value = p.issues || '';
-  document.getElementById('editTasks').value = (p.tasks || []).map(t => { let s = (t.done ? '✅ ' : '☐ ') + t.text; return s; }).join('\n');
-  document.getElementById('editModal').classList.add('show');
+  document.getElementById("modalTitle").textContent = "编辑项目";
+  document.getElementById("editId").value = id;
+  document.getElementById("editGroup").value = group;
+  document.getElementById("editName").value = p.name;
+  document.getElementById("editStatus").value = p.status;
+  document.getElementById("editNode").value = p.node || "";
+  document.getElementById("editDeadline").value = p.deadline || "";
+  document.getElementById("editIssues").value = p.issues || "";
+  document.getElementById("editTasks").value = (p.tasks || []).map(function(t) { return (t.done ? "✅ " : "☐ ") + t.text; }).join("\n");
+  document.getElementById("editModal").classList.add("show");
 }
 
+async function toggleTask(group, id, text) {
+  var p = data[group].find(function(x) { return x.id === id; });
+  if (!p) return;
+  var t = p.tasks.find(function(x) { return x.text === text; });
+  if (!t) return;
+  t.done = !t.done;
+  await saveToServer();
+  render();
+}
 
 function editSingleTaskText(group, id, text) {
-  const p = data[group].find(x => x.id === id);
+  var p = data[group].find(function(x) { return x.id === id; });
   if (!p) return;
-  const t = p.tasks.find(x => x.text === text);
+  var t = p.tasks.find(function(x) { return x.text === text; });
   if (!t) return;
-  const newText = prompt('修改任务描述:', t.text);
+  var newText = prompt("修改任务描述:", t.text);
   if (newText && newText.trim() && newText !== t.text) {
     t.text = newText.trim();
     saveToServer();
@@ -282,64 +270,41 @@ function editSingleTaskText(group, id, text) {
 }
 
 function editSingleTaskPriority(group, id, text) {
-  const p = data[group].find(x => x.id === id);
+  var p = data[group].find(function(x) { return x.id === id; });
   if (!p) return;
-  const t = p.tasks.find(x => x.text === text);
+  var t = p.tasks.find(function(x) { return x.text === text; });
   if (!t) return;
-  const priorities = ['low', 'medium', 'high'];
-  const currentP = t.priority || 'medium';
-  const currentIdx = priorities.indexOf(currentP);
-  const nextIdx = (currentIdx + 1) % priorities.length;
-  t.priority = priorities[nextIdx];
+  var priorities = ["low", "medium", "high"];
+  var currentIdx = priorities.indexOf(t.priority || "medium");
+  t.priority = priorities[(currentIdx + 1) % 3];
   saveToServer();
   render();
 }
 
 function editSingleTaskDue(group, id, text, newDue) {
-  const p = data[group].find(x => x.id === id);
+  var p = data[group].find(function(x) { return x.id === id; });
   if (!p) return;
-  const t = p.tasks.find(x => x.text === text);
+  var t = p.tasks.find(function(x) { return x.text === text; });
   if (!t) return;
   t.due = newDue;
   saveToServer();
   render();
 }
 
-async function toggleTask(group, id, text) {
-  const p = data[group].find(x => x.id === id);
-  if (!p) return;
-  const t = p.tasks.find(x => x.text === text);
-  if (!t) return;
-  t.done = !t.done;
-  await saveToServer();
-  render();
-}
-
 async function saveProject() {
-  const group = document.getElementById('editGroup').value;
-  const id = document.getElementById('editId').value;
-  const tasksText = document.getElementById('editTasks').value;
-  const project = {
-    id,
-    name: document.getElementById('editName').value,
-    status: document.getElementById('editStatus').value,
-    node: document.getElementById('editNode').value,
-    deadline: document.getElementById('editDeadline').value,
-    issues: document.getElementById('editIssues').value,
-    tasks: tasksText.split('\n').filter(t => t.trim()).map(t => {
-    const done = t.includes('✅');
-    const text = t.replace('✅ ','').replace('☐ ','').split('|')[0].trim();
-    const dueMatch = t.match(/@(\d{4}-\d{2}-\d{2})/);
-    const priorityMatch = t.match(/\[#(high|medium|low)\]/);
-    return {
-      text,
-      done,
-      due: dueMatch ? dueMatch[1] : '',
-      priority: priorityMatch ? priorityMatch[1] : 'medium'
-    };
-  })
+  var group = document.getElementById("editGroup").value;
+  var id = document.getElementById("editId").value;
+  var tasksText = document.getElementById("editTasks").value;
+  var project = {
+    id: id,
+    name: document.getElementById("editName").value,
+    status: document.getElementById("editStatus").value,
+    node: document.getElementById("editNode").value,
+    deadline: document.getElementById("editDeadline").value,
+    issues: document.getElementById("editIssues").value,
+    tasks: tasksText.split("\n").filter(function(t) { return t.trim(); }).map(function(t) { return { text: t.replace("✅ ","").replace("☐ ",""), done: t.includes("✅") }; })
   };
-  const idx = data[group].findIndex(x => x.id === id);
+  var idx = data[group].findIndex(function(x) { return x.id === id; });
   if (idx >= 0) data[group][idx] = project;
   else data[group].push(project);
   await saveToServer();
@@ -348,10 +313,13 @@ async function saveProject() {
 }
 
 async function saveToServer() {
-  await fetch('/api/projects', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+  await fetch("/api/projects", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(data) });
 }
 
-function closeModal() { document.getElementById('editModal').classList.remove('show'); }
+function closeModal() { document.getElementById("editModal").classList.remove("show"); }
+
+document.getElementById("cancelBtn").addEventListener("click", closeModal);
+document.getElementById("saveBtn").addEventListener("click", saveProject);
 
 initTheme();
 loadData();
