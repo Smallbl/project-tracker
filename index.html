@@ -217,7 +217,7 @@ function render() {
           const done = t.done ? 'done' : '';
           const check = t.done ? 'done' : '';
           const text = t.text.replace(/'/g, "\\'");
-          html += '<div class="task" onclick="toggleTask(\'' + group + '\',\'' + p.id + '\',\'' + text + '\')"><div class="task-check ' + check + '">' + (t.done ? '✓' : '') + '</div><span class="task-text ' + done + '">' + t.text.replace('✅ ','') + '</span></div>';
+          html += '<div class="task" onclick="editSingleTask(\'' + group + '\',\'' + p.id + '\',\'' + text + '\')"><div class="task-check ' + check + '">' + (t.done ? '✓' : '') + '</div><span class="task-text ' + done + '">' + t.text.replace('✅ ','') + '</span></div>';
         });
         html += '</div></div>';
       });
@@ -242,6 +242,21 @@ function editProject(group, id) {
   document.getElementById('editIssues').value = p.issues || '';
   document.getElementById('editTasks').value = (p.tasks || []).map(t => (t.done ? '✅ ' : '☐ ') + t.text).join('\n');
   document.getElementById('editModal').classList.add('show');
+}
+
+
+function editSingleTask(group, id, text) {
+  const p = data[group].find(x => x.id === id);
+  if (!p) return;
+  const t = p.tasks.find(x => x.text === text);
+  if (!t) return;
+  // 创建一个简单的编辑对话框
+  const newText = prompt('修改任务描述:', t.text);
+  if (newText && newText.trim() && newText !== t.text) {
+    t.text = newText.trim();
+    saveToServer();
+    render();
+  }
 }
 
 async function toggleTask(group, id, text) {
