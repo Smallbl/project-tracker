@@ -2,66 +2,111 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>最小测试</title>
+<title>项目跟踪系统</title>
 <style>
-body { font-family: sans-serif; padding: 20px; }
-.error { color: red; }
-.success { color: green; }
-.project { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 8px; }
-.status { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
-.status-progress { background: #e8f5e9; color: #2e7d32; }
+body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; background: #f5f5f7; }
+h1 { color: #333; }
+.project { background: white; border-radius: 12px; padding: 16px; margin: 12px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.project h3 { margin: 0 0 8px 0; display: flex; justify-content: space-between; align-items: center; }
+.status { font-size: 12px; padding: 2px 10px; border-radius: 12px; background: #e8f5e9; color: #2e7d32; }
 .status-warn { background: #fff8e1; color: #f57f17; }
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-th { background: #f5f5f5; }
+.info { font-size: 13px; color: #666; margin: 4px 0; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+th, td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
+th { background: #fafafa; font-weight: 500; color: #666; }
+.priority { font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+.priority-high { background: #ffebee; color: #c62828; }
+.priority-medium { background: #fff8e1; color: #f57f17; }
+.priority-low { background: #e8f5e9; color: #2e7d32; }
+.loading { color: #666; font-size: 14px; }
+.error { color: #c62828; }
+.tabs { margin: 16px 0; }
+.tab { padding: 8px 16px; background: #e0e0e0; border: none; border-radius: 6px; margin-right: 8px; cursor: pointer; font-size: 13px; }
+.tab.active { background: #667eea; color: white; }
 </style>
 </head>
 <body>
 <h1>📋 项目跟踪系统</h1>
-<div id="projects">加载中...</div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('all')">全部项目</button>
+  <button class="tab" onclick="showTab('四建')">🤖 四建</button>
+  <button class="tab" onclick="showTab('亚太')">🏢 亚太</button>
+</div>
+<div id="content"><p class="loading">加载中...</p></div>
 
 <script>
-// 直接在全局执行
-(async function() {
-    try {
-        const resp = await fetch('/api/projects');
-        if (!resp.ok) throw new Error('API响应失败: ' + resp.status);
-        const data = await resp.json();
-        
-        let html = '';
-        for (const group of ['四建', '亚太']) {
-            if (!data[group]) continue;
-            html += '<h2>' + (group === '四建' ? '🤖' : '🏢') + ' ' + group + '项目</h2>';
-            for (const p of data[group]) {
-                const statusClass = p.status.includes('完成') ? 'status-warn' : 'status-progress';
-                html += '<div class="project">';
-                html += '<h3>' + p.name + ' <span class="status ' + statusClass + '">' + p.status + '</span></h3>';
-                if (p.node) html += '<p><strong>当前节点:</strong> ' + p.node + '</p>';
-                if (p.tasks && p.tasks.length) {
-                    html += '<table><thead><tr><th>✓</th><th>任务</th><th>优先级</th><th>截止</th></tr></thead><tbody>';
-                    for (const t of p.tasks) {
-                        const priorityColors = {high: 'red', medium: 'orange', low: 'green'};
-                        const priorityLabels = {high: '🔴高', medium: '🟡中', low: '🟢低'};
-                        const priority = t.priority || 'medium';
-                        html += '<tr>';
-                        html += '<td>' + (t.done ? '✅' : '☐') + '</td>';
-                        html += '<td>' + t.text + '</td>';
-                        html += '<td style="color:' + priorityColors[priority] + '">' + priorityLabels[priority] + '</td>';
-                        html += '<td>' + (t.due || '-') + '</td>';
-                        html += '</tr>';
-                    }
-                    html += '</tbody></table>';
-                }
-                html += '</div>';
-            }
+var currentTab = "all";
+var projectData = null;
+
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  event.target.classList.add('active');
+  render();
+}
+
+function render() {
+  var el = document.getElementById('content');
+  if (!projectData) { el.innerHTML = '<p class="loading">加载中...</p>'; return; }
+  
+  var groups = currentTab === 'all' ? ['四建', '亚太'] : [currentTab];
+  var html = '';
+  
+  groups.forEach(function(group) {
+    var projects = projectData[group];
+    if (!projects) return;
+    html += '<h2 style="margin-top:20px;">' + (group === '四建' ? '🤖' : '🏢') + ' ' + group + '项目</h2>';
+    
+    projects.forEach(function(p) {
+      var statusClass = p.status.includes('完成') || p.status.includes('待评估') ? 'status-warn' : '';
+      html += '<div class="project">';
+      html += '<h3>' + p.name + ' <span class="status ' + statusClass + '">' + p.status + '</span></h3>';
+      if (p.node) html += '<p class="info">📍 当前节点：' + p.node + '</p>';
+      if (p.issues) html += '<p class="info">⚠️ 当前问题：' + p.issues + '</p>';
+      if (p.tasks && p.tasks.length > 0) {
+        html += '<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>';
+        p.tasks.forEach(function(t) {
+          var pri = t.priority || 'medium';
+          var priLabel = pri === 'high' ? '🔴高' : pri === 'low' ? '🟢低' : '🟡中';
+          var done = t.done ? '✅' : '☐';
+          html += '<tr>';
+          html += '<td style="text-align:center">' + done + '</td>';
+          html += '<td>' + t.text + '</td>';
+          html += '<td style="text-align:center"><span class="priority priority-' + pri + '">' + priLabel + '</span></td>';
+          html += '<td style="text-align:center">' + (t.due || '-') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+      html += '</div>';
+    });
+  });
+  
+  if (!html) html = '<p class="loading">暂无数据</p>';
+  el.innerHTML = html;
+}
+
+function loadData() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/api/projects', true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        try {
+          projectData = JSON.parse(xhr.responseText);
+          render();
+        } catch(e) {
+          document.getElementById('content').innerHTML = '<p class="error">数据解析失败: ' + e + '</p>';
         }
-        if (!html) html = '<p>暂无数据</p>';
-        document.getElementById('projects').innerHTML = html;
-    } catch(e) {
-        document.getElementById('projects').innerHTML = '<p class="error">加载失败: ' + e.message + '</p>';
-        console.error(e);
+      } else {
+        document.getElementById('content').innerHTML = '<p class="error">加载失败: ' + xhr.status + '</p>';
+      }
     }
-})();
+  };
+  xhr.send();
+}
+
+loadData();
 </script>
 </body>
 </html>
