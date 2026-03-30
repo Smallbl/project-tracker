@@ -18,95 +18,95 @@ th { background: #fafafa; font-weight: 500; color: #666; }
 .priority-high { background: #ffebee; color: #c62828; }
 .priority-medium { background: #fff8e1; color: #f57f17; }
 .priority-low { background: #e8f5e9; color: #2e7d32; }
-.loading { color: #666; font-size: 14px; }
-.error { color: #c62828; }
-.tabs { margin: 16px 0; }
-.tab { padding: 8px 16px; background: #e0e0e0; border: none; border-radius: 6px; margin-right: 8px; cursor: pointer; font-size: 13px; }
-.tab.active { background: #667eea; color: white; }
 </style>
 </head>
 <body>
 <h1>📋 项目跟踪系统</h1>
-<div class="tabs">
-  <button class="tab active" onclick="showTab('all')">全部项目</button>
-  <button class="tab" onclick="showTab('四建')">🤖 四建</button>
-  <button class="tab" onclick="showTab('亚太')">🏢 亚太</button>
+<div id="content">
+<h2 style="margin-top:20px;">🤖 四建项目</h2>
+<div class="project">
+<h3>智能审核系统优化 <span class="status ">进行中</span></h3>
+<p class="info">📍 当前节点：招标文件审核功能多项优化</p>
+<p class="info">⚠️ 当前问题：① 错别字识别效果不佳 ② 版面还原丢失 ③ 词组空格干扰</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>错别字模型更新（亚太也用，需确认同步）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>国家标准文件词库增量更新</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>版面还原丢失信息修复</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>词组空格导致识别问题优化</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>国际标模板白名单入库（本周完成）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
 </div>
-<div id="content"><p class="loading">加载中...</p></div>
-
-<script>
-var currentTab = "all";
-var projectData = null;
-
-function showTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-  event.target.classList.add('active');
-  render();
-}
-
-function render() {
-  var el = document.getElementById('content');
-  if (!projectData) { el.innerHTML = '<p class="loading">加载中...</p>'; return; }
-  
-  var groups = currentTab === 'all' ? ['四建', '亚太'] : [currentTab];
-  var html = '';
-  
-  groups.forEach(function(group) {
-    var projects = projectData[group];
-    if (!projects) return;
-    html += '<h2 style="margin-top:20px;">' + (group === '四建' ? '🤖' : '🏢') + ' ' + group + '项目</h2>';
-    
-    projects.forEach(function(p) {
-      var statusClass = p.status.includes('完成') || p.status.includes('待评估') ? 'status-warn' : '';
-      html += '<div class="project">';
-      html += '<h3>' + p.name + ' <span class="status ' + statusClass + '">' + p.status + '</span></h3>';
-      if (p.node) html += '<p class="info">📍 当前节点：' + p.node + '</p>';
-      if (p.issues) html += '<p class="info">⚠️ 当前问题：' + p.issues + '</p>';
-      if (p.tasks && p.tasks.length > 0) {
-        html += '<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>';
-        p.tasks.forEach(function(t) {
-          var pri = t.priority || 'medium';
-          var priLabel = pri === 'high' ? '🔴高' : pri === 'low' ? '🟢低' : '🟡中';
-          var done = t.done ? '✅' : '☐';
-          html += '<tr>';
-          html += '<td style="text-align:center">' + done + '</td>';
-          html += '<td>' + t.text + '</td>';
-          html += '<td style="text-align:center"><span class="priority priority-' + pri + '">' + priLabel + '</span></td>';
-          html += '<td style="text-align:center">' + (t.due || '-') + '</td>';
-          html += '</tr>';
-        });
-        html += '</tbody></table>';
-      }
-      html += '</div>';
-    });
-  });
-  
-  if (!html) html = '<p class="loading">暂无数据</p>';
-  el.innerHTML = html;
-}
-
-function loadData() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/api/projects', true);
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        try {
-          projectData = JSON.parse(xhr.responseText);
-          render();
-        } catch(e) {
-          document.getElementById('content').innerHTML = '<p class="error">数据解析失败: ' + e + '</p>';
-        }
-      } else {
-        document.getElementById('content').innerHTML = '<p class="error">加载失败: ' + xhr.status + '</p>';
-      }
-    }
-  };
-  xhr.send();
-}
-
-loadData();
-</script>
-</body>
-</html>
+<div class="project">
+<h3>翻建智能问答（知识库Agent化） <span class="status status-warn">待评估</span></h3>
+<p class="info">📍 当前节点：RAG模式改Agent模式方案评估</p>
+<p class="info">⚠️ 当前问题：RAG问答效果不佳，可能改Agent模式（改动大）</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>完成资质入库</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>Agent模式可行性评估</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
+</div>
+<h2 style="margin-top:20px;">🏢 亚太项目</h2>
+<div class="project">
+<h3>数字化综合管理平台信创升级 <span class="status ">本周上线</span></h3>
+<p class="info">📍 当前节点：大部分功能测试完成，待和综合确认后出通知</p>
+<p class="info">⚠️ 当前问题：多个财务需求需和综合开会讨论确认</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>项目实施计划/满意度/其他 → 本周上线</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">✅</td><td>新增问题收集功能 → 已上线</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>音视频归档通知功能</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>专家聘费报税打款（OCR识别发票）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>财务需求（培训费/分成权限/统计/外币等）→ 需开会</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>PC首页待办消息刷新优化</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>千里马数据关联对外投标立项</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
+</div>
+<div class="project">
+<h3>坚果云私有化部署 <span class="status ">两步走</span></h3>
+<p class="info">📍 当前节点：第一步替代网盘，第二步归档对接</p>
+<p class="info">⚠️ 当前问题：需和综合开会讨论具体方案</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>第一步：替代网盘</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>第二步：归档系统对接</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
+</div>
+<div class="project">
+<h3>风险预警系统 <span class="status ">进行中</span></h3>
+<p class="info">📍 当前节点：招标文件查重 + 单机版开发</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>招标文件查重-证件比对（测试通过后上线）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>单机版加密狗集成开发（本周完成）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>测试单机版运行环境</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
+</div>
+<div class="project">
+<h3>风控专利申请 <span class="status status-warn">待跟进</span></h3>
+<p class="info">📍 当前节点：算法、系统两个专利申请</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>算法专利申请</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>系统专利申请</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
+</div>
+<div class="project">
+<h3>总经理提出需求 <span class="status status-warn">多项待跟进</span></h3>
+<p class="info">📍 当前节点：6项需求，多项需讨论可行性</p>
+<p class="info">⚠️ 当前问题：多项需求需开会讨论</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>聘费自动审批</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>历史招标文件二次售卖（法律风险需评估）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>对外投标统计千里马关联</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">✅</td><td>国际标购标登记完善（本周上线）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>好软件推荐（需评估合规性）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>门户网站引流（待中招联合上线）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
+</div>
+<div class="project">
+<h3>综合部提出需求 <span class="status status-warn">待开会</span></h3>
+<p class="info">📍 当前节点：本周需安排会议和综合部沟通</p>
+<p class="info">⚠️ 当前问题：待安排会议</p>
+<table><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止</th></tr></thead><tbody>
+<tr><td style="text-align:center">☐</td><td>批量建项领取编号（考虑分包情况）</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>合同脱敏需求</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+<tr><td style="text-align:center">☐</td><td>外部注册功能需求</td><td style="text-align:center"><span class="priority priority-中">🟡中</span></td><td style="text-align:center">-</td></tr>
+</tbody></table>
+</div>
+</div></body></html>
