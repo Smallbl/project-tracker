@@ -230,14 +230,19 @@ function render() {
         if (p.node) html += '<div class="field"><span class="field-label">当前节点</span><span class="field-value">' + p.node + '</span></div>';
         if (p.deadline) html += '<div class="field"><span class="field-label">截止日期</span><span class="field-value">' + p.deadline + '</span></div>';
         if (p.issues) html += '<div class="field"><span class="field-label">当前问题</span><span class="field-value">' + p.issues + '</span></div>';
-        html += '<div class="tasks">';
+        html += '<table class="task-table"><thead><tr><th></th><th>任务</th><th style="text-align:center">优先级</th><th style="text-align:center">截止日期</th></tr></thead><tbody>';
         (p.tasks || []).forEach(t => {
           const done = t.done ? 'done' : '';
-          const check = t.done ? 'done' : '';
           const text = t.text.replace(/'/g, "\\'");
-          html += '<div class="task" onclick="editSingleTask(\'' + group + '\',\'' + p.id + '\',\'' + text + '\')"><div class="task-check ' + check + '">' + (t.done ? '✓' : '') + '</div><div class="task-row"><span class="task-text ' + done + '">' + t.text.replace('✅ ','') + '</span><span class="task-priority priority-' + (t.priority || 'medium') + '">' + (t.priority === 'high' ? '高' : t.priority === 'low' ? '低' : '中') + '</span><span class="task-due">' + (t.due || '') + '</span></div></div>';
+          const priority = t.priority || 'medium';
+          html += '<tr>';
+          html += '<td style="text-align:center"><div class="task-check ' + (t.done ? 'done' : '') + '" onclick="toggleTask(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\')">' + (t.done ? '✓' : '') + '</div></td>';
+          html += '<td><span class="task-text ' + done + '" onclick="editSingleTaskText(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\')">' + t.text.replace('✅ ','') + '</span></td>';
+          html += '<td style="text-align:center"><button class="priority-btn ' + priority + '" onclick="editSingleTaskPriority(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\')">' + (priority === 'high' ? '🔴高' : priority === 'low' ? '🟢低' : '🟡中') + '</button></td>';
+          html += '<td style="text-align:center"><input type="date" class="due-input" value="' + (t.due || '') + '" onchange="editSingleTaskDue(\\'' + group + '\\',\\'' + p.id + '\\',\\'' + text + '\\', this.value)"></td>';
+          html += '</tr>';
         });
-        html += '</div></div>';
+        html += '</tbody></table>';
       });
     });
     if (!html) html = '<div class="no-data">暂无数据</div>';
