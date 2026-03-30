@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>测试页面</title>
+</head>
+<body>
+<h1>项目跟踪系统 - 测试页面</h1>
+<p>如果看到这个，说明HTML加载正常</p>
+
+<script>
+console.log("JS开始执行");
+document.body.innerHTML += "<p style='color:red'>JS执行成功！</p>";
+
+fetch('/api/projects')
+  .then(r => r.json())
+  .then(d => {
+    console.log("数据加载成功:", d);
+    document.body.innerHTML += "<pre>" + JSON.stringify(d, null, 2) + "</pre>";
+  })
+  .catch(e => {
+    console.error("加载失败:", e);
+    document.body.innerHTML += "<p style='color:red'>API加载失败: " + e + "</p>";
+  });
+</script>
+</body>
+</html>

@@ -1,21 +1,19 @@
 #!/usr/bin/env python3
 """
 项目跟踪系统 - Web服务
-启动后访问 http://localhost:8765
 """
 
 import json
 import os
+import mimetypes
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse
-from pathlib import Path
 
 PORT = 8765
-BASE_DIR = Path(__file__).parent.resolve()
-DATA_DIR = BASE_DIR / "data"
-PROJECTS_FILE = DATA_DIR / "projects.json"
-
-INDEX_FILE = BASE_DIR / "index.html"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+PROJECTS_FILE = os.path.join(DATA_DIR, "projects.json")
+INDEX_FILE = os.path.join(BASE_DIR, "index.html")
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -38,7 +36,7 @@ class Handler(SimpleHTTPRequestHandler):
                 self.wfile.write(content.encode())
                 return
         
-        # index.html fallback
+        # index.html
         if path == '/' or path == '' or path == '/index.html':
             with open(INDEX_FILE, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -49,13 +47,15 @@ class Handler(SimpleHTTPRequestHandler):
             self.wfile.write(content.encode())
             return
         
-        # Other static files
-        fpath = BASE_DIR / path.lstrip('/')
-        if fpath.is_file():
+        # Static files
+        fpath = os.path.join(BASE_DIR, path.lstrip('/'))
+        if os.path.isfile(fpath):
             with open(fpath, 'rb') as f:
                 content = f.read()
+            ext = os.path.splitext(fpath)[1].lower()
+            mime_type = mimetypes.guess_type(fpath)[0] or 'application/octet-stream'
             self.send_response(200)
-            self.send_header('Content-Type', 'application/octet-stream')
+            self.send_header('Content-Type', mime_type)
             self.send_header('Content-Length', len(content))
             self.end_headers()
             self.wfile.write(content)
@@ -68,6 +68,7 @@ class Handler(SimpleHTTPRequestHandler):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             data = json.loads(post_data.decode('utf-8'))
+            os.makedirs(DATA_DIR, exist_ok=True)
             with open(PROJECTS_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             self.send_response(200)
@@ -86,37 +87,14 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
     
     def log_message(self, format, *args):
-        pass  # 静默日志
+        pass
 
 
 def run():
-    PROJECTS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    
-    # 如果数据文件不存在，创建默认数据
-    if not PROJECTS_FILE.exists():
-        default_data = {
-            "四建": [], "亚太": [], "meetings": []
-        }
-        with open(PROJECTS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(default_data, f, ensure_ascii=False, indent=2)
-    
-    os.chdir(BASE_DIR)
+    print(f"Starting server on port {PORT}...")
     server = HTTPServer(('0.0.0.0', PORT), Handler)
-    
-    import socket
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 80))
-        lan_ip = s.getsockname()[0]
-        s.close()
-    except:
-        lan_ip = '127.0.0.1'
-    
-    print(f"✅ 项目跟踪系统已启动!")
-    print(f"📍 访问地址: http://localhost:{PORT}")
-    print(f"🌐 局域网: http://{lan_ip}:{PORT}")
-    print(f"📁 静态文件: {BASE_DIR}")
-    print(f"\n按 Ctrl+C 停止服务")
+    print(f"Server running at http://localhost:{PORT}")
+    print(f"Press Ctrl+C to stop")
     server.serve_forever()
 
 
