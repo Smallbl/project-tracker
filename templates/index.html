@@ -40,6 +40,12 @@
   .status-warn { background: #fff8e1; color: #f57f17; }
   .status-todo { background: #e3f2fd; color: #1565c0; }
   .status-done { background: #f3e5f5; color: #7b1fa2; }
+  .status-red { background: #ffebee; color: #c62828; }
+  .status-orange { background: #fff3e0; color: #e65100; }
+  .status-blue { background: #e3f2fd; color: #1565c0; }
+  .status-purple { background: #f3e5f5; color: #7b1fa2; }
+  .status-gray { background: #f5f5f5; color: #757575; }
+  .status-auto { font-size: 12px; padding: 3px 12px; }
   
   .info { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
   
@@ -61,8 +67,11 @@
   .priority.medium { background: #fff8e1; color: #f57f17; }
   .priority.low { background: #e8f5e9; color: #2e7d32; }
   
-  .due-input { font-size: 12px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; width: 110px; text-align: center; }
+  .due-wrap { position: relative; display: inline-flex; align-items: center; }
+  .due-input { font-size: 12px; padding: 4px 24px 4px 8px; border: 1px solid var(--border); border-radius: 4px; width: 128px; text-align: left; background: #fff; }
   .due-input:focus { outline: none; border-color: var(--accent); }
+  .due-clear { position: absolute; right: 6px; background: none; border: none; color: #aaa; cursor: pointer; font-size: 13px; line-height: 1; padding: 2px; }
+  .due-clear:hover { color: #666; }
   
   .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; text-decoration: none; display: inline-block; }
   .btn-primary { background: var(--accent); color: white; }
@@ -127,11 +136,11 @@
       {% if projects.get(group) %}
         <div class="section-title">{% if group == '四建' %}🤖{% else %}🏢{% endif %} {{ group }}项目</div>
         {% for p in projects.get(group, []) %}
-          <div class="card">
+          <div class="card" id="project-{{ p.id }}">
             <div class="card-header">
               <div class="card-title">{{ p.name }}</div>
               <div class="card-actions">
-                <span class="status {% if '完成' in p.status %}status-done{% elif '待' in p.status or '评估' in p.status %}status-warn{% elif '开会' in p.status %}status-todo{% else %}status-progress{% endif %}">{{ p.status }}</span>
+                <span class="status {% if p.status_color %}{{ p.status_color }}{% elif '完成' in p.status %}status-done{% elif '待' in p.status or '评估' in p.status %}status-warn{% elif '开会' in p.status %}status-todo{% else %}status-progress{% endif %}">{% if p.status_text %}{{ p.status_text }}{% else %}{{ p.status }}{% endif %}</span>
                 <button class="btn btn-primary" onclick="showEdit('{{ group }}', '{{ p.id }}')">编辑</button>
               </div>
             </div>
@@ -157,6 +166,7 @@
                       <input type="hidden" name="group" value="{{ group }}">
                       <input type="hidden" name="project_id" value="{{ p.id }}">
                       <input type="hidden" name="task_text" value="{{ t.text }}">
+                      <input type="hidden" name="tab" value="{{ active_tab }}">
                       <div class="task-check {% if t.done %}done{% endif %}">{% if t.done %}✓{% endif %}</div>
                     </form>
                   </td>
@@ -171,6 +181,7 @@
                       <input type="hidden" name="group" value="{{ group }}">
                       <input type="hidden" name="project_id" value="{{ p.id }}">
                       <input type="hidden" name="task_text" value="{{ t.text }}">
+                      <input type="hidden" name="tab" value="{{ active_tab }}">
                       <button type="submit" class="priority {{ t.priority or 'medium' }}">
                         {% if t.priority == 'high' %}🔴高{% elif t.priority == 'low' %}🟢低{% else %}🟡中{% endif %}
                       </button>
@@ -181,7 +192,13 @@
                       <input type="hidden" name="group" value="{{ group }}">
                       <input type="hidden" name="project_id" value="{{ p.id }}">
                       <input type="hidden" name="task_text" value="{{ t.text }}">
-                      <input type="date" name="due" class="due-input" value="{{ t.due or '' }}" onchange="this.form.submit()">
+                      <input type="hidden" name="tab" value="{{ active_tab }}">
+                      <div class="due-wrap">
+                        <input type="date" name="due" class="due-input" value="{{ t.due or '' }}" onchange="this.form.submit()">
+                        {% if t.due %}
+                        <button type="button" class="due-clear" onclick="clearDue(this, '{{ group }}', '{{ p.id }}', '{{ t.text | e }}')" title="清空日期">×</button>
+                        {% endif %}
+                      </div>
                     </form>
                   </td>
                 </tr>
@@ -207,21 +224,48 @@
     <form method="POST" id="editForm">
       <input type="hidden" name="group" id="editGroup" value="">
       <input type="hidden" name="project_id" id="editProjectId" value="">
+      <input type="hidden" name="tab" id="editTab" value="">
       <div class="form-group">
         <label>项目名称</label>
         <input type="text" name="name" id="editName">
       </div>
       <div class="form-group">
-        <label>状态</label>
-        <select name="status" id="editStatus">
-          <option value="进行中">进行中</option>
-          <option value="待评估">待评估</option>
-          <option value="待跟进">待跟进</option>
-          <option value="待开会">待开会</option>
-          <option value="多项待跟进">多项待跟进</option>
-          <option value="两步走">两步走</option>
-          <option value="已完成">已完成</option>
-        </select>
+        <label>状态标签（自定义文字）</label>
+        <input type="text" name="status_text" id="editStatusText" placeholder="如：进行中、待跟进、待上线等">
+      </div>
+      <div class="form-group">
+        <label>状态颜色</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 0">
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="status_color" id="sc-green" value="status-progress" style="accent-color:#2e7d32" onchange="previewStatus()">
+            <span style="background:#e8f5e9;color:#2e7d32;padding:3px 12px;border-radius:20px;font-size:12px">绿色</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="status_color" id="sc-yellow" value="status-warn" style="accent-color:#f57f17" onchange="previewStatus()">
+            <span style="background:#fff8e1;color:#f57f17;padding:3px 12px;border-radius:20px;font-size:12px">黄色</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="status_color" id="sc-blue" value="status-todo" style="accent-color:#1565c0" onchange="previewStatus()">
+            <span style="background:#e3f2fd;color:#1565c0;padding:3px 12px;border-radius:20px;font-size:12px">蓝色</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="status_color" id="sc-purple" value="status-done" style="accent-color:#7b1fa2" onchange="previewStatus()">
+            <span style="background:#f3e5f5;color:#7b1fa2;padding:3px 12px;border-radius:20px;font-size:12px">紫色</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="status_color" id="sc-red" value="status-red" style="accent-color:#c62828" onchange="previewStatus()">
+            <span style="background:#ffebee;color:#c62828;padding:3px 12px;border-radius:20px;font-size:12px">红色</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="status_color" id="sc-orange" value="status-orange" style="accent-color:#e65100" onchange="previewStatus()">
+            <span style="background:#fff3e0;color:#e65100;padding:3px 12px;border-radius:20px;font-size:12px">橙色</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer">
+            <input type="radio" name="status_color" id="sc-gray" value="status-gray" style="accent-color:#757575" onchange="previewStatus()">
+            <span style="background:#f5f5f5;color:#757575;padding:3px 12px;border-radius:20px;font-size:12px">灰色</span>
+          </label>
+        </div>
+        <div id="statusPreview" style="margin-top:8px"></div>
       </div>
       <div class="form-group">
         <label>当前节点</label>
@@ -247,6 +291,27 @@
   </div>
 </div>
 
+<!-- 任务名称编辑弹窗 -->
+<div class="modal" id="taskNameModal">
+  <div class="modal-content">
+    <h2>修改任务名称</h2>
+    <form method="POST" action="/update_task_name">
+      <input type="hidden" name="group" id="taskNameGroup" value="">
+      <input type="hidden" name="project_id" id="taskNameProjectId" value="">
+      <input type="hidden" name="old_text" id="taskNameOldText" value="">
+      <input type="hidden" name="tab" id="taskNameTab" value="">
+      <div class="form-group">
+        <label>新任务名称</label>
+        <input type="text" name="new_text" id="taskNameNewText" required>
+      </div>
+      <div class="modal-btns">
+        <button type="button" class="btn btn-secondary" onclick="closeTaskNameModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 var projectData = {{ projects | tojson }};
 
@@ -256,22 +321,89 @@ function showEdit(group, id) {
   
   document.getElementById('editGroup').value = group;
   document.getElementById('editProjectId').value = id;
+  document.getElementById('editTab').value = getCurrentTab();
   document.getElementById('editName').value = p.name || '';
-  document.getElementById('editStatus').value = p.status || '';
-  document.getElementById('editNode').value = p.node || '';
+  document.getElementById('editStatusText').value = p.status_text || p.status || '';
   document.getElementById('editDeadline').value = p.deadline || '';
   document.getElementById('editIssues').value = p.issues || '';
   document.getElementById('editTasks').value = (p.tasks || []).map(function(t) { 
     return (t.done ? '✅ ' : '☐ ') + t.text; 
   }).join('\n');
   
+  // 选中颜色
+  var colorRadios = document.querySelectorAll('input[name="status_color"]');
+  var savedColor = p.status_color || '';
+  colorRadios.forEach(function(r) { r.checked = (r.value === savedColor); });
+  
   document.getElementById('editForm').action = '/update_project';
   document.getElementById('editModal').classList.add('show');
+  previewStatus();
+}
+
+function previewStatus() {
+  var text = document.getElementById('editStatusText').value;
+  var checked = document.querySelector('input[name="status_color"]:checked');
+  var color = checked ? checked.value : 'status-progress';
+  var preview = document.getElementById('statusPreview');
+  if (!text) {
+    text = '进行中 / 待评估 / 待跟进...';
+  }
+  preview.innerHTML = '<span class="status ' + color + '" style="font-size:13px;padding:4px 14px">' + text + '</span> <span style="color:#999;font-size:12px;margin-left:8px">预览</span>';
 }
 
 function closeModal() {
   document.getElementById('editModal').classList.remove('show');
 }
+
+function closeTaskNameModal() {
+  document.getElementById('taskNameModal').classList.remove('show');
+}
+
+function clearDue(btn, group, projectId, taskText) {
+  var form = btn.closest('form');
+  var tabInput = form.querySelector('input[name="tab"]');
+  var tab = tabInput ? tabInput.value : 'all';
+  
+  var hiddenGroup = document.createElement('input');
+  hiddenGroup.type = 'hidden'; hiddenGroup.name = 'group'; hiddenGroup.value = group;
+  var hiddenProject = document.createElement('input');
+  hiddenProject.type = 'hidden'; hiddenProject.name = 'project_id'; hiddenProject.value = projectId;
+  var hiddenText = document.createElement('input');
+  hiddenText.type = 'hidden'; hiddenText.name = 'task_text'; hiddenText.value = taskText;
+  var hiddenTab = document.createElement('input');
+  hiddenTab.type = 'hidden'; hiddenTab.name = 'tab'; hiddenTab.value = tab;
+  var hiddenDue = document.createElement('input');
+  hiddenDue.type = 'hidden'; hiddenDue.name = 'due'; hiddenDue.value = '';
+  
+  var newForm = document.createElement('form');
+  newForm.method = 'POST'; newForm.action = '/clear_due';
+  newForm.appendChild(hiddenGroup); newForm.appendChild(hiddenProject);
+  newForm.appendChild(hiddenText); newForm.appendChild(hiddenTab); newForm.appendChild(hiddenDue);
+  document.body.appendChild(newForm);
+  newForm.submit();
+}
+
+function getCurrentTab() {
+  var m = window.location.search.match(/[?&]tab=([^&]+)/);
+  return m ? decodeURIComponent(m[1]) : 'all';
+}
+
+// 页面加载后滚动到锚点位置（用于表单提交后保持滚动位置）
+document.addEventListener('DOMContentLoaded', function() {
+  var hash = window.location.hash;
+  if (hash) {
+    var el = document.querySelector(hash);
+    if (el) {
+      // 等待一下让浏览器完成原生hash滚动
+      requestAnimationFrame(function() {
+        var headerHeight = document.querySelector('.header') ? document.querySelector('.header').offsetHeight : 0;
+        var rect = el.getBoundingClientRect();
+        var offsetTop = rect.top + window.pageYOffset - headerHeight - 20;
+        window.scrollTo({ top: Math.max(0, offsetTop), behavior: 'instant' });
+      });
+    }
+  }
+});
 
 // 点击弹窗背景关闭
 document.getElementById('editModal').addEventListener('click', function(e) {
@@ -288,27 +420,12 @@ document.querySelectorAll('.task-check').forEach(function(el) {
 
 // 任务名称编辑
 function editTaskName(group, projectId, oldText) {
-  var newText = prompt('修改任务名称:', oldText);
-  if (newText && newText.trim() && newText !== oldText) {
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/update_task_name/' + group + '/' + projectId;
-    
-    var oldInput = document.createElement('input');
-    oldInput.type = 'hidden';
-    oldInput.name = 'old_text';
-    oldInput.value = oldText;
-    form.appendChild(oldInput);
-    
-    var newInput = document.createElement('input');
-    newInput.type = 'hidden';
-    newInput.name = 'new_text';
-    newInput.value = newText.trim();
-    form.appendChild(newInput);
-    
-    document.body.appendChild(form);
-    form.submit();
-  }
+  document.getElementById('taskNameGroup').value = group;
+  document.getElementById('taskNameProjectId').value = projectId;
+  document.getElementById('taskNameOldText').value = oldText;
+  document.getElementById('taskNameTab').value = getCurrentTab();
+  document.getElementById('taskNameNewText').value = oldText;
+  document.getElementById('taskNameModal').classList.add('show');
 }
 </script>
 

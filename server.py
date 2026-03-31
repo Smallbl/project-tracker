@@ -43,6 +43,7 @@ def toggle_task():
     group = request.form.get('group', '')
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
+    tab = request.form.get('tab', 'all')
     
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -53,7 +54,7 @@ def toggle_task():
             break
     
     save_data(data)
-    return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
 
 
 @app.route('/update_priority', methods=['POST'])
@@ -62,6 +63,7 @@ def update_priority():
     group = request.form.get('group', '')
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
+    tab = request.form.get('tab', 'all')
     
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -75,7 +77,7 @@ def update_priority():
             break
     
     save_data(data)
-    return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
 
 
 @app.route('/update_due', methods=['POST'])
@@ -85,6 +87,7 @@ def update_due():
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     new_due = request.form.get('due', '')
+    tab = request.form.get('tab', 'all')
     
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -95,7 +98,28 @@ def update_due():
             break
     
     save_data(data)
-    return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
+    anchor = f"project-{project_id}"
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#{anchor}")
+
+
+@app.route('/clear_due', methods=['POST'])
+def clear_due():
+    data = load_data()
+    group = request.form.get('group', '')
+    project_id = request.form.get('project_id', '')
+    task_text = request.form.get('task_text', '')
+    tab = request.form.get('tab', 'all')
+    
+    for p in data.get(group, []):
+        if p.get('id') == project_id:
+            for t in p.get('tasks', []):
+                if t.get('text') == task_text:
+                    t['due'] = ''
+                    break
+            break
+    
+    save_data(data)
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
 
 
 @app.route('/update_project', methods=['POST'])
@@ -103,11 +127,13 @@ def update_project():
     data = load_data()
     group = request.form.get('group', '')
     project_id = request.form.get('project_id', '')
+    tab = request.form.get('tab', 'all')
     
     for i, p in enumerate(data.get(group, [])):
         if p.get('id') == project_id:
             p['name'] = request.form.get('name', p.get('name', ''))
-            p['status'] = request.form.get('status', p.get('status', ''))
+            p['status_text'] = request.form.get('status_text', '')
+            p['status_color'] = request.form.get('status_color', '')
             p['node'] = request.form.get('node', p.get('node', ''))
             p['deadline'] = request.form.get('deadline', p.get('deadline', ''))
             p['issues'] = request.form.get('issues', p.get('issues', ''))
@@ -124,7 +150,7 @@ def update_project():
             break
     
     save_data(data)
-    return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all'))
 
 
 @app.route('/update_task_name', methods=['POST'])
@@ -134,6 +160,7 @@ def update_task_name():
     project_id = request.form.get('project_id', '')
     old_text = request.form.get('old_text', '')
     new_text = request.form.get('new_text', '')
+    tab = request.form.get('tab', 'all')
     
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -144,7 +171,7 @@ def update_task_name():
             break
     
     save_data(data)
-    return redirect(url_for('index', tab=group if group in ['四建', '亚太'] else 'all'))
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
 
 
 if __name__ == '__main__':

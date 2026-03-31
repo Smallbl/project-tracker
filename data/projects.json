@@ -4,41 +4,43 @@
       "id": "sijian-001",
       "name": "智能审核系统优化",
       "status": "进行中",
-      "node": "招标文件审核功能多项优化",
+      "node": "",
       "deadline": "",
       "issues": "① 错别字识别效果不佳 ② 版面还原丢失 ③ 词组空格干扰",
       "tasks": [
         {
           "text": "错别字模型更新（亚太也用，需确认同步）",
-          "done": true,
-          "due": "2026-04-03",
-          "priority": "medium"
+          "done": false,
+          "priority": "medium",
+          "due": ""
         },
         {
           "text": "国家标准文件词库增量更新",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "priority": "medium",
+          "due": ""
         },
         {
           "text": "版面还原丢失信息修复",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "priority": "medium",
+          "due": ""
         },
         {
           "text": "词组空格导致识别问题优化",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "priority": "medium",
+          "due": ""
         },
         {
           "text": "国际标模板白名单入库（本周完成）",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "priority": "medium",
+          "due": ""
         }
-      ]
+      ],
+      "status_text": "进行中",
+      "status_color": "status-todo"
     },
     {
       "id": "sijian-002",
@@ -51,13 +53,13 @@
         {
           "text": "完成资质入库",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         },
         {
           "text": "Agent模式可行性评估",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         }
       ]
@@ -73,45 +75,45 @@
       "issues": "多个财务需求需和综合开会讨论确认",
       "tasks": [
         {
-          "text": "项目实施计划/满意度/其他 → 本周上线",
+          "text": "项目实施计划/满意度/其他 → 本周上线，需尽快提供手册给综合出通知后上线",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-03",
+          "priority": "high"
         },
         {
           "text": "新增问题收集功能 → 已上线",
           "done": true,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-03",
+          "priority": "low"
         },
         {
           "text": "音视频归档通知功能",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         },
         {
           "text": "专家聘费报税打款（OCR识别发票）",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         },
         {
           "text": "财务需求（培训费/分成权限/统计/外币等）→ 需开会",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         },
         {
           "text": "PC首页待办消息刷新优化",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         },
         {
           "text": "千里马数据关联对外投标立项",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         }
       ]
@@ -127,13 +129,13 @@
         {
           "text": "第一步：替代网盘",
           "done": false,
-          "due": "",
+          "due": "2026-04-30",
           "priority": "medium"
         },
         {
           "text": "第二步：归档系统对接",
           "done": false,
-          "due": "",
+          "due": "2026-04-30",
           "priority": "medium"
         }
       ]
@@ -149,20 +151,20 @@
         {
           "text": "招标文件查重-证件比对（测试通过后上线）",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-03",
+          "priority": "high"
         },
         {
           "text": "单机版加密狗集成开发（本周完成）",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-03",
+          "priority": "high"
         },
         {
           "text": "测试单机版运行环境",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-03",
+          "priority": "high"
         }
       ]
     },
@@ -199,38 +201,38 @@
         {
           "text": "聘费自动审批",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-30",
+          "priority": "low"
         },
         {
           "text": "历史招标文件二次售卖（法律风险需评估）",
           "done": false,
           "due": "",
-          "priority": "medium"
+          "priority": "low"
         },
         {
           "text": "对外投标统计千里马关联",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-03",
+          "priority": "high"
         },
         {
           "text": "国际标购标登记完善（本周上线）",
-          "done": true,
-          "due": "",
-          "priority": "medium"
+          "done": false,
+          "due": "2026-04-03",
+          "priority": "high"
         },
         {
           "text": "好软件推荐（需评估合规性）",
           "done": false,
           "due": "",
-          "priority": "medium"
+          "priority": "low"
         },
         {
           "text": "门户网站引流（待中招联合上线）",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-03-31",
+          "priority": "low"
         }
       ]
     },
@@ -245,7 +247,7 @@
         {
           "text": "批量建项领取编号（考虑分包情况）",
           "done": false,
-          "due": "",
+          "due": "2026-04-03",
           "priority": "medium"
         },
         {
@@ -257,8 +259,8 @@
         {
           "text": "外部注册功能需求",
           "done": false,
-          "due": "",
-          "priority": "medium"
+          "due": "2026-04-30",
+          "priority": "high"
         }
       ]
     }
