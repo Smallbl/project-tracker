@@ -34,21 +34,43 @@
       "date": "2026-04-02",
       "content": "预开票数据找财务确认，其他值统计沟通规则",
       "status": "completed",
-      "completed_at": "2026-04-02 22:24:15.358634"
+      "completed_at": "2026-04-02 22:24:15.358634",
+      "source": "planned",
+      "source_dept": "",
+      "notes": "",
+      "tags": [],
+      "project": ""
     },
     {
       "id": "95",
       "done": false,
       "priority": "medium",
       "date": "2026-04-03",
-      "content": "跟供应商过短信通知模板，确认后安排开发去阿里云申请",
+      "content": "跟供应商过短信通知模板",
       "source": "planned",
       "source_dept": "",
       "notes": "",
       "tags": [],
       "project": "",
       "status": "pending"
+    },
+    {
+      "id": 96,
+      "content": "排查风险预警系统报错问题",
+      "date": "2026-04-03",
+      "status": "pending",
+      "source": "temp",
+      "source_dept": "招标五处",
+      "priority": "medium",
+      "notes": "",
+      "tags": [
+        "跟进"
+      ],
+      "project": "风险预警系统",
+      "created_at": "2026-04-02 22:30:59.101223",
+      "completed_at": null,
+      "done": false
     }
   ],
-  "last_id": 95
+  "last_id": 96
 }
