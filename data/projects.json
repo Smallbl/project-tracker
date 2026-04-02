@@ -115,6 +115,24 @@
           "done": false,
           "due": "2026-04-03",
           "priority": "medium"
+        },
+        {
+          "text": "三处分成项目清单整理给到开发导入系统",
+          "done": false,
+          "due": "2026-04-03",
+          "priority": "high"
+        },
+        {
+          "text": "预开票数据找财务确认，其他值统计沟通规则",
+          "done": false,
+          "due": "2026-04-03",
+          "priority": "medium"
+        },
+        {
+          "text": "跟供应商过短信通知模板，确认后安排开发去阿里云申请",
+          "done": false,
+          "due": "2026-04-03",
+          "priority": "medium"
         }
       ]
     },
