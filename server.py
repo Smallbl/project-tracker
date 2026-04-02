@@ -248,10 +248,11 @@ def update_daily_task(task_id):
             for key in ['content', 'date', 'status', 'source', 'source_dept', 'priority', 'notes', 'tags', 'project']:
                 if key in req:
                     task[key] = req[key]
-            if task['status'] == 'completed' and not task.get('completed_at'):
-                task['completed_at'] = str(datetime.now())
-            elif task['status'] != 'completed':
-                task['completed_at'] = None
+            # 同步 done 和 status
+            if 'status' in task:
+                task['done'] = (task['status'] == 'completed')
+            elif 'done' in task:
+                task['status'] = 'completed' if task['done'] else 'pending'
             break
     with open('data/daily_tasks.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -276,8 +277,9 @@ def toggle_daily_task(task_id):
     task_id = str(task_id)
     for task in data['tasks']:
         if str(task['id']) == task_id:
-            task['status'] = 'completed' if task['status'] != 'completed' else 'pending'
-            task['completed_at'] = str(datetime.now()) if task['status'] == 'completed' else None
+            task['done'] = not task.get('done', False)
+            task['status'] = 'completed' if task['done'] else 'pending'
+            task['completed_at'] = str(datetime.now()) if task['done'] else None
             break
     with open('data/daily_tasks.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
