@@ -16,6 +16,20 @@ app.config['JSON_AS_ASCII'] = False
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 PROJECTS_FILE = os.path.join(DATA_DIR, 'projects.json')
 
+# ===== 服务器代码更新检测 =====
+SERVER_FILE = os.path.abspath(__file__)
+_server_mtime = os.path.getmtime(SERVER_FILE)
+_restart_warned = False
+
+@app.after_request
+def set_restart_header(response):
+    """检测 server.py 是否被修改，每次响应都追加提示头"""
+    global _server_mtime
+    if os.path.getmtime(SERVER_FILE) > _server_mtime:
+        response.headers['X-Server-Restart-Required'] = 'true'
+        response.headers['X-Restart-Message'] = 'server.py 已更新，请重启服务器'
+    return response
+
 
 def load_data():
     os.makedirs(DATA_DIR, exist_ok=True)

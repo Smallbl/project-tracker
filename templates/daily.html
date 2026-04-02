@@ -732,6 +732,10 @@
       data.source = sourceChecked ? sourceChecked.value : 'planned';
       data.tags = (data.tags || '').split(',').map(s => s.trim()).filter(Boolean);
 
+      const idx = tasks.findIndex(t => String(t.id) === editingId);
+      const oldDate = idx !== -1 ? tasks[idx].date : null;
+      const dateChanged = oldDate && data.date && data.date !== oldDate;
+
       try {
         await fetch(API + '/' + editingId, {
           method: 'PUT',
@@ -740,12 +744,23 @@
         });
       } catch {}
 
-      const idx = tasks.findIndex(t => String(t.id) === editingId);
       if (idx !== -1) tasks[idx] = { ...tasks[idx], ...data };
 
       document.getElementById('editModal').classList.remove('show');
-      renderTasks();
-      updateStats();
+
+      // 日期变更：从当前列表移除并切换到新日期视图
+      if (dateChanged) {
+        // 从当前列表移除
+        tasks = tasks.filter(t => String(t.id) !== editingId);
+        // 切换到新日期视图并重新加载
+        const newDate = data.date;
+        document.getElementById('datePicker').value = newDate;
+        // 重新加载新日期的任务列表（包含刚移动过来的任务）
+        loadTasks();
+      } else {
+        renderTasks();
+        updateStats();
+      }
       showToast('任务已更新', 'success');
     });
 

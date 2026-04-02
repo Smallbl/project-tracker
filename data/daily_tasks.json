@@ -18,25 +18,36 @@
       "id": "93",
       "done": false,
       "priority": "high",
-      "date": "2026-04-04",
+      "date": "2026-04-03",
       "content": "三处分成项目清单",
       "source": "temp",
       "source_dept": "招标三处",
-      "status": "pending"
+      "status": "pending",
+      "notes": "",
+      "tags": [],
+      "project": "数字化综合管理平台信创升级"
     },
     {
       "id": "94",
-      "done": false,
+      "done": true,
       "priority": "medium",
       "date": "2026-04-02",
-      "content": "预开票数据找财务确认，其他值统计沟通规则"
+      "content": "预开票数据找财务确认，其他值统计沟通规则",
+      "status": "completed",
+      "completed_at": "2026-04-02 22:24:15.358634"
     },
     {
       "id": "95",
       "done": false,
       "priority": "medium",
-      "date": "2026-04-02",
-      "content": "跟供应商过短信通知模板，确认后安排开发去阿里云申请"
+      "date": "2026-04-03",
+      "content": "跟供应商过短信通知模板，确认后安排开发去阿里云申请",
+      "source": "planned",
+      "source_dept": "",
+      "notes": "",
+      "tags": [],
+      "project": "",
+      "status": "pending"
     }
   ],
   "last_id": 95
