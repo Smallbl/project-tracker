@@ -242,8 +242,9 @@ def update_daily_task(task_id):
     req = request.get_json()
     with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
+    task_id = str(task_id)
     for task in data['tasks']:
-        if task['id'] == task_id:
+        if str(task['id']) == task_id:
             for key in ['content', 'date', 'status', 'source', 'source_dept', 'priority', 'notes', 'tags', 'project']:
                 if key in req:
                     task[key] = req[key]
@@ -261,7 +262,8 @@ def update_daily_task(task_id):
 def delete_daily_task(task_id):
     with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
-    data['tasks'] = [t for t in data['tasks'] if t['id'] != task_id]
+    task_id = str(task_id)
+    data['tasks'] = [t for t in data['tasks'] if str(t['id']) != task_id]
     with open('data/daily_tasks.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     return json_response({'success': True})
@@ -271,8 +273,9 @@ def delete_daily_task(task_id):
 def toggle_daily_task(task_id):
     with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
+    task_id = str(task_id)
     for task in data['tasks']:
-        if task['id'] == task_id:
+        if str(task['id']) == task_id:
             task['status'] = 'completed' if task['status'] != 'completed' else 'pending'
             task['completed_at'] = str(datetime.now()) if task['status'] == 'completed' else None
             break
