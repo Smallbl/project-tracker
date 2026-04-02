@@ -698,7 +698,8 @@
     document.getElementById('taskForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = getFormData('f-');
-      data.source = document.querySelector('input[name="source"]:checked').value;
+      const sourceChecked = document.querySelector('input[name="source"]:checked');
+      data.source = sourceChecked ? sourceChecked.value : 'planned';
       data.tags = (data.tags || '').split(',').map(s => s.trim()).filter(Boolean);
 
       try {
@@ -727,7 +728,8 @@
     document.getElementById('editForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = getFormData('e-');
-      data.source = document.querySelector('#editForm input[name="source"]:checked').value;
+      const sourceChecked = document.querySelector('#editForm input[name="source"]:checked');
+      data.source = sourceChecked ? sourceChecked.value : 'planned';
       data.tags = (data.tags || '').split(',').map(s => s.trim()).filter(Boolean);
 
       try {

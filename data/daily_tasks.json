@@ -4,8 +4,15 @@
       "id": "92",
       "done": false,
       "priority": "high",
-      "date": "2026-04-02",
-      "content": "客户满意度、项目实施计划、其他项目管理功能操作说明整合后发给综合管理部，具备上线条件，等综合通知安排上线"
+      "date": "2026-04-03",
+      "content": "客户满意度",
+      "status": "pending",
+      "completed_at": null,
+      "source": "planned",
+      "source_dept": "",
+      "notes": "",
+      "tags": "",
+      "project": ""
     },
     {
       "id": "93",
