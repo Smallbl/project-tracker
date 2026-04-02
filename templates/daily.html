@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:,">
 <title>📌 每日任务</title>
 <style>
   :root {
@@ -209,13 +210,15 @@
     padding: 2px 8px;
     border-radius: 4px;
     font-weight: 500;
+    position: relative;
   }
   .tag.blue { background: rgba(79,70,229,0.2); color: #a5b4fc; }
   .tag.green { background: rgba(16,185,129,0.2); color: #6ee7b7; }
   .tag.orange { background: rgba(245,158,11,0.2); color: #fcd34d; }
   .tag.red { background: rgba(239,68,68,0.2); color: #fca5a5; }
   .tag.cyan { background: rgba(6,182,212,0.2); color: #67e8f9; }
-  .tag.purple { background: rgba(139,92,246,0.2); color: #c4b5fd; }
+  .tag.purple { background: rgba(139,92,246,0.2); color: #c4b5fd; cursor: pointer; }
+  .tag[data-notes]:hover::after { content: attr(data-notes); position: absolute; background: #1e2a38; color: #e6edf3; padding: 6px 10px; border-radius: 6px; font-size: 12px; max-width: 250px; white-space: pre-wrap; z-index: 999; margin-top: 24px; margin-left: -30px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid #2d3748; }
 
   .priority-badge { font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
   .priority-badge.high { background: rgba(239,68,68,0.2); color: #f87171; }
@@ -579,13 +582,13 @@
         <div class="task-check ${doneClass}" onclick="toggleTask('${t.id}')">${checkIcon}</div>
         <div class="task-seq">${idx + 1}</div>
         <div class="task-body">
-          <div class="task-content">${escapeHtml(t.content)}</div>
+          <div class="task-content">${escapeHtml(t.text || t.content || '')}</div>
           <div class="task-meta">
             ${tagHtml}
             <span class="priority-badge ${priorityClass}">${priorityLabel}</span>
             ${sourceLabel}
             ${t.project ? `<span class="tag cyan">📁 ${escapeHtml(t.project)}</span>` : ''}
-            ${t.notes ? `<span class="tag purple">💬</span>` : ''}
+            ${t.notes ? `<span class="tag purple" data-notes="${escapeHtml(t.notes)}">💬</span>` : ''}
           </div>
         </div>
         <div class="task-actions">
@@ -634,7 +637,7 @@
     if (!t) return;
     editingId = id;
 
-    document.getElementById('e-content').value = t.content;
+    document.getElementById('e-content').value = t.text || t.content || '';
     document.getElementById('e-date').value = t.date || '';
     document.getElementById('e-priority').value = t.priority || 'medium';
     document.getElementById('e-project').value = t.project || '';
