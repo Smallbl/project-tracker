@@ -782,14 +782,18 @@
 
   // ===== 工具函数 =====
   function getFormData(prefix) {
+    function v(id) {
+      const el = document.getElementById(prefix + id);
+      return el ? el.value : '';
+    }
     return {
-      content: document.getElementById(prefix + 'content').value,
-      date: document.getElementById(prefix + 'date').value,
-      priority: document.getElementById(prefix + 'priority').value,
-      project: document.getElementById(prefix + 'project').value,
-      tags: document.getElementById(prefix + 'tags').value,
-      notes: document.getElementById(prefix + 'remark').value,
-      source_dept: document.getElementById(prefix + 'dept') ? document.getElementById(prefix + 'dept').value : ''
+      content: v('content'),
+      date: v('date'),
+      priority: v('priority'),
+      project: v('project'),
+      tags: v('tags'),
+      notes: v('remark'),
+      source_dept: v('dept')
     };
   }
 
