@@ -195,6 +195,34 @@ def update_task_name():
     return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
 
 
+@app.route('/update_task_detail', methods=['POST'])
+def update_task_detail():
+    """更新任务的完整详情：任务名称、优先级、截止日期、意见备注"""
+    data = load_data()
+    group = request.form.get('group', '')
+    project_id = request.form.get('project_id', '')
+    task_text = request.form.get('task_text', '')
+    new_text = request.form.get('text', '')
+    priority = request.form.get('priority', 'medium')
+    due = request.form.get('due', '')
+    opinion = request.form.get('opinion', '')
+    tab = request.form.get('tab', 'all')
+    
+    for p in data.get(group, []):
+        if p.get('id') == project_id:
+            for t in p.get('tasks', []):
+                if t.get('text') == task_text:
+                    t['text'] = new_text
+                    t['priority'] = priority
+                    t['due'] = due
+                    t['opinion'] = opinion
+                    break
+            break
+    
+    save_data(data)
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
+
+
 # ==================== 每日任务模块 API ====================
 
 def json_response(data):
@@ -299,6 +327,162 @@ def toggle_daily_task(task_id):
         json.dump(data, f, ensure_ascii=False, indent=2)
     return json_response({'task': task})
 
+
+# ==================== 项目管理 API（表单提交） ====================
+
+@app.route('/add_company', methods=['POST'])
+def add_company():
+    """动态添加新公司"""
+    company_name = request.form.get('company_name', '').strip()
+    tab = request.form.get('tab', 'all')
+    if not company_name:
+        return redirect(url_for('index', tab=tab))
+    data = load_data()
+    # 避免重复添加
+    if company_name not in data:
+        data[company_name] = []
+        save_data(data)
+    return redirect(url_for('index', tab=tab))
+
+
+@app.route('/get_companies', methods=['GET'])
+def get_companies():
+    """获取所有公司列表（用于动态下拉）"""
+    data = load_data()
+    companies = [g for g in data.keys() if g != 'meetings']
+    return jsonify({'companies': companies})
+
+
+@app.route('/add_project', methods=['POST'])
+def add_project():
+    """新建项目"""
+    name = request.form.get('name', '').strip()
+    group = request.form.get('group', '').strip()
+    status = request.form.get('status', '进行中').strip()
+    node = request.form.get('node', '').strip()
+    deadline = request.form.get('deadline', '').strip()
+    issues = request.form.get('issues', '').strip()
+    tab = request.form.get('tab', 'all')
+
+    # 立即添加的任务（可选）
+    task_name = request.form.get('task_name', '').strip()
+    task_priority = request.form.get('task_priority', 'medium').strip()
+    task_due = request.form.get('task_due', '').strip()
+    task_opinion = request.form.get('task_opinion', '').strip()
+
+    if not name or not group:
+        return redirect(url_for('index', tab=tab))
+
+    data = load_data()
+    if group not in data:
+        data[group] = []
+    if group == 'meetings':
+        return redirect(url_for('index', tab=tab))
+
+    # 生成项目ID（动态根据公司名生成）
+    prefix = ''.join([c for c in group if c.isalnum()])[:8].lower()
+    existing_ids = [p['id'] for p in data.get(group, []) if p['id'].startswith(prefix)]
+    nums = [int(x.split('-')[-1]) for x in existing_ids if x.split('-')[-1].isdigit()]
+    next_num = max(nums) + 1 if nums else 1
+    project_id = f'{prefix}-{str(next_num).zfill(3)}'
+
+    tasks = []
+    if task_name:
+        tasks.append({
+            'text': html.escape(task_name),
+            'done': False,
+            'priority': task_priority if task_priority in ['low', 'medium', 'high'] else 'medium',
+            'due': task_due,
+            'opinion': html.escape(task_opinion),
+            'createdAt': datetime.now().strftime('%Y-%m-%d')
+        })
+
+    new_project = {
+        'id': project_id,
+        'name': html.escape(name),
+        'status': status,
+        'node': html.escape(node),
+        'deadline': deadline,
+        'issues': html.escape(issues),
+        'tasks': tasks,
+        'status_text': status,
+        'status_color': ''
+    }
+    data[group].insert(0, new_project)
+    save_data(data)
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
+
+
+@app.route('/delete_project', methods=['POST'])
+def delete_project():
+    """删除项目"""
+    group = request.form.get('group', '').strip()
+    project_id = request.form.get('project_id', '').strip()
+    tab = request.form.get('tab', 'all')
+
+    data = load_data()
+    if group in data and group != 'meetings':
+        data[group] = [p for p in data[group] if p.get('id') != project_id]
+
+    save_data(data)
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all'))
+
+
+@app.route('/add_task', methods=['POST'])
+def add_task():
+    """在项目下添加任务"""
+    group = request.form.get('group', '').strip()
+    project_id = request.form.get('project_id', '').strip()
+    task_name = request.form.get('task_name', '').strip()
+    priority = request.form.get('priority', 'medium').strip()
+    due = request.form.get('due', '').strip()
+    opinion = request.form.get('opinion', '').strip()
+    createdAt = request.form.get('createdAt', '').strip()
+    tab = request.form.get('tab', 'all')
+
+    if not group or not project_id or not task_name:
+        return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
+
+    data = load_data()
+    if group not in data or group == 'meetings':
+        return redirect(url_for('index', tab=tab))
+
+    for p in data[group]:
+        if p.get('id') == project_id:
+            p.setdefault('tasks', []).append({
+                'text': html.escape(task_name),
+                'done': False,
+                'priority': priority if priority in ['low', 'medium', 'high'] else 'medium',
+                'due': due,
+                'opinion': html.escape(opinion),
+                'createdAt': createdAt or datetime.now().strftime('%Y-%m-%d')
+            })
+            break
+
+    save_data(data)
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
+
+
+@app.route('/delete_task', methods=['POST'])
+def delete_task():
+    """删除任务"""
+    group = request.form.get('group', '').strip()
+    project_id = request.form.get('project_id', '').strip()
+    task_text = request.form.get('task_text', '').strip()
+    tab = request.form.get('tab', 'all')
+
+    data = load_data()
+    if group in data and group != 'meetings':
+        for p in data[group]:
+            if p.get('id') == project_id:
+                p['tasks'] = [t for t in p.get('tasks', []) if t.get('text') != task_text]
+                break
+
+    save_data(data)
+    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
+
+
+# ==================== 每日任务统计 API ====================
 
 @app.route('/api/daily_tasks/stats', methods=['GET'])
 def daily_tasks_stats():

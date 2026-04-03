@@ -23,9 +23,12 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  .header { background: var(--gradient); padding: 20px 28px; box-shadow: var(--shadow); }
+  .header { background: var(--gradient); padding: 20px 28px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .header-left { flex: 1; }
   .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
   .header p { font-size: 13px; opacity: 0.85; }
+  .header .btn-add-project { padding: 8px 18px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .header .btn-add-project:hover { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.6); }
 
   .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
@@ -36,10 +39,24 @@
 
   .section-title { font-size: 16px; font-weight: 600; margin: 24px 0 12px 0; padding-left: 12px; border-left: 4px solid transparent; border-image: var(--gradient) 1; color: var(--text); }
 
-  .card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
   .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
   .card-title { font-size: 15px; font-weight: 600; color: var(--text); }
-  .card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 1; }
+  .card-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; line-height: 1; transition: all 0.2s; }
+  .card-delete:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+  .card-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .btn-add-task { padding: 6px 14px; background: var(--inner-bg); color: var(--accent-2); border: 1px solid var(--accent-2); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
+  .btn-add-task:hover { background: var(--accent-2); color: white; }
+  .task-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 2px 5px; border-radius: 4px; transition: all 0.2s; margin-left: 4px; }
+  .task-delete:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+  .confirm-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+  .confirm-modal.show { display: flex; }
+  .confirm-box { background: var(--card-bg); border-radius: 16px; padding: 28px; width: 90%; max-width: 400px; border: 1px solid var(--border); box-shadow: var(--shadow); text-align: center; }
+  .confirm-box p { font-size: 15px; color: var(--text); margin-bottom: 20px; line-height: 1.5; }
+  .confirm-box .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+  .btn-danger { background: rgba(239,68,68,0.8); color: white; }
+  .btn-danger:hover { background: rgba(239,68,68,1); }
 
   .info { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
 
@@ -53,8 +70,12 @@
   .task-check.done { background: var(--gradient); border-color: transparent; color: white; }
   .task-check:hover { border-color: var(--accent-2); }
 
-  .task-text { cursor: pointer; }
+  .task-text { cursor: pointer; transition: color 0.15s, text-decoration 0.15s; }
+  .task-text:hover { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
   .task-text.done { color: var(--text-muted); text-decoration: line-through; }
+
+  .task-opinion { color: #9ca3af; font-size: 11px; font-style: italic; margin-left: 6px; }
+  .task-created { display: inline-block; color: #60a5fa; font-size: 11px; padding: 1px 6px; background: rgba(96,165,250,0.12); border-radius: 10px; margin-left: 6px; }
 
   .priority { font-size: 10px; padding: 3px 8px; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; }
   .priority.high { background: rgba(239,68,68,0.2); color: #f87171; }
@@ -116,8 +137,11 @@
 <body>
 
 <div class="header">
-  <h1>📋 项目跟踪系统 v2.0</h1>
-  <p>四建 & 亚太项目进度跟踪 · 招投标行业</p>
+  <div class="header-left">
+    <h1>📋 项目跟踪系统 v2.0</h1>
+    <p>四建 & 亚太项目进度跟踪 · 招投标行业</p>
+  </div>
+  <button class="btn-add-project" onclick="showAddProject()">+ 新建项目</button>
 </div>
 
 <div class="container">
@@ -149,6 +173,7 @@
             <div class="card-header">
               <div class="card-title">{{ p.name }}</div>
               <div class="card-actions">
+                <button class="card-delete" onclick="confirmDeleteProject('{{ group }}', '{{ p.id }}', '{{ p.name | e }}', {{ 'true' if p.tasks else 'false' }})" title="删除项目">×</button>
                 <span class="status {% if p.status_color %}{{ p.status_color }}{% elif '完成' in p.status %}status-done{% elif '待' in p.status or '评估' in p.status %}status-warn{% elif '开会' in p.status %}status-todo{% else %}status-progress{% endif %}">{% if p.status_text %}{{ p.status_text }}{% else %}{{ p.status }}{% endif %}</span>
                 <button class="btn btn-primary" onclick="showEdit('{{ group }}', '{{ p.id }}')">编辑</button>
               </div>
@@ -165,6 +190,19 @@
                   <th>任务</th>
                   <th style="width:70px;text-align:center">优先级</th>
                   <th style="width:120px;text-align:center">截止日期</th>
+                  <th style="width:140px;text-align:center">意见备注</th>
+                  <th style="width:100px;text-align:center">创建时间</th>
+                  <th style="width:40px;text-align:center"></th>
+                </tr>
+              </thead>
+              <thead>
+                <tr>
+                  <th style="width:40px;text-align:center"></th>
+                  <th>任务</th>
+                  <th style="width:70px;text-align:center">优先级</th>
+                  <th style="width:120px;text-align:center">截止日期</th>
+                  <th style="width:140px;text-align:center">意见备注</th>
+                  <th style="width:100px;text-align:center">创建时间</th>
                 </tr>
               </thead>
               <tbody>
@@ -181,7 +219,7 @@
                   </td>
                   <td>
                     <span class="task-text {% if t.done %}done{% endif %}" 
-                          onclick="editTaskName('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')">
+                          onclick="openTaskDetail('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')">
                       {{ t.text.replace('✅ ','').replace('☐ ','') }}
                     </span>
                   </td>
@@ -210,11 +248,23 @@
                       </div>
                     </form>
                   </td>
+                  <td style="text-align:center; font-size:11px; color:#9ca3af;">
+                    {% if t.opinion %}<span class="task-opinion">{{ t.opinion | e }}</span>{% else %}—{% endif %}
+                  </td>
+                  <td style="text-align:center">
+                    {% if t.createdAt %}<span class="task-created">{{ t.createdAt }}</span>{% else %}—{% endif %}
+                  </td>
+                  <td style="text-align:center">
+                    <button class="task-delete" onclick="confirmDeleteTask('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')" title="删除任务">×</button>
+                  </td>
                 </tr>
                 {% endfor %}
               </tbody>
             </table>
             {% endif %}
+            <div class="card-footer">
+              <button class="btn-add-task" onclick="showAddTask('{{ group }}', '{{ p.id }}')">+ 添加任务</button>
+            </div>
           </div>
         {% endfor %}
       {% endif %}
@@ -292,7 +342,7 @@
         <label>子任务（每行一个，已完成的任务前面加✅）</label>
         <textarea name="tasks" id="editTasks"></textarea>
       </div>
-      <div class="modal-btns">
+            <div class="modal-btns">
         <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
         <button type="submit" class="btn btn-primary">保存</button>
       </div>
@@ -300,21 +350,169 @@
   </div>
 </div>
 
-<!-- 任务名称编辑弹窗 -->
-<div class="modal" id="taskNameModal">
+<!-- 新建项目弹窗 -->
+<div class="modal" id="addProjectModal">
   <div class="modal-content">
-    <h2>修改任务名称</h2>
-    <form method="POST" action="/update_task_name">
-      <input type="hidden" name="group" id="taskNameGroup" value="">
-      <input type="hidden" name="project_id" id="taskNameProjectId" value="">
-      <input type="hidden" name="old_text" id="taskNameOldText" value="">
-      <input type="hidden" name="tab" id="taskNameTab" value="">
+    <h2>新建项目</h2>
+    <form method="POST" action="/add_project" id="addProjectForm">
+      <input type="hidden" name="tab" id="addProjectTab" value="all">
       <div class="form-group">
-        <label>新任务名称</label>
-        <input type="text" name="new_text" id="taskNameNewText" required>
+        <label>项目名称 <span style="color:#f87171">*</span></label>
+        <input type="text" name="name" id="apName" required placeholder="请输入项目名称">
+      </div>
+      <div class="form-group">
+        <label>所属公司 <span style="color:#f87171">*</span></label>
+        <select name="group" id="apGroup" required>
+          <option value="">请选择公司</option>
+          <option value="四建">🤖 四建</option>
+          <option value="亚太">🏢 亚太</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>项目状态</label>
+        <select name="status" id="apStatus">
+          <option value="进行中">进行中</option>
+          <option value="待评估">待评估</option>
+          <option value="待上线">待上线</option>
+          <option value="待开会">待开会</option>
+          <option value="待确认">待确认</option>
+          <option value="多项待跟进">多项待跟进</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>当前节点</label>
+        <input type="text" name="node" id="apNode" placeholder="可空">
+      </div>
+      <div class="form-group">
+        <label>截止日期</label>
+        <input type="date" name="deadline" id="apDeadline" placeholder="可空">
+      </div>
+      <div class="form-group">
+        <label>当前问题</label>
+        <textarea name="issues" id="apIssues" placeholder="可空"></textarea>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="addTaskNow" onchange="toggleAddTaskForm()"> <span style="color:var(--accent-2);font-size:14px">立即添加任务</span>
+        </label>
+      </div>
+      <div id="addTaskNowFields" style="display:none;padding:14px;background:var(--inner-bg);border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid var(--border);">
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;font-weight:500">任务信息</div>
+        <div class="form-group">
+          <label>任务名称 <span style="color:#f87171">*</span></label>
+          <input type="text" name="task_name" id="apTaskName" placeholder="请输入任务名称">
+        </div>
+        <div class="form-group">
+          <label>优先级</label>
+          <select name="task_priority" id="apTaskPriority">
+            <option value="high">🔴 高</option>
+            <option value="medium" selected>🟡 中</option>
+            <option value="low">🟢 低</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>截止日期</label>
+          <input type="date" name="task_due" id="apTaskDue">
+        </div>
+        <div class="form-group">
+          <label>意见备注</label>
+          <textarea name="task_opinion" id="apTaskOpinion" placeholder="可空" style="min-height:60px"></textarea>
+        </div>
       </div>
       <div class="modal-btns">
-        <button type="button" class="btn btn-secondary" onclick="closeTaskNameModal()">取消</button>
+        <button type="button" class="btn btn-secondary" onclick="closeAddProjectModal()">取消</button>
+        <button type="submit" class="btn btn-primary">创建项目</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 添加任务弹窗 -->
+<div class="modal" id="addTaskModal">
+  <div class="modal-content">
+    <h2>添加任务</h2>
+    <form method="POST" action="/add_task" id="addTaskForm">
+      <input type="hidden" name="group" id="atGroup" value="">
+      <input type="hidden" name="project_id" id="atProjectId" value="">
+      <input type="hidden" name="tab" id="atTab" value="">
+      <div class="form-group">
+        <label>任务名称 <span style="color:#f87171">*</span></label>
+        <input type="text" name="task_name" id="atName" required placeholder="请输入任务名称">
+      </div>
+      <div class="form-group">
+        <label>优先级</label>
+        <select name="priority" id="atPriority">
+          <option value="high">🔴 高</option>
+          <option value="medium" selected>🟡 中</option>
+          <option value="low">🟢 低</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>截止日期</label>
+        <input type="date" name="due" id="atDue">
+      </div>
+      <div class="form-group">
+        <label>意见备注</label>
+        <textarea name="opinion" id="atOpinion" placeholder="可填写意见、备注等..." style="min-height:80px"></textarea>
+      </div>
+      <div class="form-group">
+        <label>创建时间</label>
+        <input type="date" name="createdAt" id="atCreatedAt">
+      </div>
+      <div class="modal-btns">
+        <button type="button" class="btn btn-secondary" onclick="closeAddTaskModal()">取消</button>
+        <button type="submit" class="btn btn-primary">添加任务</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-box">
+    <p id="confirmMsg"></p>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeConfirmModal()">取消</button>
+      <button class="btn btn-danger" id="confirmBtn">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 任务详情编辑弹窗 -->
+<div class="modal" id="taskDetailModal">
+  <div class="modal-content">
+    <h2>任务详情</h2>
+    <form method="POST" action="/update_task_detail" id="taskDetailForm">
+      <input type="hidden" name="group" id="tdGroup" value="">
+      <input type="hidden" name="project_id" id="tdProjectId" value="">
+      <input type="hidden" name="task_text" id="tdTaskText" value="">
+      <input type="hidden" name="tab" id="tdTab" value="">
+      <div class="form-group">
+        <label>任务名称</label>
+        <input type="text" name="text" id="tdText" required>
+      </div>
+      <div class="form-group">
+        <label>优先级</label>
+        <select name="priority" id="tdPriority">
+          <option value="high">🔴 高</option>
+          <option value="medium">🟡 中</option>
+          <option value="low">🟢 低</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>截止日期</label>
+        <input type="date" name="due" id="tdDue">
+      </div>
+      <div class="form-group">
+        <label>意见备注</label>
+        <textarea name="opinion" id="tdOpinion" placeholder="可填写意见、备注等..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>创建时间</label>
+        <input type="date" name="createdAt" id="tdCreatedAt">
+      </div>
+      <div class="modal-btns">
+        <button type="button" class="btn btn-secondary" onclick="closeTaskDetailModal()">取消</button>
         <button type="submit" class="btn btn-primary">保存</button>
       </div>
     </form>
@@ -418,6 +616,9 @@ document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('editModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+document.getElementById('taskDetailModal').addEventListener('click', function(e) {
+  if (e.target === this) closeTaskDetailModal();
+});
 
 // 任务点击切换
 document.querySelectorAll('.task-check').forEach(function(el) {
@@ -428,14 +629,124 @@ document.querySelectorAll('.task-check').forEach(function(el) {
 });
 
 // 任务名称编辑
-function editTaskName(group, projectId, oldText) {
-  document.getElementById('taskNameGroup').value = group;
-  document.getElementById('taskNameProjectId').value = projectId;
-  document.getElementById('taskNameOldText').value = oldText;
-  document.getElementById('taskNameTab').value = getCurrentTab();
-  document.getElementById('taskNameNewText').value = oldText;
-  document.getElementById('taskNameModal').classList.add('show');
+function openTaskDetail(group, projectId, taskText) {
+  // 从 projectData 中查找该任务的完整信息
+  var groupData = projectData[group];
+  if (!groupData) return;
+  var proj = groupData.find(function(p) { return p.id === projectId; });
+  if (!proj) return;
+  var task = proj.tasks.find(function(t) { return t.text === taskText; });
+  if (!task) return;
+
+  document.getElementById('tdGroup').value = group;
+  document.getElementById('tdProjectId').value = projectId;
+  document.getElementById('tdTaskText').value = taskText;
+  document.getElementById('tdTab').value = getCurrentTab();
+  document.getElementById('tdText').value = taskText;
+  document.getElementById('tdPriority').value = task.priority || 'medium';
+  document.getElementById('tdDue').value = task.due || '';
+  document.getElementById('tdOpinion').value = task.opinion || '';
+  document.getElementById('tdCreatedAt').value = task.createdAt || '';
+
+  document.getElementById('taskDetailModal').classList.add('show');
 }
+
+function closeTaskDetailModal() {
+  document.getElementById('taskDetailModal').classList.remove('show');
+}
+
+// 新建项目
+function showAddProject() {
+  document.getElementById('addProjectTab').value = getCurrentTab();
+  document.getElementById('addProjectModal').classList.add('show');
+}
+
+function closeAddProjectModal() {
+  document.getElementById('addProjectModal').classList.remove('show');
+}
+
+function toggleAddTaskForm() {
+  var checked = document.getElementById('addTaskNow').checked;
+  document.getElementById('addTaskNowFields').style.display = checked ? 'block' : 'none';
+}
+
+// 添加任务
+function showAddTask(group, projectId) {
+  document.getElementById('atGroup').value = group;
+  document.getElementById('atProjectId').value = projectId;
+  document.getElementById('atTab').value = getCurrentTab();
+  document.getElementById('atName').value = '';
+  document.getElementById('atPriority').value = 'medium';
+  document.getElementById('atDue').value = '';
+  document.getElementById('atOpinion').value = '';
+  document.getElementById('atCreatedAt').value = new Date().toISOString().split('T')[0];
+  document.getElementById('addTaskModal').classList.add('show');
+}
+
+function closeAddTaskModal() {
+  document.getElementById('addTaskModal').classList.remove('show');
+}
+
+// 删除确认弹窗
+function confirmDeleteProject(group, projectId, projectName) {
+  document.getElementById('confirmMsg').textContent = '确定删除项目「' + projectName + '」及所有任务？';
+  document.getElementById('confirmBtn').onclick = function() {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/delete_project';
+    var fields = {
+      group: group,
+      project_id: projectId,
+      tab: getCurrentTab()
+    };
+    for (var k in fields) {
+      var input = document.createElement('input');
+      input.type = 'hidden'; input.name = k; input.value = fields[k];
+      form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+  };
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function confirmDeleteTask(group, projectId, taskText) {
+  document.getElementById('confirmMsg').textContent = '确定删除该任务？';
+  document.getElementById('confirmBtn').onclick = function() {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/delete_task';
+    var fields = {
+      group: group,
+      project_id: projectId,
+      task_text: taskText,
+      tab: getCurrentTab()
+    };
+    for (var k in fields) {
+      var input = document.createElement('input');
+      input.type = 'hidden'; input.name = k; input.value = fields[k];
+      form.appendChild(input);
+    }
+    document.body.appendChild(form);
+    form.submit();
+  };
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeConfirmModal() {
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+// 点击弹窗背景关闭
+document.getElementById('addProjectModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddProjectModal();
+});
+document.getElementById('addTaskModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddTaskModal();
+});
+document.getElementById('confirmModal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirmModal();
+});
 </script>
 
 </body>
