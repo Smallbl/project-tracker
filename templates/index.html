@@ -145,13 +145,7 @@
 </div>
 
 <div class="container">
-  <div class="tabs">
-    <a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?tab=all">全部项目</a>
-    <a class="tab {% if active_tab == '四建' %}active{% endif %}" href="/?tab=四建">🤖 四建</a>
-    <a class="tab {% if active_tab == '亚太' %}active{% endif %}" href="/?tab=亚太">🏢 亚太</a>
-    <a class="tab {% if active_tab == 'meetings' %}active{% endif %}" href="/?tab=meetings">📅 会议</a>
-    <a class="tab {% if active_tab == 'daily' %}active{% endif %}" href="/daily.html">📌 每日任务</a>
-  </div>
+  <div class="tabs"><a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?tab=all">全部项目</a>{% for company in projects.keys() %}{% if company != 'meetings' %}<a class="tab {% if active_tab == company %}active{% endif %}" href="/?tab={{ company | urlencode }}">{{ company }}</a>{% endif %}{% endfor %}<a class="tab {% if active_tab == 'meetings' %}active{% endif %}" href="/?tab=meetings">📅 会议</a><a class="tab {% if active_tab == 'daily' %}active{% endif %}" href="/daily.html">📌 每日任务</a></div>
   
   {% if active_tab == 'meetings' %}
     <div class="meetings-grid">
@@ -164,10 +158,10 @@
       {% endfor %}
     </div>
   {% else %}
-    {% set groups = ['四建', '亚太'] if active_tab == 'all' else [active_tab] %}
+    {% set groups = projects.keys() | reject('equalto', 'meetings') | list if active_tab == 'all' else [active_tab] %}
     {% for group in groups %}
       {% if projects.get(group) %}
-        <div class="section-title">{% if group == '四建' %}🤖{% else %}🏢{% endif %} {{ group }}项目</div>
+        <div class="section-title">{{ group }}项目</div>
         {% for p in projects.get(group, []) %}
           <div class="card" id="project-{{ p.id }}">
             <div class="card-header">
@@ -193,16 +187,6 @@
                   <th style="width:140px;text-align:center">意见备注</th>
                   <th style="width:100px;text-align:center">创建时间</th>
                   <th style="width:40px;text-align:center"></th>
-                </tr>
-              </thead>
-              <thead>
-                <tr>
-                  <th style="width:40px;text-align:center"></th>
-                  <th>任务</th>
-                  <th style="width:70px;text-align:center">优先级</th>
-                  <th style="width:120px;text-align:center">截止日期</th>
-                  <th style="width:140px;text-align:center">意见备注</th>
-                  <th style="width:100px;text-align:center">创建时间</th>
                 </tr>
               </thead>
               <tbody>
@@ -362,10 +346,8 @@
       </div>
       <div class="form-group">
         <label>所属公司 <span style="color:#f87171">*</span></label>
-        <select name="group" id="apGroup" required>
+        <select name="group" id="apGroup" required onchange="handleCompanyChange(this)">
           <option value="">请选择公司</option>
-          <option value="四建">🤖 四建</option>
-          <option value="亚太">🏢 亚太</option>
         </select>
       </div>
       <div class="form-group">
@@ -522,6 +504,60 @@
 <script>
 var projectData = {{ projects | tojson }};
 
+function populateCompanySelect() {
+  var select = document.getElementById('apGroup');
+  // 保留第一项"请选择公司"
+  var defaultOpt = select.options[0];
+  select.innerHTML = '';
+  select.appendChild(defaultOpt);
+  // 动态添加所有公司
+  var companies = Object.keys(projectData).filter(function(k) { return k !== 'meetings'; });
+  companies.forEach(function(c) {
+    var opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+  // 添加"+ 添加新公司"选项
+  var addOpt = document.createElement('option');
+  addOpt.value = '__add_new__';
+  addOpt.textContent = '+ 添加新公司';
+  select.appendChild(addOpt);
+}
+
+function handleCompanyChange(selectEl) {
+  if (selectEl.value === '__add_new__') {
+    var name = prompt('请输入新公司名称：');
+    if (name && name.trim()) {
+      name = name.trim();
+      // 先添加到 projectData
+      if (!projectData[name]) {
+        projectData[name] = [];
+      }
+      // 提交到后端添加公司
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/add_company';
+      var tabInput = document.createElement('input');
+      tabInput.type = 'hidden'; tabInput.name = 'tab'; tabInput.value = getCurrentTab();
+      var companyInput = document.createElement('input');
+      companyInput.type = 'hidden'; companyInput.name = 'company_name'; companyInput.value = name;
+      form.appendChild(tabInput);
+      form.appendChild(companyInput);
+      document.body.appendChild(form);
+      form.submit();
+    } else {
+      selectEl.value = '';
+    }
+  }
+}
+
+function showAddProject() {
+  populateCompanySelect();
+  document.getElementById('addProjectTab').value = getCurrentTab();
+  document.getElementById('addProjectModal').classList.add('show');
+}
+
 function showEdit(group, id) {
   var p = projectData[group].find(function(x) { return x.id === id; });
   if (!p) return;
@@ -655,12 +691,6 @@ function closeTaskDetailModal() {
   document.getElementById('taskDetailModal').classList.remove('show');
 }
 
-// 新建项目
-function showAddProject() {
-  document.getElementById('addProjectTab').value = getCurrentTab();
-  document.getElementById('addProjectModal').classList.add('show');
-}
-
 function closeAddProjectModal() {
   document.getElementById('addProjectModal').classList.remove('show');
 }
@@ -688,8 +718,11 @@ function closeAddTaskModal() {
 }
 
 // 删除确认弹窗
-function confirmDeleteProject(group, projectId, projectName) {
-  document.getElementById('confirmMsg').textContent = '确定删除项目「' + projectName + '」及所有任务？';
+function confirmDeleteProject(group, projectId, projectName, hasTasks) {
+  var msg = hasTasks
+    ? '确定删除项目「' + projectName + '」及所有任务？'
+    : '确定删除项目「' + projectName + '」？';
+  document.getElementById('confirmMsg').textContent = msg;
   document.getElementById('confirmBtn').onclick = function() {
     var form = document.createElement('form');
     form.method = 'POST';
