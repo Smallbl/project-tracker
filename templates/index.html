@@ -24,30 +24,59 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  .header { background: var(--gradient); padding: 20px 28px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 56px; background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: none; }
   .header-left { flex: 1; }
-  .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
-  .header p { font-size: 13px; opacity: 0.85; }
-  .header .btn-add-project { padding: 8px 18px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-  .header .btn-add-project:hover { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.6); }
+  .header h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+  .header p { font-size: 12px; opacity: 0.6; }
+  .header .btn-add-project { padding: 6px 14px; background: rgba(79,70,229,0.6); color: white; border: 1px solid rgba(79,70,229,0.8); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .header .btn-add-project:hover { background: rgba(79,70,229,0.8); border-color: rgba(79,70,229,1); }
 
-  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  .sub-nav { position: fixed; top: 56px; left: 0; right: 0; z-index: 99; background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 8px 20px; display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .sub-nav .nav-section { margin-bottom: 0; background: transparent; border-radius: 0; padding: 0; border: none; width: auto; }
+  .sub-nav .tabs { margin-bottom: 0; }
+
+  .sub-nav-second { position: fixed; top: 90px; left: 0; right: 0; z-index: 98; background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 8px 20px; display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+
+  .main { padding: 140px 20px 20px; max-width: 1400px; margin: 0 auto; border-top: 3px dashed #f59e0b; }
 
   /* ===== 两级导航 ===== */
+  .sec-nav { display: flex; gap: 4px; background: #252836; padding: 4px; border-radius: 8px; width: fit-content; }
+  .sec-nav a { padding: 6px 14px; border-radius: 6px; font-size: 13px; color: #888; text-decoration: none; transition: all 0.2s; }
+  .sec-nav a:hover { color: #fff; }
+  .sec-nav a.active { background: #6366f1; color: #fff; }
+
   .nav-section { display: flex; gap: 4px; margin-bottom: 16px; background: var(--card-bg); border-radius: var(--radius-sm); padding: 4px; border: 1px solid var(--border); width: fit-content; }
   .nav-section .sec-tab { padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; border: none; background: transparent; }
   .nav-section .sec-tab:hover { color: var(--text); }
   .nav-section .sec-tab.active { background: var(--gradient); color: white; box-shadow: 0 2px 8px rgba(79,70,229,0.3); }
 
+  /* 二级导航胶囊样式（在 .sub-nav 内） */
+  .sub-nav .tabs { margin-bottom: 0; }
+  .sub-nav .tab {
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    color: #888;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    background: transparent;
+    box-shadow: none;
+    cursor: pointer;
+  }
+  .sub-nav .tab:hover { color: #fff; border-color: #3a3d4a; }
+  .sub-nav .tab.active { background: rgba(99,102,241,0.15); color: #818cf8; border-color: rgba(99,102,241,0.3); }
+
+  /* 页面内的 .tabs 样式（内容区域使用，非 sub-nav 内） */
   .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
   .tab { padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; color: var(--text-secondary); box-shadow: var(--shadow); text-decoration: none; transition: all 0.2s; }
   .tab:hover { border-color: var(--accent-2); color: var(--text); }
   .tab.active { background: var(--gradient); color: white; border-color: transparent; box-shadow: 0 2px 12px rgba(79,70,229,0.35); }
 
-  .section-title { font-size: 16px; font-weight: 600; margin: 24px 0 12px 0; padding-left: 12px; border-left: 4px solid transparent; border-image: var(--gradient) 1; color: var(--text); }
+  .section-title { font-size: 16px; font-weight: 600; margin: 12px 0 10px 0; padding-left: 12px; border-left: 4px solid transparent; border-image: var(--gradient) 1; color: var(--text); }
 
   /* ===== 拖拽手柄 ===== */
-  .card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: opacity 0.2s, transform 0.2s; }
+  .card { background: var(--card-bg); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: opacity 0.2s, transform 0.2s; }
   .card.sortable-ghost { opacity: 0.4; }
   .card.sortable-chosen { box-shadow: 0 8px 30px rgba(79,70,229,0.4); border-color: var(--accent-2); transform: scale(1.02); }
   .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
@@ -159,30 +188,25 @@
   .status-auto { font-size: 12px; padding: 3px 12px; }
 
   /* 统计卡片 */
-  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px; }
   .stat-card {
-    background: var(--card-bg);
-    border-radius: var(--radius);
-    padding: 16px;
+    background: #1e2130;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 10px 12px;
     text-align: center;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    transition: transform 0.2s, box-shadow 0.2s;
   }
-  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
   .stat-card .stat-value {
-    font-size: 28px;
+    font-size: 18px;
     font-weight: 700;
-    background: var(--gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #fff;
+    margin-bottom: 4px;
   }
-  .stat-card .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-  .stat-card.rate .stat-value { color: #34d399; -webkit-text-fill-color: #34d399; }
+  .stat-card .stat-label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card.rate .stat-value { color: #34d399; }
 
   /* 任务折叠 */
-  .task-summary-bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(79,70,229,0.08); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; }
+  .task-summary-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(79,70,229,0.08); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; }
   .task-priority-icon { font-size: 12px; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
   .task-priority-icon.high { background: rgba(239,68,68,0.25); color: #f87171; }
   .task-priority-icon.medium { background: rgba(245,158,11,0.25); color: #fbbf24; }
@@ -199,8 +223,10 @@
   .hidden { display: none !important; }
 
   @media (max-width: 768px) {
-    .header { padding: 16px 20px; }
-    .container { padding: 16px; }
+    .header { padding: 0 16px; }
+    .sub-nav { padding: 6px 16px; }
+    .sub-nav-second { padding: 6px 16px; }
+    .main { padding: 220px 16px 16px; max-width: 100%; }
     table { font-size: 12px; }
     th, td { padding: 8px 4px; }
     .stats-row { grid-template-columns: repeat(3, 1fr); }
@@ -219,14 +245,30 @@
   <button class="btn-add-project" onclick="showAddProject()">+ 新建项目</button>
 </div>
 
-<div class="container">
-
+<div class="sub-nav">
   <!-- ===== 一级导航 ===== -->
-  <div class="nav-section">
-    <a class="sec-tab {% if active_section == 'projects' %}active{% endif %}" href="/?section=projects&tab={{ active_tab | urlencode }}">📁 项目</a>
-    <a class="sec-tab {% if active_section == 'meetings' %}active{% endif %}" href="/?section=meetings">📅 会议</a>
-    <a class="sec-tab" href="/daily.html">📌 每日任务</a>
+  <div class="sec-nav">
+    <a class="{% if active_section == 'projects' %}active{% endif %}" href="/?section=projects&tab={{ active_tab | urlencode }}">📁 项目</a>
+    <a class="{% if active_section == 'meetings' %}active{% endif %}" href="/?section=meetings">📅 会议</a>
+    <a href="/daily.html">📌 每日任务</a>
   </div>
+</div>
+
+{% if active_section != 'meetings' %}
+<!-- 二级导航（项目下） -->
+<div class="sub-nav-second">
+  <div class="tabs">
+    <a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?section=projects&tab=all">全部项目</a>
+    {% for company in projects.keys() %}
+      {% if company != 'meetings' %}
+        <a class="tab {% if active_tab == company %}active{% endif %}" href="/?section=projects&tab={{ company | urlencode }}">{{ company }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="main">
 
   {% if active_section == 'meetings' %}
     <!-- ===== 会议管理 ===== -->
@@ -244,15 +286,7 @@
   {% else %}
     <!-- ===== 项目列表 ===== -->
 
-    <!-- 二级导航（项目下） -->
-    <div class="tabs">
-      <a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?section=projects&tab=all">全部项目</a>
-      {% for company in projects.keys() %}
-        {% if company != 'meetings' %}
-          <a class="tab {% if active_tab == company %}active{% endif %}" href="/?section=projects&tab={{ company | urlencode }}">{{ company }}</a>
-        {% endif %}
-      {% endfor %}
-    </div>
+
 
     {% if active_tab == 'all' %}
     <div class="stats-row">
