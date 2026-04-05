@@ -58,9 +58,31 @@ def valid_tab(tab, data):
 @app.route('/')
 def index():
     data = load_data()
+
+    # 计算全部项目的统计数据（仅在 all tab 显示）
+    stats = {'total_proj': 0, 'active_proj': 0, 'pending_proj': 0,
+             'total_tasks': 0, 'done_tasks': 0, 'task_rate': 0}
+    for group, projects_list in data.items():
+        if group == 'meetings':
+            continue
+        for p in projects_list:
+            stats['total_proj'] += 1
+            status_str = p.get('status_text') or p.get('status') or ''
+            if '完成' not in status_str:
+                stats['active_proj'] += 1
+            if '待' in status_str or '评估' in status_str:
+                stats['pending_proj'] += 1
+            for t in p.get('tasks', []):
+                stats['total_tasks'] += 1
+                if t.get('done'):
+                    stats['done_tasks'] += 1
+    if stats['total_tasks'] > 0:
+        stats['task_rate'] = round(stats['done_tasks'] / stats['total_tasks'] * 100, 1)
+
     return render_template('index.html',
                            projects=data,
-                           active_tab=request.args.get('tab', 'all'))
+                           active_tab=request.args.get('tab', 'all'),
+                           stats=stats)
 
 
 @app.route('/toggle_task', methods=['POST'])

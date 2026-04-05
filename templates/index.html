@@ -126,6 +126,29 @@
   .status-gray { background: rgba(110,118,129,0.2); color: #8b949e; }
   .status-auto { font-size: 12px; padding: 3px 12px; }
 
+  /* ===== 统计卡片 ===== */
+  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-card .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .stat-card.rate .stat-value { color: #34d399; -webkit-text-fill-color: #34d399; }
+
   /* ===== 任务折叠 ===== */
   .task-toggle-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--inner-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--accent-2); margin-top: 10px; transition: background 0.2s, border-color 0.2s; user-select: none; }
   .task-toggle-bar:hover { background: rgba(6,182,212,0.1); border-color: var(--accent-2); }
@@ -139,6 +162,7 @@
     .container { padding: 16px; }
     table { font-size: 12px; }
     th, td { padding: 8px 4px; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
@@ -154,7 +178,32 @@
 
 <div class="container">
   <div class="tabs"><a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?tab=all">全部项目</a>{% for company in projects.keys() %}{% if company != 'meetings' %}<a class="tab {% if active_tab == company %}active{% endif %}" href="/?tab={{ company | urlencode }}">{{ company }}</a>{% endif %}{% endfor %}<a class="tab {% if active_tab == 'meetings' %}active{% endif %}" href="/?tab=meetings">📅 会议</a><a class="tab {% if active_tab == 'daily' %}active{% endif %}" href="/daily.html">📌 每日任务</a></div>
-  
+
+  {% if active_tab == 'all' %}
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.total_proj }}</div>
+      <div class="stat-label">总项目数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.active_proj }}</div>
+      <div class="stat-label">进行中</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.pending_proj }}</div>
+      <div class="stat-label">待跟进/待评估</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.done_tasks }}/{{ stats.total_tasks }}</div>
+      <div class="stat-label">已完成/总任务</div>
+    </div>
+    <div class="stat-card rate">
+      <div class="stat-value">{{ stats.task_rate }}%</div>
+      <div class="stat-label">任务完成率</div>
+    </div>
+  </div>
+  {% endif %}
+
   {% if active_tab == 'meetings' %}
     <div class="meetings-grid">
       {% for m in projects.meetings %}
