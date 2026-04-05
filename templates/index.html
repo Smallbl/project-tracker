@@ -7,52 +7,116 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <style>
   :root {
-    --bg: #0f1419;
-    --card-bg: #1e2a38;
+    --bg: #0f1117;
+    --card-bg: #1e2130;
     --inner-bg: #1a2332;
-    --text: #e6edf3;
+    --text: #e0e0e0;
     --text-secondary: #8b949e;
-    --text-muted: #6e7681;
-    --border: #2d3748;
-    --accent-1: #4f46e5;
-    --accent-2: #06b6d4;
-    --gradient: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+    --text-muted: #6b7280;
+    --border: #2a2d3a;
+    --accent: #6366f1;
+    --accent-light: #818cf8;
+    --accent-bg: rgba(99,102,241,0.15);
+    --accent-border: rgba(99,102,241,0.3);
+    --green: #34d399;
+    --yellow: #fbbf24;
+    --red: #f87171;
     --shadow: 0 4px 20px rgba(0,0,0,0.3);
-    --radius: 12px;
-    --radius-sm: 8px;
+    --radius: 10px;
+    --radius-sm: 6px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  .header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 56px; background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: none; }
-  .header-left { flex: 1; }
-  .header h1 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
-  .header p { font-size: 12px; opacity: 0.6; }
-  .header .btn-add-project { padding: 6px 14px; background: rgba(79,70,229,0.6); color: white; border: 1px solid rgba(79,70,229,0.8); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-  .header .btn-add-project:hover { background: rgba(79,70,229,0.8); border-color: rgba(79,70,229,1); }
+  /* ===== 固定顶部导航 ===== */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: #1a1d27;
+    border-bottom: 1px solid #2a2d3a;
+    padding: 0 20px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-  .sub-nav { position: fixed; top: 56px; left: 0; right: 0; z-index: 99; background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 8px 20px; display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-  .sub-nav .nav-section { margin-bottom: 0; background: transparent; border-radius: 0; padding: 0; border: none; width: auto; }
-  .sub-nav .tabs { margin-bottom: 0; }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
 
-  .sub-nav-second { position: fixed; top: 90px; left: 0; right: 0; z-index: 98; background: #1a1d27; border-bottom: 1px solid #2a2d3a; padding: 8px 20px; display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .logo {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+  }
 
-  .main { padding: 140px 20px 20px; max-width: 1400px; margin: 0 auto; border-top: 3px dashed #f59e0b; }
+  .logo span {
+    color: #6366f1;
+  }
 
-  /* ===== 两级导航 ===== */
-  .sec-nav { display: flex; gap: 4px; background: #252836; padding: 4px; border-radius: 8px; width: fit-content; }
-  .sec-nav a { padding: 6px 14px; border-radius: 6px; font-size: 13px; color: #888; text-decoration: none; transition: all 0.2s; }
-  .sec-nav a:hover { color: #fff; }
-  .sec-nav a.active { background: #6366f1; color: #fff; }
+  /* 一级导航 */
+  .sec-nav {
+    display: flex;
+    gap: 4px;
+    background: #252836;
+    padding: 4px;
+    border-radius: 8px;
+  }
 
-  .nav-section { display: flex; gap: 4px; margin-bottom: 16px; background: var(--card-bg); border-radius: var(--radius-sm); padding: 4px; border: 1px solid var(--border); width: fit-content; }
-  .nav-section .sec-tab { padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; border: none; background: transparent; }
-  .nav-section .sec-tab:hover { color: var(--text); }
-  .nav-section .sec-tab.active { background: var(--gradient); color: white; box-shadow: 0 2px 8px rgba(79,70,229,0.3); }
+  .sec-nav a {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #888;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
 
-  /* 二级导航胶囊样式（在 .sub-nav 内） */
-  .sub-nav .tabs { margin-bottom: 0; }
-  .sub-nav .tab {
+  .sec-nav a:hover {
+    color: #fff;
+  }
+
+  .sec-nav a.active {
+    background: #6366f1;
+    color: #fff;
+  }
+
+  .btn-add {
+    padding: 7px 14px;
+    background: #6366f1;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-add:hover {
+    background: #5558e3;
+  }
+
+  /* 二级导航 */
+  .sub-nav {
+    position: sticky;
+    top: 56px;
+    z-index: 99;
+    background: #1a1d27;
+    border-bottom: 1px solid #2a2d3a;
+    padding: 8px 20px;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .sub-nav a {
     padding: 5px 12px;
     border-radius: 5px;
     font-size: 12px;
@@ -60,122 +124,486 @@
     text-decoration: none;
     border: 1px solid transparent;
     transition: all 0.2s;
-    background: transparent;
-    box-shadow: none;
+  }
+
+  .sub-nav a:hover {
+    color: #fff;
+    border-color: #3a3d4a;
+  }
+
+  .sub-nav a.active {
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+    border-color: rgba(99,102,241,0.3);
+  }
+
+  /* 主内容区 */
+  .main {
+    padding: 16px 20px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* 统计卡片行 */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: #1e2130;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .stat-value.highlight { color: #6366f1; }
+  .stat-value.green { color: #34d399; }
+  .stat-value.yellow { color: #fbbf24; }
+
+  .stat-label {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* 操作栏 */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .toolbar-left {
+    display: flex;
+    gap: 6px;
+  }
+
+  .filter-btn {
+    padding: 6px 12px;
+    background: #1e2130;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    color: #888;
+    font-size: 12px;
     cursor: pointer;
   }
-  .sub-nav .tab:hover { color: #fff; border-color: #3a3d4a; }
-  .sub-nav .tab.active { background: rgba(99,102,241,0.15); color: #818cf8; border-color: rgba(99,102,241,0.3); }
 
-  /* 页面内的 .tabs 样式（内容区域使用，非 sub-nav 内） */
-  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-  .tab { padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; color: var(--text-secondary); box-shadow: var(--shadow); text-decoration: none; transition: all 0.2s; }
-  .tab:hover { border-color: var(--accent-2); color: var(--text); }
-  .tab.active { background: var(--gradient); color: white; border-color: transparent; box-shadow: 0 2px 12px rgba(79,70,229,0.35); }
+  .filter-btn.active {
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+    border-color: rgba(99,102,241,0.3);
+  }
 
-  .section-title { font-size: 16px; font-weight: 600; margin: 12px 0 10px 0; padding-left: 12px; border-left: 4px solid transparent; border-image: var(--gradient) 1; color: var(--text); }
+  /* 项目卡片 */
+  .project-card {
+    background: #1e2130;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
 
-  /* ===== 拖拽手柄 ===== */
-  .card { background: var(--card-bg); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: opacity 0.2s, transform 0.2s; }
-  .card.sortable-ghost { opacity: 0.4; }
-  .card.sortable-chosen { box-shadow: 0 8px 30px rgba(79,70,229,0.4); border-color: var(--accent-2); transform: scale(1.02); }
-  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
-  .drag-handle { cursor: grab; color: var(--text-muted); font-size: 18px; padding: 4px 8px 4px 0; user-select: none; flex-shrink: 0; }
-  .drag-handle:active { cursor: grabbing; }
-  .card-title-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
-  .card-title { font-size: 15px; font-weight: 600; color: var(--text); }
-  .card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 1; }
-  .card-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; line-height: 1; transition: all 0.2s; }
-  .card-delete:hover { background: rgba(239,68,68,0.2); color: #f87171; }
-  .card-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
-  .btn-add-task { padding: 6px 14px; background: var(--inner-bg); color: var(--accent-2); border: 1px solid var(--accent-2); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; }
-  .btn-add-task:hover { background: var(--accent-2); color: white; }
-  .task-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; padding: 2px 5px; border-radius: 4px; transition: all 0.2s; margin-left: 4px; }
-  .task-delete:hover { background: rgba(239,68,68,0.2); color: #f87171; }
-  .confirm-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
-  .confirm-modal.show { display: flex; }
-  .confirm-box { background: var(--card-bg); border-radius: 16px; padding: 28px; width: 90%; max-width: 400px; border: 1px solid var(--border); box-shadow: var(--shadow); text-align: center; }
-  .confirm-box p { font-size: 15px; color: var(--text); margin-bottom: 20px; line-height: 1.5; }
-  .confirm-box .confirm-btns { display: flex; gap: 10px; justify-content: center; }
-  .btn-danger { background: rgba(239,68,68,0.8); color: white; }
-  .btn-danger:hover { background: rgba(239,68,68,1); }
+  .project-card:hover {
+    border-color: #3a3d4a;
+  }
 
-  .info { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+  .project-card.sortable-ghost {
+    opacity: 0.4;
+  }
 
-  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
-  th { text-align: left; padding: 10px 8px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 500; font-size: 12px; background: var(--inner-bg); }
-  td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--inner-bg); }
+  .project-card.sortable-chosen {
+    box-shadow: 0 8px 30px rgba(99,102,241,0.4);
+    border-color: var(--accent);
+    transform: scale(1.02);
+  }
 
-  .task-check { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .task-check.done { background: var(--gradient); border-color: transparent; color: white; }
-  .task-check:hover { border-color: var(--accent-2); }
+  .drag-handle {
+    color: #3a3d4a;
+    cursor: grab;
+    font-size: 14px;
+    padding: 4px;
+    user-select: none;
+    flex-shrink: 0;
+    line-height: 1;
+  }
 
-  .task-text { cursor: pointer; transition: color 0.15s, text-decoration 0.15s; }
-  .task-text:hover { color: var(--accent-2); text-decoration: underline; text-underline-offset: 3px; }
-  .task-text.done { color: var(--text-muted); text-decoration: line-through; }
+  .drag-handle:active {
+    cursor: grabbing;
+  }
 
-  .task-opinion { color: #9ca3af; font-size: 11px; font-style: italic; margin-left: 6px; }
-  .task-created { display: inline-block; color: #60a5fa; font-size: 11px; padding: 1px 6px; background: rgba(96,165,250,0.12); border-radius: 10px; margin-left: 6px; }
+  .project-content {
+    flex: 1;
+    min-width: 0;
+  }
 
-  .priority { font-size: 10px; padding: 3px 8px; border-radius: 4px; cursor: pointer; border: none; font-weight: 500; }
-  .priority.high { background: rgba(239,68,68,0.2); color: #f87171; }
-  .priority.medium { background: rgba(245,158,11,0.2); color: #fbbf24; }
-  .priority.low { background: rgba(16,185,129,0.2); color: #34d399; }
+  .project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
 
-  .due-wrap { position: relative; display: inline-flex; align-items: center; }
-  .due-input { font-size: 12px; padding: 4px 24px 4px 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); width: 128px; text-align: left; background: var(--inner-bg); color: var(--text); }
-  .due-input:focus { outline: none; border-color: var(--accent-2); }
-  .due-clear { position: absolute; right: 6px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; line-height: 1; padding: 2px; }
-  .due-clear:hover { color: var(--text-secondary); }
+  .project-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+  }
 
-  .btn { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; border: none; text-decoration: none; display: inline-block; }
-  .btn-primary { background: var(--gradient); color: white; box-shadow: 0 2px 10px rgba(79,70,229,0.3); }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-secondary { background: var(--inner-bg); color: var(--text-secondary); border: 1px solid var(--border); }
-  .btn-secondary:hover { border-color: var(--text-secondary); }
-  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--text-secondary); color: var(--text); }
+  .project-status {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+    white-space: nowrap;
+  }
 
-  .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
-  .modal.show { display: flex; }
-  .modal-content { background: var(--card-bg); border-radius: 16px; padding: 28px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; border: 1px solid var(--border); box-shadow: var(--shadow); }
-  .modal h2 { font-size: 18px; margin-bottom: 16px; color: var(--text); }
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
-  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; background: var(--inner-bg); color: var(--text); transition: border-color 0.2s; }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-2); }
-  .form-group textarea { resize: vertical; min-height: 80px; }
-  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .project-meta {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+
+  /* 任务汇总条 */
+  .task-summary {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .task-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .task-badge.high { background: rgba(239,68,68,0.15); color: #f87171; }
+  .task-badge.medium { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .task-badge.low { background: rgba(16,185,129,0.15); color: #34d399; }
+
+  .completion-rate {
+    margin-left: auto;
+    color: #34d399;
+    font-size: 12px;
+  }
+
+  .task-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #6366f1;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    padding: 6px 0;
+  }
+
+  .task-toggle-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #1a2332;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #6366f1;
+    margin-top: 10px;
+    transition: background 0.2s, border-color 0.2s;
+    user-select: none;
+  }
+
+  .task-toggle-bar:hover {
+    background: rgba(99,102,241,0.08);
+    border-color: #6366f1;
+  }
+
+  .task-toggle-bar .toggle-icon {
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+
+  .task-toggle-bar.expanded .toggle-icon {
+    transform: rotate(90deg);
+  }
+
+  .task-table-wrap {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+  }
+
+  .task-table-wrap.open {
+    max-height: 2000px;
+    opacity: 1;
+  }
+
+  /* 卡片操作按钮 */
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    z-index: 1;
+  }
+
+  .card-delete {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: all 0.2s;
+  }
+
+  .card-delete:hover {
+    background: rgba(239,68,68,0.2);
+    color: #f87171;
+  }
+
+  .btn-add-task {
+    padding: 6px 14px;
+    background: #1a2332;
+    color: #6366f1;
+    border: 1px solid #6366f1;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .btn-add-task:hover {
+    background: #6366f1;
+    color: white;
+  }
 
   /* ===== 会议管理 ===== */
-  .meetings-section { }
-  .meetings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-  .meetings-header h2 { font-size: 18px; color: var(--text); }
-  .meetings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-  .meeting-card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: all 0.2s; }
-  .meeting-card:hover { border-color: var(--accent-2); }
-  .meeting-card.completed { opacity: 0.55; }
-  .meeting-card.completed .meeting-name { text-decoration: line-through; }
-  .meeting-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .meeting-date-badge { background: var(--gradient); color: white; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; }
-  .meeting-actions { display: flex; gap: 6px; }
-  .meeting-actions button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: all 0.2s; }
-  .meeting-actions button:hover { background: rgba(255,255,255,0.1); color: var(--text); }
-  .meeting-actions .meeting-complete:hover { color: #34d399; }
-  .meeting-actions .meeting-delete:hover { color: #f87171; background: rgba(239,68,68,0.15); }
-  .meeting-name { font-size: 15px; font-weight: 500; margin: 10px 0 4px 0; color: var(--text); }
-  .meeting-time { font-size: 12px; color: var(--text-secondary); }
-  .meeting-remark { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-style: italic; }
-  .meeting-completed-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #34d399; margin-top: 8px; padding: 3px 8px; background: rgba(52,211,153,0.12); border-radius: 6px; }
-  .past-meetings { margin-top: 32px; }
-  .past-meetings-title { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; padding-left: 8px; border-left: 3px solid var(--border); }
+  .meetings-section {
+    padding: 76px 20px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 
-  .no-data { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
+  .meetings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .meetings-header h2 {
+    font-size: 18px;
+    color: var(--text);
+  }
+
+  .meetings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .meeting-card {
+    background: #1e2130;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    transition: border-color 0.2s;
+  }
+
+  .meeting-card:hover {
+    border-color: #3a3d4a;
+  }
+
+  .meeting-card.completed {
+    opacity: 0.5;
+  }
+
+  .meeting-card.completed .meeting-name {
+    text-decoration: line-through;
+  }
+
+  .meeting-date-badge {
+    background: #6366f1;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 56px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .meeting-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .meeting-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .meeting-time {
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  .meeting-remark {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .meeting-completed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #34d399;
+    margin-top: 6px;
+    padding: 3px 8px;
+    background: rgba(52,211,153,0.12);
+    border-radius: 6px;
+  }
+
+  .meeting-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .meeting-actions button {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .meeting-actions button:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+  }
+
+  .meeting-actions .meeting-complete:hover {
+    color: #34d399;
+  }
+
+  .meeting-actions .meeting-delete:hover {
+    color: #f87171;
+    background: rgba(239,68,68,0.15);
+  }
+
+  .past-meetings {
+    margin-top: 32px;
+  }
+
+  .past-meetings-title {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 12px;
+    padding-left: 8px;
+    border-left: 3px solid #2a2d3a;
+  }
+
+  /* ===== 通用组件 ===== */
+  .btn {
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary {
+    background: #6366f1;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5558e3;
+  }
+
+  .btn-secondary {
+    background: #1a2332;
+    color: #888;
+    border: 1px solid #2a2d3a;
+  }
+
+  .btn-secondary:hover {
+    border-color: #888;
+    color: #fff;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: #888;
+    border: 1px solid #2a2d3a;
+  }
+
+  .btn-ghost:hover {
+    border-color: #888;
+    color: #fff;
+  }
+
+  .btn-danger {
+    background: rgba(239,68,68,0.8);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: rgba(239,68,68,1);
+  }
 
   /* Status badges */
-  .status { font-size: 12px; padding: 3px 12px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+  .status {
+    font-size: 12px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
   .status-progress { background: rgba(16,185,129,0.2); color: #34d399; }
   .status-warn { background: rgba(245,158,11,0.2); color: #fbbf24; }
   .status-todo { background: rgba(79,70,229,0.2); color: #a5b4fc; }
@@ -185,150 +613,428 @@
   .status-blue { background: rgba(59,130,246,0.2); color: #60a5fa; }
   .status-purple { background: rgba(139,92,246,0.2); color: #c4b5fd; }
   .status-gray { background: rgba(110,118,129,0.2); color: #8b949e; }
-  .status-auto { font-size: 12px; padding: 3px 12px; }
-
-  /* 统计卡片 */
-  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px; }
-  .stat-card {
-    background: #1e2130;
-    border: 1px solid #2a2d3a;
+  .status-auto {
+    font-size: 11px;
+    padding: 2px 8px;
     border-radius: 10px;
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+  }
+
+  /* 表格 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  th {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 2px solid #2a2d3a;
+    color: #6b7280;
+    font-weight: 500;
+    font-size: 12px;
+    background: #1a2332;
+  }
+
+  td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #2a2d3a;
+    vertical-align: middle;
+    color: var(--text);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: rgba(99,102,241,0.04);
+  }
+
+  .task-check {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #2a2d3a;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: transparent;
+    color: transparent;
+  }
+
+  .task-check.done {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+  }
+
+  .task-check:hover {
+    border-color: #6366f1;
+  }
+
+  .task-text {
+    cursor: pointer;
+    transition: color 0.15s, text-decoration 0.15s;
+  }
+
+  .task-text:hover {
+    color: #6366f1;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .task-text.done {
+    color: #6b7280;
+    text-decoration: line-through;
+  }
+
+  .task-opinion {
+    color: #9ca3af;
+    font-size: 11px;
+    font-style: italic;
+    margin-left: 6px;
+  }
+
+  .task-created {
+    display: inline-block;
+    color: #60a5fa;
+    font-size: 11px;
+    padding: 1px 6px;
+    background: rgba(96,165,250,0.12);
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+
+  .priority {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    background: transparent;
+  }
+
+  .priority.high { background: rgba(239,68,68,0.2); color: #f87171; }
+  .priority.medium { background: rgba(245,158,11,0.2); color: #fbbf24; }
+  .priority.low { background: rgba(16,185,129,0.2); color: #34d399; }
+
+  .task-delete {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin-left: 4px;
+  }
+
+  .task-delete:hover {
+    background: rgba(239,68,68,0.2);
+    color: #f87171;
+  }
+
+  .due-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .due-input {
+    font-size: 12px;
+    padding: 4px 24px 4px 8px;
+    border: 1px solid #2a2d3a;
+    border-radius: var(--radius-sm);
+    width: 128px;
+    text-align: left;
+    background: #1a2332;
+    color: var(--text);
+  }
+
+  .due-input:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+
+  .due-clear {
+    position: absolute;
+    right: 6px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    padding: 2px;
+  }
+
+  .due-clear:hover {
+    color: #888;
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal.show {
+    display: flex;
+  }
+
+  .modal-content {
+    background: #1e2130;
+    border-radius: 12px;
+    padding: 28px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid #2a2d3a;
+    box-shadow: var(--shadow);
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .form-group {
+    margin-bottom: 14px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
     padding: 10px 12px;
+    border: 1px solid #2a2d3a;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    background: #1a2332;
+    color: var(--text);
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .modal-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  /* Confirm Modal */
+  .confirm-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .confirm-modal.show {
+    display: flex;
+  }
+
+  .confirm-box {
+    background: #1e2130;
+    border-radius: 12px;
+    padding: 28px;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid #2a2d3a;
+    box-shadow: var(--shadow);
     text-align: center;
   }
-  .stat-card .stat-value {
-    font-size: 18px;
-    font-weight: 700;
-    color: #fff;
+
+  .confirm-box p {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .confirm-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  /* Section title */
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 16px 0 10px 0;
+    padding-left: 12px;
+    border-left: 4px solid #6366f1;
+    color: var(--text);
+  }
+
+  /* No data */
+  .no-data {
+    text-align: center;
+    color: #6b7280;
+    padding: 40px;
+    font-size: 14px;
+  }
+
+  /* Info text */
+  .info {
+    font-size: 13px;
+    color: #8b949e;
     margin-bottom: 4px;
   }
-  .stat-card .stat-label { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-card.rate .stat-value { color: #34d399; }
 
-  /* 任务折叠 */
-  .task-summary-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(79,70,229,0.08); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; }
-  .task-priority-icon { font-size: 12px; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
-  .task-priority-icon.high { background: rgba(239,68,68,0.25); color: #f87171; }
-  .task-priority-icon.medium { background: rgba(245,158,11,0.25); color: #fbbf24; }
-  .task-priority-icon.low { background: rgba(16,185,129,0.25); color: #34d399; }
-  .task-completion-rate { margin-left: auto; font-size: 13px; color: #34d399; font-weight: 600; }
-  .task-toggle-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--inner-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--accent-2); margin-top: 10px; transition: background 0.2s, border-color 0.2s; user-select: none; }
-  .task-toggle-bar:hover { background: rgba(6,182,212,0.1); border-color: var(--accent-2); }
-  .task-toggle-bar .toggle-icon { font-size: 12px; transition: transform 0.2s; }
-  .task-toggle-bar.expanded .toggle-icon { transform: rotate(90deg); }
-  .task-table-wrap { overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; }
-  .task-table-wrap.open { max-height: 2000px; opacity: 1; }
+  /* Project list wrapper */
+  .project-list {
+    margin-bottom: 16px;
+  }
 
-  /* 隐藏字段 */
-  .hidden { display: none !important; }
+  /* Hidden */
+  .hidden {
+    display: none !important;
+  }
 
+  /* Responsive */
   @media (max-width: 768px) {
-    .header { padding: 0 16px; }
-    .sub-nav { padding: 6px 16px; }
-    .sub-nav-second { padding: 6px 16px; }
-    .main { padding: 220px 16px 16px; max-width: 100%; }
+    .header { padding: 0 12px; }
+    .main { padding: 16px 12px 12px; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .sec-nav a { padding: 6px 10px; font-size: 12px; }
+    .meetings-grid { grid-template-columns: 1fr; }
     table { font-size: 12px; }
     th, td { padding: 8px 4px; }
-    .stats-row { grid-template-columns: repeat(3, 1fr); }
-    .meetings-grid { grid-template-columns: 1fr; }
-    .nav-section { width: 100%; }
   }
 </style>
 </head>
 <body>
 
+<!-- 固定顶部导航 -->
 <div class="header">
   <div class="header-left">
-    <h1>📋 项目跟踪系统 v3.0</h1>
-    <p>项目进度 · 会议管理 · 每日任务</p>
+    <div class="logo">📋 <span>项目跟踪</span> v3.0</div>
+    <div class="sec-nav">
+      <a class="{% if active_section == 'projects' %}active{% endif %}" href="/?section=projects&tab={{ active_tab | urlencode if active_tab else 'all' }}">📁 项目</a>
+      <a class="{% if active_section == 'meetings' %}active{% endif %}" href="/?section=meetings">📅 会议</a>
+      <a href="/daily.html">📌 每日任务</a>
+    </div>
   </div>
-  <button class="btn-add-project" onclick="showAddProject()">+ 新建项目</button>
+  {% if active_section != 'meetings' %}
+  <button class="btn-add" onclick="showAddProject()">+ 新建项目</button>
+  {% endif %}
 </div>
 
-<div class="sub-nav">
-  <!-- ===== 一级导航 ===== -->
-  <div class="sec-nav">
-    <a class="{% if active_section == 'projects' %}active{% endif %}" href="/?section=projects&tab={{ active_tab | urlencode }}">📁 项目</a>
-    <a class="{% if active_section == 'meetings' %}active{% endif %}" href="/?section=meetings">📅 会议</a>
-    <a href="/daily.html">📌 每日任务</a>
-  </div>
-</div>
-
+<!-- 二级导航（仅项目tab显示） -->
 {% if active_section != 'meetings' %}
-<!-- 二级导航（项目下） -->
-<div class="sub-nav-second">
-  <div class="tabs">
-    <a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?section=projects&tab=all">全部项目</a>
-    {% for company in projects.keys() %}
-      {% if company != 'meetings' %}
-        <a class="tab {% if active_tab == company %}active{% endif %}" href="/?section=projects&tab={{ company | urlencode }}">{{ company }}</a>
-      {% endif %}
-    {% endfor %}
-  </div>
+<div class="sub-nav">
+  <a class="{% if active_tab == 'all' %}active{% endif %}" href="/?section=projects&tab=all">全部项目</a>
+  {% for company in projects.keys() %}
+    {% if company != 'meetings' %}
+      <a class="{% if active_tab == company %}active{% endif %}" href="/?section=projects&tab={{ company | urlencode }}">{{ company }}</a>
+    {% endif %}
+  {% endfor %}
 </div>
 {% endif %}
 
+<!-- 主内容区 -->
+{% if active_section == 'meetings' %}
+<div class="meetings-section">
+  <div class="meetings-header">
+    <h2>📅 会议列表</h2>
+    <button class="btn btn-primary" onclick="showAddMeeting()">+ 添加会议</button>
+  </div>
+  <div class="meetings-grid" id="meetingsGrid"></div>
+  <div id="pastMeetingsArea"></div>
+</div>
+
+{% else %}
 <div class="main">
 
-  {% if active_section == 'meetings' %}
-    <!-- ===== 会议管理 ===== -->
-    <div class="meetings-section">
-      <div class="meetings-header">
-        <h2>📅 会议列表</h2>
-        <button class="btn btn-primary" onclick="showAddMeeting()">+ 添加会议</button>
-      </div>
-      <div class="meetings-grid" id="meetingsGrid">
-        <!-- JS 动态渲染 -->
-      </div>
-      <div id="pastMeetingsArea"></div>
+  <!-- 统计卡片（全部视图） -->
+  {% if active_tab == 'all' %}
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value highlight">{{ stats.total_proj }}</div>
+      <div class="stat-label">总项目</div>
     </div>
-
-  {% else %}
-    <!-- ===== 项目列表 ===== -->
-
-
-
-    {% if active_tab == 'all' %}
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value">{{ stats.total_proj }}</div>
-        <div class="stat-label">总项目数</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ stats.active_proj }}</div>
-        <div class="stat-label">进行中</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ stats.pending_proj }}</div>
-        <div class="stat-label">待跟进/待评估</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ stats.done_tasks }}/{{ stats.total_tasks }}</div>
-        <div class="stat-label">已完成/总任务</div>
-      </div>
-      <div class="stat-card rate">
-        <div class="stat-value">{{ stats.task_rate }}%</div>
-        <div class="stat-label">任务完成率</div>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.active_proj }}</div>
+      <div class="stat-label">进行中</div>
     </div>
-    {% endif %}
+    <div class="stat-card">
+      <div class="stat-value yellow">{{ stats.pending_proj }}</div>
+      <div class="stat-label">待跟进</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.done_tasks }}/{{ stats.total_tasks }}</div>
+      <div class="stat-label">完成/总数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value green">{{ stats.task_rate }}%</div>
+      <div class="stat-label">完成率</div>
+    </div>
+  </div>
+  {% endif %}
 
-    {% set groups = projects.keys() | reject('equalto', 'meetings') | list if active_tab == 'all' else [active_tab] %}
-    {% for group in groups %}
+  {% set groups = projects.keys() | reject('equalto', 'meetings') | list if active_tab == 'all' else [active_tab] %}
+  {% for group in groups %}
+    {% if projects.get(group) %}
       <div class="section-title">{{ group }}项目</div>
-      {% if projects.get(group) %}
-        <div class="project-list" id="project-list-{{ group }}" data-group="{{ group }}">
-        {% for p in projects.get(group, []) | sort(attribute='sort_order') %}
-          <div class="card" id="project-{{ p.id }}" data-project-id="{{ p.id }}">
-            <div class="card-header">
-              <div class="card-title-wrap">
-                <span class="drag-handle" title="拖拽排序">⠿</span>
-                <div class="card-title">{{ p.name }}</div>
-              </div>
+    {% endif %}
+    {% if projects.get(group) %}
+      <div class="project-list" id="project-list-{{ group }}" data-group="{{ group }}">
+      {% for p in projects.get(group, []) | sort(attribute='sort_order') %}
+        <div class="project-card" id="project-{{ p.id }}" data-project-id="{{ p.id }}">
+          <div class="drag-handle" title="拖拽排序">⠿</div>
+          <div class="project-content">
+            <div class="project-header">
+              <span class="project-name">{{ p.name }}</span>
               <div class="card-actions">
                 <button class="card-delete" onclick="confirmDeleteProject('{{ group }}', '{{ p.id }}', '{{ p.name | e }}', {{ 'true' if p.tasks else 'false' }})" title="删除项目">×</button>
                 <span class="status {% if p.status_color %}{{ p.status_color }}{% elif '完成' in (p.status_text or p.status or '') %}status-done{% elif '待' in (p.status_text or p.status or '') or '评估' in (p.status_text or p.status or '') %}status-warn{% elif '开会' in (p.status_text or p.status or '') %}status-todo{% else %}status-progress{% endif %}">{% if p.status_text %}{{ p.status_text }}{% else %}{{ p.status }}{% endif %}</span>
                 <button class="btn btn-primary" onclick="showEdit('{{ group }}', '{{ p.id }}')">编辑</button>
+                <button class="btn-add-task" onclick="showAddTask('{{ group }}', '{{ p.id }}')">+ 添加任务</button>
               </div>
             </div>
             {% if p.node %}<div class="info">📍 当前节点：{{ p.node }}</div>{% endif %}
@@ -342,112 +1048,112 @@
             {% set done_count = p.tasks|selectattr('done', 'equalto', true)|list|length %}
             {% set total_count = p.tasks|length %}
             {% set completion_rate = ((done_count / total_count * 100)|round if total_count > 0 else 0) %}
-            <div class="task-summary-bar">
-              <span class="task-priority-icon high">🔴 {{ high_count }}</span>
-              <span class="task-priority-icon medium">🟡 {{ medium_count }}</span>
-              <span class="task-priority-icon low">🟢 {{ low_count }}</span>
-              <span class="task-completion-rate">完成率 {{ completion_rate }}%</span>
+            <div class="task-summary">
+              <span class="task-badge high">🔴 {{ high_count }}</span>
+              <span class="task-badge medium">🟡 {{ medium_count }}</span>
+              <span class="task-badge low">🟢 {{ low_count }}</span>
+              <span class="completion-rate">{{ completion_rate }}%</span>
             </div>
             <div class="task-toggle-bar" onclick="toggleTasks(this)">
               <span class="toggle-icon">▶</span> 展开任务 ({{ p.tasks|length }})
             </div>
             <div class="task-table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:40px;text-align:center"></th>
-                  <th>任务</th>
-                  <th style="width:70px;text-align:center">优先级</th>
-                  <th style="width:120px;text-align:center">截止日期</th>
-                  <th style="width:140px;text-align:center">意见备注</th>
-                  <th style="width:100px;text-align:center">创建时间</th>
-                  <th style="width:40px;text-align:center"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for t in p.tasks %}
-                <tr>
-                  <td style="text-align:center">
-                    <form method="POST" action="/toggle_task" style="display:inline">
-                      <input type="hidden" name="group" value="{{ group }}">
-                      <input type="hidden" name="project_id" value="{{ p.id }}">
-                      <input type="hidden" name="task_text" value="{{ t.text }}">
-                      <input type="hidden" name="tab" value="{{ active_tab }}">
-                      <input type="hidden" name="section" value="projects">
-                      <div class="task-check {% if t.done %}done{% endif %}">{% if t.done %}✓{% endif %}</div>
-                    </form>
-                  </td>
-                  <td>
-                    <span class="task-text {% if t.done %}done{% endif %}"
-                          onclick="openTaskDetail('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')">
-                      {{ t.text.replace('✅ ','').replace('☐ ','') }}
-                    </span>
-                  </td>
-                  <td style="text-align:center">
-                    <form method="POST" action="/update_priority" style="display:inline">
-                      <input type="hidden" name="group" value="{{ group }}">
-                      <input type="hidden" name="project_id" value="{{ p.id }}">
-                      <input type="hidden" name="task_text" value="{{ t.text }}">
-                      <input type="hidden" name="tab" value="{{ active_tab }}">
-                      <input type="hidden" name="section" value="projects">
-                      <button type="submit" class="priority {{ t.priority or 'medium' }}">
-                        {% if t.priority == 'high' %}🔴高{% elif t.priority == 'low' %}🟢低{% else %}🟡中{% endif %}
-                      </button>
-                    </form>
-                  </td>
-                  <td style="text-align:center">
-                    <form method="POST" action="/update_due" style="display:inline">
-                      <input type="hidden" name="group" value="{{ group }}">
-                      <input type="hidden" name="project_id" value="{{ p.id }}">
-                      <input type="hidden" name="task_text" value="{{ t.text }}">
-                      <input type="hidden" name="tab" value="{{ active_tab }}">
-                      <input type="hidden" name="section" value="projects">
-                      <div class="due-wrap">
-                        <input type="date" name="due" class="due-input" value="{{ t.due or '' }}" onchange="this.form.submit()">
-                        {% if t.due %}
-                        <button type="button" class="due-clear" onclick="clearDue(this, '{{ group }}', '{{ p.id }}', '{{ t.text | e }}')" title="清空日期">×</button>
-                        {% endif %}
-                      </div>
-                    </form>
-                  </td>
-                  <td style="text-align:center; font-size:11px; color:#9ca3af;">
-                    {% if t.opinion %}<span class="task-opinion">{{ t.opinion | e }}</span>{% else %}—{% endif %}
-                  </td>
-                  <td style="text-align:center">
-                    {% if t.createdAt %}<span class="task-created">{{ t.createdAt }}</span>{% else %}—{% endif %}
-                  </td>
-                  <td style="text-align:center">
-                    <button class="task-delete" onclick="confirmDeleteTask('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')" title="删除任务">×</button>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:40px;text-align:center"></th>
+                    <th>任务</th>
+                    <th style="width:70px;text-align:center">优先级</th>
+                    <th style="width:120px;text-align:center">截止日期</th>
+                    <th style="width:140px;text-align:center">意见备注</th>
+                    <th style="width:100px;text-align:center">创建时间</th>
+                    <th style="width:40px;text-align:center"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for t in p.tasks %}
+                  <tr>
+                    <td style="text-align:center">
+                      <form method="POST" action="/toggle_task" style="display:inline">
+                        <input type="hidden" name="group" value="{{ group }}">
+                        <input type="hidden" name="project_id" value="{{ p.id }}">
+                        <input type="hidden" name="task_text" value="{{ t.text }}">
+                        <input type="hidden" name="tab" value="{{ active_tab }}">
+                        <input type="hidden" name="section" value="projects">
+                        <div class="task-check {% if t.done %}done{% endif %}">{% if t.done %}✓{% endif %}</div>
+                      </form>
+                    </td>
+                    <td>
+                      <span class="task-text {% if t.done %}done{% endif %}"
+                            onclick="openTaskDetail('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')">
+                        {{ t.text.replace('✅ ','').replace('☐ ','') }}
+                      </span>
+                    </td>
+                    <td style="text-align:center">
+                      <form method="POST" action="/update_priority" style="display:inline">
+                        <input type="hidden" name="group" value="{{ group }}">
+                        <input type="hidden" name="project_id" value="{{ p.id }}">
+                        <input type="hidden" name="task_text" value="{{ t.text }}">
+                        <input type="hidden" name="tab" value="{{ active_tab }}">
+                        <input type="hidden" name="section" value="projects">
+                        <button type="submit" class="priority {{ t.priority or 'medium' }}">
+                          {% if t.priority == 'high' %}🔴高{% elif t.priority == 'low' %}🟢低{% else %}🟡中{% endif %}
+                        </button>
+                      </form>
+                    </td>
+                    <td style="text-align:center">
+                      <form method="POST" action="/update_due" style="display:inline">
+                        <input type="hidden" name="group" value="{{ group }}">
+                        <input type="hidden" name="project_id" value="{{ p.id }}">
+                        <input type="hidden" name="task_text" value="{{ t.text }}">
+                        <input type="hidden" name="tab" value="{{ active_tab }}">
+                        <input type="hidden" name="section" value="projects">
+                        <div class="due-wrap">
+                          <input type="date" name="due" class="due-input" value="{{ t.due or '' }}" onchange="this.form.submit()">
+                          {% if t.due %}
+                          <button type="button" class="due-clear" onclick="clearDue(this, '{{ group }}', '{{ p.id }}', '{{ t.text | e }}')" title="清空日期">×</button>
+                          {% endif %}
+                        </div>
+                      </form>
+                    </td>
+                    <td style="text-align:center; font-size:11px; color:#9ca3af;">
+                      {% if t.opinion %}<span class="task-opinion">{{ t.opinion | e }}</span>{% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:center">
+                      {% if t.createdAt %}<span class="task-created">{{ t.createdAt }}</span>{% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:center">
+                      <button class="task-delete" onclick="confirmDeleteTask('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')" title="删除任务">×</button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
             {% endif %}
-            <div class="card-footer">
-              <button class="btn-add-task" onclick="showAddTask('{{ group }}', '{{ p.id }}')">+ 添加任务</button>
-            </div>
           </div>
-        {% endfor %}
         </div>
-      {% else %}
-        <div style="text-align:center;padding:20px;">
-          <div class="no-data" style="margin-bottom:12px;">暂无项目</div>
-          <button class="btn btn-primary" onclick="showAddProject()">+ 添加项目</button>
-        </div>
-      {% endif %}
-    {% endfor %}
-
-    {% if active_tab != 'meetings' and active_tab != 'daily' %}
-      {% set has_any = false %}
-      {% for g in groups %}{% if projects.get(g) %}{% set has_any = true %}{% endif %}{% endfor %}
-      {% if not has_any %}<div class="no-data">暂无数据</div>{% endif %}
+      {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align:center;padding:20px;">
+        <div class="no-data" style="margin-bottom:12px;">暂无项目</div>
+        <button class="btn btn-primary" onclick="showAddProject()">+ 添加项目</button>
+      </div>
     {% endif %}
+  {% endfor %}
+
+  {% if (active_tab != 'meetings' and active_tab != 'daily') %}
+    {% set has_any = false %}
+    {% for g in groups %}{% if projects.get(g) %}{% set has_any = true %}{% endif %}{% endfor %}
+    {% if not has_any %}<div class="no-data">暂无数据</div>{% endif %}
   {% endif %}
 </div>
+{% endif %}
 
-<!-- 编辑弹窗 -->
+<!-- ===== 弹窗 ===== -->
+
+<!-- 编辑项目弹窗 -->
 <div class="modal" id="editModal">
   <div class="modal-content">
     <h2 id="modalTitle">编辑项目</h2>
@@ -514,7 +1220,7 @@
         <label>子任务（每行一个，已完成的任务前面加✅）</label>
         <textarea name="tasks" id="editTasks"></textarea>
       </div>
-            <div class="modal-btns">
+      <div class="modal-btns">
         <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
         <button type="submit" class="btn btn-primary">保存</button>
       </div>
@@ -564,11 +1270,11 @@
       </div>
       <div class="form-group">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="addTaskNow" onchange="toggleAddTaskForm()"> <span style="color:var(--accent-2);font-size:14px">立即添加任务</span>
+          <input type="checkbox" id="addTaskNow" onchange="toggleAddTaskForm()"> <span style="color:#6366f1;font-size:14px">立即添加任务</span>
         </label>
       </div>
-      <div id="addTaskNowFields" style="display:none;padding:14px;background:var(--inner-bg);border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid var(--border);">
-        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;font-weight:500">任务信息</div>
+      <div id="addTaskNowFields" style="display:none;padding:14px;background:#1a2332;border-radius:6px;margin-bottom:14px;border:1px solid #2a2d3a;">
+        <div style="font-size:13px;color:#888;margin-bottom:10px;font-weight:500">任务信息</div>
         <div class="form-group">
           <label>任务名称 <span style="color:#f87171">*</span></label>
           <input type="text" name="task_name" id="apTaskName" placeholder="请输入任务名称">
@@ -650,7 +1356,7 @@
   </div>
 </div>
 
-<!-- 任务详情编辑弹窗 -->
+<!-- 任务详情弹窗 -->
 <div class="modal" id="taskDetailModal">
   <div class="modal-content">
     <h2>任务详情</h2>
@@ -787,6 +1493,7 @@ function showEdit(group, id) {
   document.getElementById('editSection').value = 'projects';
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editStatusText').value = p.status_text || p.status || '';
+  document.getElementById('editNode').value = p.node || '';
   document.getElementById('editDeadline').value = p.deadline || '';
   document.getElementById('editIssues').value = p.issues || '';
   document.getElementById('editTasks').value = (p.tasks || []).map(function(t) {
@@ -845,7 +1552,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var el = document.querySelector(hash);
     if (el) {
       requestAnimationFrame(function() {
-        var headerHeight = document.querySelector('.header') ? document.querySelector('.header').offsetHeight : 0;
+        var headerHeight = 56;
         var rect = el.getBoundingClientRect();
         var offsetTop = rect.top + window.pageYOffset - headerHeight - 20;
         window.scrollTo({ top: Math.max(0, offsetTop), behavior: 'instant' });
@@ -853,10 +1560,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // 初始化 SortableJS 拖拽
   initSortable();
 
-  // 会议页加载数据
   if (currentSection === 'meetings') {
     loadMeetings();
   }
@@ -864,7 +1569,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ===== SortableJS 拖拽排序 =====
 function initSortable() {
-  // 为每个公司项目列表初始化 Sortable
   document.querySelectorAll('.project-list').forEach(function(el) {
     var group = el.getAttribute('data-group');
     new Sortable(el, {
@@ -874,10 +1578,9 @@ function initSortable() {
       chosenClass: 'sortable-chosen',
       onEnd: function(evt) {
         var order = [];
-        el.querySelectorAll('.card').forEach(function(card) {
+        el.querySelectorAll('.project-card').forEach(function(card) {
           order.push(card.getAttribute('data-project-id'));
         });
-        // 发送到后端
         fetch('/api/reorder_projects', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -903,14 +1606,10 @@ function loadMeetings() {
       var upcoming = [];
       var past = [];
       meetings.forEach(function(m) {
-        var mDate = m.date || '';
-        // 判断是否过期（完整日期格式）
         if (m.completed) {
           past.push(m);
-        } else if (mDate >= today && mDate.length >= 10) {
+        } else if ((m.date || '') >= today && (m.date || '').length >= 10) {
           upcoming.push(m);
-        } else if (m.completed) {
-          past.push(m);
         } else {
           upcoming.push(m);
         }
@@ -949,18 +1648,18 @@ function meetingCardHTML(m) {
   var completedBadge = m.completed ? '<div class="meeting-completed-badge">✓ 已完成</div>' : '';
 
   return '<div class="meeting-card ' + completedClass + '" data-id="' + m.id + '">' +
-    '<div class="meeting-top">' +
-      dateBadge +
-      '<div class="meeting-actions">' +
-        '<button class="meeting-complete" onclick="toggleMeeting(\'' + m.id + '\')" title="标记完成">' + (m.completed ? '↩' : '✓') + '</button>' +
-        '<button onclick="editMeeting(\'' + m.id + '\')" title="编辑">✎</button>' +
-        '<button class="meeting-delete" onclick="deleteMeeting(\'' + m.id + '\')" title="删除">×</button>' +
-      '</div>' +
+    '<div class="meeting-date-badge">' + (m.date || '—') + '</div>' +
+    '<div class="meeting-info">' +
+      '<div class="meeting-name">' + checkIcon + escHtml(m.name) + '</div>' +
+      (m.time ? '<div class="meeting-time">🕐 ' + escHtml(m.time) + '</div>' : '') +
+      (m.remark ? '<div class="meeting-remark">' + escHtml(m.remark) + '</div>' : '') +
+      completedBadge +
     '</div>' +
-    '<div class="meeting-name">' + checkIcon + escHtml(m.name) + '</div>' +
-    (timeStr ? '<div class="meeting-time">🕐 ' + timeStr + '</div>' : '') +
-    (m.remark ? '<div class="meeting-remark">' + escHtml(m.remark) + '</div>' : '') +
-    completedBadge +
+    '<div class="meeting-actions">' +
+      '<button class="meeting-complete" onclick="toggleMeeting(\'' + m.id + '\')" title="标记完成">' + (m.completed ? '↩' : '✓') + '</button>' +
+      '<button onclick="editMeeting(\'' + m.id + '\')" title="编辑">✎</button>' +
+      '<button class="meeting-delete" onclick="deleteMeeting(\'' + m.id + '\')" title="删除">×</button>' +
+    '</div>' +
   '</div>';
 }
 
@@ -1018,7 +1717,6 @@ document.getElementById('meetingForm').addEventListener('submit', function(e) {
   };
 
   if (id) {
-    // 更新
     fetch('/api/meetings/' + id, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
@@ -1029,7 +1727,6 @@ document.getElementById('meetingForm').addEventListener('submit', function(e) {
         loadMeetings();
       });
   } else {
-    // 新建
     fetch('/api/meetings', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -1047,7 +1744,6 @@ document.getElementById('meetingModal').addEventListener('click', function(e) {
   if (e.target === this) closeMeetingModal();
 });
 
-// ===== 其他弹窗 =====
 document.getElementById('editModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
@@ -1098,7 +1794,8 @@ function toggleTasks(btn) {
   if (isOpen) {
     wrap.classList.remove('open');
     btn.classList.remove('expanded');
-    btn.innerHTML = '<span class="toggle-icon">▶</span> 展开任务 (' + (wrap.querySelectorAll('tbody tr').length) + ')';
+    var count = wrap.querySelectorAll('tbody tr').length;
+    btn.innerHTML = '<span class="toggle-icon">▶</span> 展开任务 (' + count + ')';
   } else {
     wrap.classList.add('open');
     btn.classList.add('expanded');
