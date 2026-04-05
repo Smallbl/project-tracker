@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📋 项目跟踪系统 v2.0</title>
+<title>📋 项目跟踪系统 v3.0</title>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <style>
   :root {
     --bg: #0f1419;
@@ -32,6 +33,12 @@
 
   .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
+  /* ===== 两级导航 ===== */
+  .nav-section { display: flex; gap: 4px; margin-bottom: 16px; background: var(--card-bg); border-radius: var(--radius-sm); padding: 4px; border: 1px solid var(--border); width: fit-content; }
+  .nav-section .sec-tab { padding: 8px 20px; border-radius: 6px; font-size: 14px; cursor: pointer; color: var(--text-secondary); text-decoration: none; transition: all 0.2s; border: none; background: transparent; }
+  .nav-section .sec-tab:hover { color: var(--text); }
+  .nav-section .sec-tab.active { background: var(--gradient); color: white; box-shadow: 0 2px 8px rgba(79,70,229,0.3); }
+
   .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
   .tab { padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; color: var(--text-secondary); box-shadow: var(--shadow); text-decoration: none; transition: all 0.2s; }
   .tab:hover { border-color: var(--accent-2); color: var(--text); }
@@ -39,8 +46,14 @@
 
   .section-title { font-size: 16px; font-weight: 600; margin: 24px 0 12px 0; padding-left: 12px; border-left: 4px solid transparent; border-image: var(--gradient) 1; color: var(--text); }
 
-  .card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; }
+  /* ===== 拖拽手柄 ===== */
+  .card { background: var(--card-bg); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: opacity 0.2s, transform 0.2s; }
+  .card.sortable-ghost { opacity: 0.4; }
+  .card.sortable-chosen { box-shadow: 0 8px 30px rgba(79,70,229,0.4); border-color: var(--accent-2); transform: scale(1.02); }
   .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+  .drag-handle { cursor: grab; color: var(--text-muted); font-size: 18px; padding: 4px 8px 4px 0; user-select: none; flex-shrink: 0; }
+  .drag-handle:active { cursor: grabbing; }
+  .card-title-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
   .card-title { font-size: 15px; font-weight: 600; color: var(--text); }
   .card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; z-index: 1; }
   .card-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; line-height: 1; transition: all 0.2s; }
@@ -93,6 +106,8 @@
   .btn-primary:hover { opacity: 0.88; }
   .btn-secondary { background: var(--inner-bg); color: var(--text-secondary); border: 1px solid var(--border); }
   .btn-secondary:hover { border-color: var(--text-secondary); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--text-secondary); color: var(--text); }
 
   .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
   .modal.show { display: flex; }
@@ -105,15 +120,32 @@
   .form-group textarea { resize: vertical; min-height: 80px; }
   .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
-  .meetings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
-  .meeting-card { background: var(--card-bg); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-  .meeting-date { background: var(--gradient); color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 8px; }
-  .meeting-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; color: var(--text); }
+  /* ===== 会议管理 ===== */
+  .meetings-section { }
+  .meetings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .meetings-header h2 { font-size: 18px; color: var(--text); }
+  .meetings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .meeting-card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: all 0.2s; }
+  .meeting-card:hover { border-color: var(--accent-2); }
+  .meeting-card.completed { opacity: 0.55; }
+  .meeting-card.completed .meeting-name { text-decoration: line-through; }
+  .meeting-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .meeting-date-badge { background: var(--gradient); color: white; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .meeting-actions { display: flex; gap: 6px; }
+  .meeting-actions button { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 4px; transition: all 0.2s; }
+  .meeting-actions button:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+  .meeting-actions .meeting-complete:hover { color: #34d399; }
+  .meeting-actions .meeting-delete:hover { color: #f87171; background: rgba(239,68,68,0.15); }
+  .meeting-name { font-size: 15px; font-weight: 500; margin: 10px 0 4px 0; color: var(--text); }
   .meeting-time { font-size: 12px; color: var(--text-secondary); }
+  .meeting-remark { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-style: italic; }
+  .meeting-completed-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #34d399; margin-top: 8px; padding: 3px 8px; background: rgba(52,211,153,0.12); border-radius: 6px; }
+  .past-meetings { margin-top: 32px; }
+  .past-meetings-title { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; padding-left: 8px; border-left: 3px solid var(--border); }
 
   .no-data { text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px; }
 
-  /* Status badges — dark mode: dark bg + light text */
+  /* Status badges */
   .status { font-size: 12px; padding: 3px 12px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
   .status-progress { background: rgba(16,185,129,0.2); color: #34d399; }
   .status-warn { background: rgba(245,158,11,0.2); color: #fbbf24; }
@@ -126,7 +158,7 @@
   .status-gray { background: rgba(110,118,129,0.2); color: #8b949e; }
   .status-auto { font-size: 12px; padding: 3px 12px; }
 
-  /* ===== 统计卡片 ===== */
+  /* 统计卡片 */
   .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
   .stat-card {
     background: var(--card-bg);
@@ -149,7 +181,7 @@
   .stat-card .stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
   .stat-card.rate .stat-value { color: #34d399; -webkit-text-fill-color: #34d399; }
 
-  /* ===== 任务折叠 ===== */
+  /* 任务折叠 */
   .task-summary-bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(79,70,229,0.08); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; }
   .task-priority-icon { font-size: 12px; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
   .task-priority-icon.high { background: rgba(239,68,68,0.25); color: #f87171; }
@@ -163,12 +195,17 @@
   .task-table-wrap { overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; }
   .task-table-wrap.open { max-height: 2000px; opacity: 1; }
 
+  /* 隐藏字段 */
+  .hidden { display: none !important; }
+
   @media (max-width: 768px) {
     .header { padding: 16px 20px; }
     .container { padding: 16px; }
     table { font-size: 12px; }
     th, td { padding: 8px 4px; }
     .stats-row { grid-template-columns: repeat(3, 1fr); }
+    .meetings-grid { grid-template-columns: 1fr; }
+    .nav-section { width: 100%; }
   }
 </style>
 </head>
@@ -176,69 +213,94 @@
 
 <div class="header">
   <div class="header-left">
-    <h1>📋 项目跟踪系统 v2.0</h1>
-    <p>四建 & 亚太项目进度跟踪 · 招投标行业</p>
+    <h1>📋 项目跟踪系统 v3.0</h1>
+    <p>项目进度 · 会议管理 · 每日任务</p>
   </div>
   <button class="btn-add-project" onclick="showAddProject()">+ 新建项目</button>
 </div>
 
 <div class="container">
-  <div class="tabs"><a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?tab=all">全部项目</a>{% for company in projects.keys() %}{% if company != 'meetings' %}<a class="tab {% if active_tab == company %}active{% endif %}" href="/?tab={{ company | urlencode }}">{{ company }}</a>{% endif %}{% endfor %}<a class="tab {% if active_tab == 'meetings' %}active{% endif %}" href="/?tab=meetings">📅 会议</a><a class="tab {% if active_tab == 'daily' %}active{% endif %}" href="/daily.html">📌 每日任务</a></div>
 
-  {% if active_tab == 'all' %}
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.total_proj }}</div>
-      <div class="stat-label">总项目数</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.active_proj }}</div>
-      <div class="stat-label">进行中</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.pending_proj }}</div>
-      <div class="stat-label">待跟进/待评估</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ stats.done_tasks }}/{{ stats.total_tasks }}</div>
-      <div class="stat-label">已完成/总任务</div>
-    </div>
-    <div class="stat-card rate">
-      <div class="stat-value">{{ stats.task_rate }}%</div>
-      <div class="stat-label">任务完成率</div>
-    </div>
+  <!-- ===== 一级导航 ===== -->
+  <div class="nav-section">
+    <a class="sec-tab {% if active_section == 'projects' %}active{% endif %}" href="/?section=projects&tab={{ active_tab | urlencode }}">📁 项目</a>
+    <a class="sec-tab {% if active_section == 'meetings' %}active{% endif %}" href="/?section=meetings">📅 会议</a>
+    <a class="sec-tab" href="/daily.html">📌 每日任务</a>
   </div>
-  {% endif %}
 
-  {% if active_tab == 'meetings' %}
-    <div class="meetings-grid">
-      {% for m in projects.meetings %}
-      <div class="meeting-card">
-        <div class="meeting-date">{{ m.date }}</div>
-        <div class="meeting-name">{{ m.name }}</div>
-        <div class="meeting-time">{{ m.time }} {{ m.remark or '' }}</div>
+  {% if active_section == 'meetings' %}
+    <!-- ===== 会议管理 ===== -->
+    <div class="meetings-section">
+      <div class="meetings-header">
+        <h2>📅 会议列表</h2>
+        <button class="btn btn-primary" onclick="showAddMeeting()">+ 添加会议</button>
       </div>
+      <div class="meetings-grid" id="meetingsGrid">
+        <!-- JS 动态渲染 -->
+      </div>
+      <div id="pastMeetingsArea"></div>
+    </div>
+
+  {% else %}
+    <!-- ===== 项目列表 ===== -->
+
+    <!-- 二级导航（项目下） -->
+    <div class="tabs">
+      <a class="tab {% if active_tab == 'all' %}active{% endif %}" href="/?section=projects&tab=all">全部项目</a>
+      {% for company in projects.keys() %}
+        {% if company != 'meetings' %}
+          <a class="tab {% if active_tab == company %}active{% endif %}" href="/?section=projects&tab={{ company | urlencode }}">{{ company }}</a>
+        {% endif %}
       {% endfor %}
     </div>
-  {% else %}
+
+    {% if active_tab == 'all' %}
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.total_proj }}</div>
+        <div class="stat-label">总项目数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.active_proj }}</div>
+        <div class="stat-label">进行中</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.pending_proj }}</div>
+        <div class="stat-label">待跟进/待评估</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ stats.done_tasks }}/{{ stats.total_tasks }}</div>
+        <div class="stat-label">已完成/总任务</div>
+      </div>
+      <div class="stat-card rate">
+        <div class="stat-value">{{ stats.task_rate }}%</div>
+        <div class="stat-label">任务完成率</div>
+      </div>
+    </div>
+    {% endif %}
+
     {% set groups = projects.keys() | reject('equalto', 'meetings') | list if active_tab == 'all' else [active_tab] %}
     {% for group in groups %}
       <div class="section-title">{{ group }}项目</div>
       {% if projects.get(group) %}
-        {% for p in projects.get(group, []) %}
-          <div class="card" id="project-{{ p.id }}">
+        <div class="project-list" id="project-list-{{ group }}" data-group="{{ group }}">
+        {% for p in projects.get(group, []) | sort(attribute='sort_order') %}
+          <div class="card" id="project-{{ p.id }}" data-project-id="{{ p.id }}">
             <div class="card-header">
-              <div class="card-title">{{ p.name }}</div>
+              <div class="card-title-wrap">
+                <span class="drag-handle" title="拖拽排序">⠿</span>
+                <div class="card-title">{{ p.name }}</div>
+              </div>
               <div class="card-actions">
                 <button class="card-delete" onclick="confirmDeleteProject('{{ group }}', '{{ p.id }}', '{{ p.name | e }}', {{ 'true' if p.tasks else 'false' }})" title="删除项目">×</button>
-                <span class="status {% if p.status_color %}{{ p.status_color }}{% elif '完成' in p.status %}status-done{% elif '待' in p.status or '评估' in p.status %}status-warn{% elif '开会' in p.status %}status-todo{% else %}status-progress{% endif %}">{% if p.status_text %}{{ p.status_text }}{% else %}{{ p.status }}{% endif %}</span>
+                <span class="status {% if p.status_color %}{{ p.status_color }}{% elif '完成' in (p.status_text or p.status or '') %}status-done{% elif '待' in (p.status_text or p.status or '') or '评估' in (p.status_text or p.status or '') %}status-warn{% elif '开会' in (p.status_text or p.status or '') %}status-todo{% else %}status-progress{% endif %}">{% if p.status_text %}{{ p.status_text }}{% else %}{{ p.status }}{% endif %}</span>
                 <button class="btn btn-primary" onclick="showEdit('{{ group }}', '{{ p.id }}')">编辑</button>
               </div>
             </div>
             {% if p.node %}<div class="info">📍 当前节点：{{ p.node }}</div>{% endif %}
             {% if p.deadline %}<div class="info">📅 截止：{{ p.deadline }}</div>{% endif %}
             {% if p.issues %}<div class="info">⚠️ 当前问题：{{ p.issues }}</div>{% endif %}
-            
+
             {% if p.tasks %}
             {% set high_count = p.tasks|selectattr('priority', 'equalto', 'high')|list|length %}
             {% set medium_count = p.tasks|selectattr('priority', 'equalto', 'medium')|list|length %}
@@ -277,11 +339,12 @@
                       <input type="hidden" name="project_id" value="{{ p.id }}">
                       <input type="hidden" name="task_text" value="{{ t.text }}">
                       <input type="hidden" name="tab" value="{{ active_tab }}">
+                      <input type="hidden" name="section" value="projects">
                       <div class="task-check {% if t.done %}done{% endif %}">{% if t.done %}✓{% endif %}</div>
                     </form>
                   </td>
                   <td>
-                    <span class="task-text {% if t.done %}done{% endif %}" 
+                    <span class="task-text {% if t.done %}done{% endif %}"
                           onclick="openTaskDetail('{{ group }}', '{{ p.id }}', '{{ t.text | e }}')">
                       {{ t.text.replace('✅ ','').replace('☐ ','') }}
                     </span>
@@ -292,6 +355,7 @@
                       <input type="hidden" name="project_id" value="{{ p.id }}">
                       <input type="hidden" name="task_text" value="{{ t.text }}">
                       <input type="hidden" name="tab" value="{{ active_tab }}">
+                      <input type="hidden" name="section" value="projects">
                       <button type="submit" class="priority {{ t.priority or 'medium' }}">
                         {% if t.priority == 'high' %}🔴高{% elif t.priority == 'low' %}🟢低{% else %}🟡中{% endif %}
                       </button>
@@ -303,6 +367,7 @@
                       <input type="hidden" name="project_id" value="{{ p.id }}">
                       <input type="hidden" name="task_text" value="{{ t.text }}">
                       <input type="hidden" name="tab" value="{{ active_tab }}">
+                      <input type="hidden" name="section" value="projects">
                       <div class="due-wrap">
                         <input type="date" name="due" class="due-input" value="{{ t.due or '' }}" onchange="this.form.submit()">
                         {% if t.due %}
@@ -331,6 +396,7 @@
             </div>
           </div>
         {% endfor %}
+        </div>
       {% else %}
         <div style="text-align:center;padding:20px;">
           <div class="no-data" style="margin-bottom:12px;">暂无项目</div>
@@ -338,7 +404,7 @@
         </div>
       {% endif %}
     {% endfor %}
-    
+
     {% if active_tab != 'meetings' and active_tab != 'daily' %}
       {% set has_any = false %}
       {% for g in groups %}{% if projects.get(g) %}{% set has_any = true %}{% endif %}{% endfor %}
@@ -355,6 +421,7 @@
       <input type="hidden" name="group" id="editGroup" value="">
       <input type="hidden" name="project_id" id="editProjectId" value="">
       <input type="hidden" name="tab" id="editTab" value="">
+      <input type="hidden" name="section" id="editSection" value="projects">
       <div class="form-group">
         <label>项目名称</label>
         <input type="text" name="name" id="editName">
@@ -427,6 +494,7 @@
     <h2>新建项目</h2>
     <form method="POST" action="/add_project" id="addProjectForm">
       <input type="hidden" name="tab" id="addProjectTab" value="all">
+      <input type="hidden" name="section" value="projects">
       <div class="form-group">
         <label>项目名称 <span style="color:#f87171">*</span></label>
         <input type="text" name="name" id="apName" required placeholder="请输入项目名称">
@@ -504,6 +572,7 @@
       <input type="hidden" name="group" id="atGroup" value="">
       <input type="hidden" name="project_id" id="atProjectId" value="">
       <input type="hidden" name="tab" id="atTab" value="">
+      <input type="hidden" name="section" id="atSection" value="projects">
       <div class="form-group">
         <label>任务名称 <span style="color:#f87171">*</span></label>
         <input type="text" name="task_name" id="atName" required placeholder="请输入任务名称">
@@ -556,6 +625,7 @@
       <input type="hidden" name="project_id" id="tdProjectId" value="">
       <input type="hidden" name="task_text" id="tdTaskText" value="">
       <input type="hidden" name="tab" id="tdTab" value="">
+      <input type="hidden" name="section" id="tdSection" value="projects">
       <div class="form-group">
         <label>任务名称</label>
         <input type="text" name="text" id="tdText" required>
@@ -588,16 +658,47 @@
   </div>
 </div>
 
+<!-- 会议添加/编辑弹窗 -->
+<div class="modal" id="meetingModal">
+  <div class="modal-content">
+    <h2 id="meetingModalTitle">添加会议</h2>
+    <form id="meetingForm">
+      <input type="hidden" id="meetingId" value="">
+      <div class="form-group">
+        <label>会议名称 <span style="color:#f87171">*</span></label>
+        <input type="text" id="meetingName" required placeholder="如：中招联合-进度汇报">
+      </div>
+      <div class="form-group">
+        <label>日期</label>
+        <input type="date" id="meetingDate" placeholder="如：2026-04-02">
+      </div>
+      <div class="form-group">
+        <label>时间</label>
+        <input type="time" id="meetingTime" placeholder="如：09:30">
+      </div>
+      <div class="form-group">
+        <label>备注</label>
+        <textarea id="meetingRemark" placeholder="可空，填写会议讨论内容等..." style="min-height:80px"></textarea>
+      </div>
+      <div class="modal-btns">
+        <button type="button" class="btn btn-secondary" onclick="closeMeetingModal()">取消</button>
+        <button type="submit" class="btn btn-primary">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 var projectData = {{ projects | tojson }};
+var currentSection = '{{ active_section | default("projects") }}';
+var currentTab = '{{ active_tab | default("all") }}';
 
+// ===== 公司选择 =====
 function populateCompanySelect() {
   var select = document.getElementById('apGroup');
-  // 保留第一项"请选择公司"
   var defaultOpt = select.options[0];
   select.innerHTML = '';
   select.appendChild(defaultOpt);
-  // 动态添加所有公司
   var companies = Object.keys(projectData).filter(function(k) { return k !== 'meetings'; });
   companies.forEach(function(c) {
     var opt = document.createElement('option');
@@ -605,7 +706,6 @@ function populateCompanySelect() {
     opt.textContent = c;
     select.appendChild(opt);
   });
-  // 添加"+ 添加新公司"选项
   var addOpt = document.createElement('option');
   addOpt.value = '__add_new__';
   addOpt.textContent = '+ 添加新公司';
@@ -617,11 +717,9 @@ function handleCompanyChange(selectEl) {
     var name = prompt('请输入新公司名称：');
     if (name && name.trim()) {
       name = name.trim();
-      // 先添加到 projectData
       if (!projectData[name]) {
         projectData[name] = [];
       }
-      // 提交到后端添加公司
       var form = document.createElement('form');
       form.method = 'POST';
       form.action = '/add_company';
@@ -641,30 +739,30 @@ function handleCompanyChange(selectEl) {
 
 function showAddProject() {
   populateCompanySelect();
-  document.getElementById('addProjectTab').value = getCurrentTab();
+  document.getElementById('addProjectTab').value = currentTab;
   document.getElementById('addProjectModal').classList.add('show');
 }
 
 function showEdit(group, id) {
   var p = projectData[group].find(function(x) { return x.id === id; });
   if (!p) return;
-  
+
   document.getElementById('editGroup').value = group;
   document.getElementById('editProjectId').value = id;
-  document.getElementById('editTab').value = getCurrentTab();
+  document.getElementById('editTab').value = currentTab;
+  document.getElementById('editSection').value = 'projects';
   document.getElementById('editName').value = p.name || '';
   document.getElementById('editStatusText').value = p.status_text || p.status || '';
   document.getElementById('editDeadline').value = p.deadline || '';
   document.getElementById('editIssues').value = p.issues || '';
-  document.getElementById('editTasks').value = (p.tasks || []).map(function(t) { 
-    return (t.done ? '✅ ' : '☐ ') + t.text; 
+  document.getElementById('editTasks').value = (p.tasks || []).map(function(t) {
+    return (t.done ? '✅ ' : '☐ ') + t.text;
   }).join('\n');
-  
-  // 选中颜色
+
   var colorRadios = document.querySelectorAll('input[name="status_color"]');
   var savedColor = p.status_color || '';
   colorRadios.forEach(function(r) { r.checked = (r.value === savedColor); });
-  
+
   document.getElementById('editForm').action = '/update_project';
   document.getElementById('editModal').classList.add('show');
   previewStatus();
@@ -685,30 +783,19 @@ function closeModal() {
   document.getElementById('editModal').classList.remove('show');
 }
 
-function closeTaskNameModal() {
-  document.getElementById('taskNameModal').classList.remove('show');
-}
-
 function clearDue(btn, group, projectId, taskText) {
   var form = btn.closest('form');
   var tabInput = form.querySelector('input[name="tab"]');
   var tab = tabInput ? tabInput.value : 'all';
-  
-  var hiddenGroup = document.createElement('input');
-  hiddenGroup.type = 'hidden'; hiddenGroup.name = 'group'; hiddenGroup.value = group;
-  var hiddenProject = document.createElement('input');
-  hiddenProject.type = 'hidden'; hiddenProject.name = 'project_id'; hiddenProject.value = projectId;
-  var hiddenText = document.createElement('input');
-  hiddenText.type = 'hidden'; hiddenText.name = 'task_text'; hiddenText.value = taskText;
-  var hiddenTab = document.createElement('input');
-  hiddenTab.type = 'hidden'; hiddenTab.name = 'tab'; hiddenTab.value = tab;
-  var hiddenDue = document.createElement('input');
-  hiddenDue.type = 'hidden'; hiddenDue.name = 'due'; hiddenDue.value = '';
-  
+
   var newForm = document.createElement('form');
   newForm.method = 'POST'; newForm.action = '/clear_due';
-  newForm.appendChild(hiddenGroup); newForm.appendChild(hiddenProject);
-  newForm.appendChild(hiddenText); newForm.appendChild(hiddenTab); newForm.appendChild(hiddenDue);
+  var fields = {group: group, project_id: projectId, task_text: taskText, tab: tab, section: 'projects'};
+  for (var k in fields) {
+    var input = document.createElement('input');
+    input.type = 'hidden'; input.name = k; input.value = fields[k];
+    newForm.appendChild(input);
+  }
   document.body.appendChild(newForm);
   newForm.submit();
 }
@@ -718,13 +805,11 @@ function getCurrentTab() {
   return m ? decodeURIComponent(m[1]) : 'all';
 }
 
-// 页面加载后滚动到锚点位置（用于表单提交后保持滚动位置）
 document.addEventListener('DOMContentLoaded', function() {
   var hash = window.location.hash;
   if (hash) {
     var el = document.querySelector(hash);
     if (el) {
-      // 等待一下让浏览器完成原生hash滚动
       requestAnimationFrame(function() {
         var headerHeight = document.querySelector('.header') ? document.querySelector('.header').offsetHeight : 0;
         var rect = el.getBoundingClientRect();
@@ -733,9 +818,202 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
+
+  // 初始化 SortableJS 拖拽
+  initSortable();
+
+  // 会议页加载数据
+  if (currentSection === 'meetings') {
+    loadMeetings();
+  }
+});
+
+// ===== SortableJS 拖拽排序 =====
+function initSortable() {
+  // 为每个公司项目列表初始化 Sortable
+  document.querySelectorAll('.project-list').forEach(function(el) {
+    var group = el.getAttribute('data-group');
+    new Sortable(el, {
+      animation: 200,
+      handle: '.drag-handle',
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      onEnd: function(evt) {
+        var order = [];
+        el.querySelectorAll('.card').forEach(function(card) {
+          order.push(card.getAttribute('data-project-id'));
+        });
+        // 发送到后端
+        fetch('/api/reorder_projects', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({group: group, order: order})
+        }).then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (!data.success) {
+              console.error('排序保存失败');
+            }
+          });
+      }
+    });
+  });
+}
+
+// ===== 会议管理 =====
+function loadMeetings() {
+  fetch('/api/meetings')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var meetings = data.meetings || [];
+      var today = new Date().toISOString().split('T')[0];
+      var upcoming = [];
+      var past = [];
+      meetings.forEach(function(m) {
+        var mDate = m.date || '';
+        // 判断是否过期（完整日期格式）
+        if (m.completed) {
+          past.push(m);
+        } else if (mDate >= today && mDate.length >= 10) {
+          upcoming.push(m);
+        } else if (m.completed) {
+          past.push(m);
+        } else {
+          upcoming.push(m);
+        }
+      });
+
+      upcoming.sort(function(a, b) { return (a.date || '').localeCompare(b.date || ''); });
+      past.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+
+      var grid = document.getElementById('meetingsGrid');
+      var pastArea = document.getElementById('pastMeetingsArea');
+
+      if (upcoming.length === 0 && past.length === 0) {
+        grid.innerHTML = '<div class="no-data" style="grid-column:1/-1">暂无会议，点击右上角添加</div>';
+        pastArea.innerHTML = '';
+        return;
+      }
+
+      grid.innerHTML = upcoming.map(function(m) {
+        return meetingCardHTML(m);
+      }).join('');
+
+      if (past.length > 0) {
+        pastArea.innerHTML = '<div class="past-meetings"><div class="past-meetings-title">已完成 (' + past.length + ')</div><div class="meetings-grid">' +
+          past.map(function(m) { return meetingCardHTML(m); }).join('') + '</div></div>';
+      } else {
+        pastArea.innerHTML = '';
+      }
+    });
+}
+
+function meetingCardHTML(m) {
+  var completedClass = m.completed ? 'completed' : '';
+  var checkIcon = m.completed ? '✓ ' : '';
+  var dateBadge = m.date ? '<div class="meeting-date-badge">' + m.date + '</div>' : '';
+  var timeStr = m.time ? m.time : '';
+  var completedBadge = m.completed ? '<div class="meeting-completed-badge">✓ 已完成</div>' : '';
+
+  return '<div class="meeting-card ' + completedClass + '" data-id="' + m.id + '">' +
+    '<div class="meeting-top">' +
+      dateBadge +
+      '<div class="meeting-actions">' +
+        '<button class="meeting-complete" onclick="toggleMeeting(\'' + m.id + '\')" title="标记完成">' + (m.completed ? '↩' : '✓') + '</button>' +
+        '<button onclick="editMeeting(\'' + m.id + '\')" title="编辑">✎</button>' +
+        '<button class="meeting-delete" onclick="deleteMeeting(\'' + m.id + '\')" title="删除">×</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="meeting-name">' + checkIcon + escHtml(m.name) + '</div>' +
+    (timeStr ? '<div class="meeting-time">🕐 ' + timeStr + '</div>' : '') +
+    (m.remark ? '<div class="meeting-remark">' + escHtml(m.remark) + '</div>' : '') +
+    completedBadge +
+  '</div>';
+}
+
+function showAddMeeting() {
+  document.getElementById('meetingModalTitle').textContent = '添加会议';
+  document.getElementById('meetingId').value = '';
+  document.getElementById('meetingName').value = '';
+  document.getElementById('meetingDate').value = '';
+  document.getElementById('meetingTime').value = '';
+  document.getElementById('meetingRemark').value = '';
+  document.getElementById('meetingModal').classList.add('show');
+}
+
+function editMeeting(id) {
+  fetch('/api/meetings')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var m = (data.meetings || []).find(function(x) { return x.id === id; });
+      if (!m) return;
+      document.getElementById('meetingModalTitle').textContent = '编辑会议';
+      document.getElementById('meetingId').value = m.id;
+      document.getElementById('meetingName').value = m.name || '';
+      document.getElementById('meetingDate').value = m.date || '';
+      document.getElementById('meetingTime').value = m.time || '';
+      document.getElementById('meetingRemark').value = m.remark || '';
+      document.getElementById('meetingModal').classList.add('show');
+    });
+}
+
+function closeMeetingModal() {
+  document.getElementById('meetingModal').classList.remove('show');
+}
+
+function toggleMeeting(id) {
+  fetch('/api/meetings/' + id + '/toggle', {method: 'POST'})
+    .then(function(r) { return r.json(); })
+    .then(function() { loadMeetings(); });
+}
+
+function deleteMeeting(id) {
+  if (!confirm('确定删除该会议？')) return;
+  fetch('/api/meetings/' + id, {method: 'DELETE'})
+    .then(function(r) { return r.json(); })
+    .then(function() { loadMeetings(); });
+}
+
+document.getElementById('meetingForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var id = document.getElementById('meetingId').value;
+  var payload = {
+    name: document.getElementById('meetingName').value,
+    date: document.getElementById('meetingDate').value,
+    time: document.getElementById('meetingTime').value,
+    remark: document.getElementById('meetingRemark').value
+  };
+
+  if (id) {
+    // 更新
+    fetch('/api/meetings/' + id, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    }).then(function(r) { return r.json(); })
+      .then(function() {
+        closeMeetingModal();
+        loadMeetings();
+      });
+  } else {
+    // 新建
+    fetch('/api/meetings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    }).then(function(r) { return r.json(); })
+      .then(function() {
+        closeMeetingModal();
+        loadMeetings();
+      });
+  }
 });
 
 // 点击弹窗背景关闭
+document.getElementById('meetingModal').addEventListener('click', function(e) {
+  if (e.target === this) closeMeetingModal();
+});
+
+// ===== 其他弹窗 =====
 document.getElementById('editModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
@@ -743,7 +1021,6 @@ document.getElementById('taskDetailModal').addEventListener('click', function(e)
   if (e.target === this) closeTaskDetailModal();
 });
 
-// 任务点击切换
 document.querySelectorAll('.task-check').forEach(function(el) {
   el.style.cursor = 'pointer';
   el.addEventListener('click', function() {
@@ -751,9 +1028,7 @@ document.querySelectorAll('.task-check').forEach(function(el) {
   });
 });
 
-// 任务名称编辑
 function openTaskDetail(group, projectId, taskText) {
-  // 从 projectData 中查找该任务的完整信息
   var groupData = projectData[group];
   if (!groupData) return;
   var proj = groupData.find(function(p) { return p.id === projectId; });
@@ -764,7 +1039,8 @@ function openTaskDetail(group, projectId, taskText) {
   document.getElementById('tdGroup').value = group;
   document.getElementById('tdProjectId').value = projectId;
   document.getElementById('tdTaskText').value = taskText;
-  document.getElementById('tdTab').value = getCurrentTab();
+  document.getElementById('tdTab').value = currentTab;
+  document.getElementById('tdSection').value = 'projects';
   document.getElementById('tdText').value = taskText;
   document.getElementById('tdPriority').value = task.priority || 'medium';
   document.getElementById('tdDue').value = task.due || '';
@@ -801,11 +1077,11 @@ function toggleAddTaskForm() {
   document.getElementById('addTaskNowFields').style.display = checked ? 'block' : 'none';
 }
 
-// 添加任务
 function showAddTask(group, projectId) {
   document.getElementById('atGroup').value = group;
   document.getElementById('atProjectId').value = projectId;
-  document.getElementById('atTab').value = getCurrentTab();
+  document.getElementById('atTab').value = currentTab;
+  document.getElementById('atSection').value = 'projects';
   document.getElementById('atName').value = '';
   document.getElementById('atPriority').value = 'medium';
   document.getElementById('atDue').value = '';
@@ -818,7 +1094,6 @@ function closeAddTaskModal() {
   document.getElementById('addTaskModal').classList.remove('show');
 }
 
-// 删除确认弹窗
 function confirmDeleteProject(group, projectId, projectName, hasTasks) {
   var msg = hasTasks
     ? '确定删除项目「' + projectName + '」及所有任务？'
@@ -831,7 +1106,8 @@ function confirmDeleteProject(group, projectId, projectName, hasTasks) {
     var fields = {
       group: group,
       project_id: projectId,
-      tab: getCurrentTab()
+      tab: currentTab,
+      section: 'projects'
     };
     for (var k in fields) {
       var input = document.createElement('input');
@@ -854,7 +1130,8 @@ function confirmDeleteTask(group, projectId, taskText) {
       group: group,
       project_id: projectId,
       task_text: taskText,
-      tab: getCurrentTab()
+      tab: currentTab,
+      section: 'projects'
     };
     for (var k in fields) {
       var input = document.createElement('input');
@@ -871,7 +1148,6 @@ function closeConfirmModal() {
   document.getElementById('confirmModal').classList.remove('show');
 }
 
-// 点击弹窗背景关闭
 document.getElementById('addProjectModal').addEventListener('click', function(e) {
   if (e.target === this) closeAddProjectModal();
 });
@@ -881,6 +1157,11 @@ document.getElementById('addTaskModal').addEventListener('click', function(e) {
 document.getElementById('confirmModal').addEventListener('click', function(e) {
   if (e.target === this) closeConfirmModal();
 });
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 </script>
 
 </body>

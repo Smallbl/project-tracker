@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-项目跟踪系统 v2.0 - Flask + Jinja2
-纯服务器端渲染，不依赖浏览器JavaScript
+项目跟踪系统 v3.0 - Flask + Jinja2
+纯服务器端渲染，支持两级Tab导航、拖拽排序、会议管理
 """
 
 import os
@@ -20,6 +20,7 @@ PROJECTS_FILE = os.path.join(DATA_DIR, 'projects.json')
 SERVER_FILE = os.path.abspath(__file__)
 _server_mtime = os.path.getmtime(SERVER_FILE)
 _restart_warned = False
+
 
 @app.after_request
 def set_restart_header(response):
@@ -47,7 +48,7 @@ def save_data(data):
 
 def get_valid_tabs(data):
     """动态获取所有合法的tab值"""
-    return ['all'] + [g for g in data.keys() if g != 'meetings'] + ['meetings', 'daily']
+    return ['all'] + [g for g in data.keys() if g != 'meetings']
 
 
 def valid_tab(tab, data):
@@ -55,9 +56,34 @@ def valid_tab(tab, data):
     return tab if tab in get_valid_tabs(data) else 'all'
 
 
+def sort_projects_by_order(projects):
+    """按 sort_order 排序，未设置则按创建顺序"""
+    return sorted(projects, key=lambda p: p.get('sort_order', 999))
+
+
+# ==================== 两级Tab路由 ====================
+
 @app.route('/')
 def index():
     data = load_data()
+    section = request.args.get('section', 'projects')
+    tab = request.args.get('tab', 'all')
+
+    # meetings section 单独处理
+    if section == 'meetings':
+        return render_template('index.html',
+                               projects=data,
+                               active_section='meetings',
+                               active_tab=tab,
+                               stats=None)
+
+    # 每日任务跳转到 daily.html
+    if section == 'daily':
+        return redirect('/daily.html')
+
+    # 默认 section=projects
+    if section not in ('projects', ''):
+        section = 'projects'
 
     # 计算全部项目的统计数据（仅在 all tab 显示）
     stats = {'total_proj': 0, 'active_proj': 0, 'pending_proj': 0,
@@ -81,9 +107,149 @@ def index():
 
     return render_template('index.html',
                            projects=data,
-                           active_tab=request.args.get('tab', 'all'),
+                           active_section='projects',
+                           active_tab=tab,
                            stats=stats)
 
+
+# ==================== 项目拖拽排序 API ====================
+
+@app.route('/api/reorder_projects', methods=['POST'])
+def reorder_projects():
+    """更新项目的 sort_order"""
+    req = request.get_json()
+    group = req.get('group')
+    project_ids = req.get('order', [])  # 新的排序ID列表 [id1, id2, ...]
+
+    data = load_data()
+    if not group or group not in data:
+        return jsonify({'error': 'Invalid group'}), 400
+
+    # 更新 sort_order
+    for idx, pid in enumerate(project_ids):
+        for p in data[group]:
+            if p.get('id') == pid:
+                p['sort_order'] = idx
+                break
+
+    save_data(data)
+    return jsonify({'success': True})
+
+
+# ==================== 会议管理 API ====================
+
+@app.route('/api/meetings', methods=['GET'])
+def get_meetings():
+    """获取所有会议"""
+    data = load_data()
+    meetings = data.get('meetings', [])
+    # 按日期排序，未完成在前
+    today = datetime.now().strftime('%Y-%m-%d')
+    upcoming = []
+    past = []
+    for m in meetings:
+        m_date = m.get('date', '')
+        # 解析日期（支持格式：周二 04-02 或 2026-04-02）
+        if m.get('completed'):
+            past.append(m)
+        elif '-' in str(m_date) and len(str(m_date)) >= 10:
+            # 完整日期格式
+            if m_date < today:
+                past.append(m)
+            else:
+                upcoming.append(m)
+        elif '-' in str(m_date) and len(str(m_date).split('-')[-1]) <= 2:
+            # 短格式如 周二 04-02，算作未来
+            upcoming.append(m)
+        else:
+            upcoming.append(m)
+
+    upcoming.sort(key=lambda x: x.get('date', ''))
+    past.sort(key=lambda x: x.get('date', ''), reverse=True)
+    return jsonify({'meetings': upcoming + past})
+
+
+@app.route('/api/meetings', methods=['POST'])
+def create_meeting():
+    """新建会议"""
+    req = request.get_json()
+    name = req.get('name', '').strip()
+    date = req.get('date', '').strip()
+    time = req.get('time', '').strip()
+    remark = req.get('remark', '').strip()
+
+    if not name:
+        return jsonify({'error': '会议名称不能为空'}), 400
+
+    data = load_data()
+    meetings = data.get('meetings', [])
+
+    # 生成ID
+    existing_ids = [m.get('id', '') for m in meetings if m.get('id', '').startswith('meet-')]
+    nums = [int(x.split('-')[-1]) for x in existing_ids if x.split('-')[-1].isdigit()]
+    next_num = max(nums) + 1 if nums else 1
+    meeting_id = f'meet-{str(next_num).zfill(3)}'
+
+    new_meeting = {
+        'id': meeting_id,
+        'name': html.escape(name),
+        'date': date,
+        'time': time,
+        'remark': html.escape(remark),
+        'completed': False,
+        'createdAt': datetime.now().strftime('%Y-%m-%d')
+    }
+    meetings.append(new_meeting)
+    data['meetings'] = meetings
+    save_data(data)
+    return jsonify({'meeting': new_meeting})
+
+
+@app.route('/api/meetings/<meeting_id>', methods=['DELETE'])
+def delete_meeting(meeting_id):
+    """删除会议"""
+    data = load_data()
+    meetings = data.get('meetings', [])
+    data['meetings'] = [m for m in meetings if m.get('id') != meeting_id]
+    save_data(data)
+    return jsonify({'success': True})
+
+
+@app.route('/api/meetings/<meeting_id>/toggle', methods=['POST'])
+def toggle_meeting(meeting_id):
+    """标记完成/未完成"""
+    data = load_data()
+    meetings = data.get('meetings', [])
+    for m in meetings:
+        if m.get('id') == meeting_id:
+            m['completed'] = not m.get('completed', False)
+            break
+    save_data(data)
+    return jsonify({'success': True})
+
+
+@app.route('/api/meetings/<meeting_id>', methods=['PUT'])
+def update_meeting(meeting_id):
+    """更新会议"""
+    req = request.get_json()
+    data = load_data()
+    meetings = data.get('meetings', [])
+    for m in meetings:
+        if m.get('id') == meeting_id:
+            if 'name' in req:
+                m['name'] = html.escape(req['name'].strip())
+            if 'date' in req:
+                m['date'] = req['date'].strip()
+            if 'time' in req:
+                m['time'] = req['time'].strip()
+            if 'remark' in req:
+                m['remark'] = html.escape(req['remark'].strip())
+            break
+    save_data(data)
+    return jsonify({'success': True})
+
+
+# ==================== 项目任务相关路由（保持兼容）====================
 
 @app.route('/toggle_task', methods=['POST'])
 def toggle_task():
@@ -92,6 +258,7 @@ def toggle_task():
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     tab = request.form.get('tab', 'all')
+    section = request.form.get('section', 'projects')
 
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -102,7 +269,7 @@ def toggle_task():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
+    return redirect(url_for('index', section=section, tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_priority', methods=['POST'])
@@ -112,6 +279,7 @@ def update_priority():
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     tab = request.form.get('tab', 'all')
+    section = request.form.get('section', 'projects')
 
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -125,7 +293,7 @@ def update_priority():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
+    return redirect(url_for('index', section=section, tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_due', methods=['POST'])
@@ -136,6 +304,7 @@ def update_due():
     task_text = request.form.get('task_text', '')
     new_due = request.form.get('due', '')
     tab = request.form.get('tab', 'all')
+    section = request.form.get('section', 'projects')
 
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -147,7 +316,7 @@ def update_due():
 
     save_data(data)
     anchor = f"project-{project_id}"
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#{anchor}")
+    return redirect(url_for('index', section=section, tab=valid_tab(tab, data)) + f"#{anchor}")
 
 
 @app.route('/clear_due', methods=['POST'])
@@ -157,6 +326,7 @@ def clear_due():
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     tab = request.form.get('tab', 'all')
+    section = request.form.get('section', 'projects')
 
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -167,7 +337,7 @@ def clear_due():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
+    return redirect(url_for('index', section=section, tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_project', methods=['POST'])
@@ -176,6 +346,7 @@ def update_project():
     group = request.form.get('group', '')
     project_id = request.form.get('project_id', '')
     tab = request.form.get('tab', 'all')
+    section = request.form.get('section', 'projects')
 
     for i, p in enumerate(data.get(group, [])):
         if p.get('id') == project_id:
@@ -198,7 +369,7 @@ def update_project():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)))
+    return redirect(url_for('index', section=section, tab=valid_tab(tab, data)))
 
 
 @app.route('/daily.html')
@@ -214,6 +385,7 @@ def update_task_name():
     old_text = request.form.get('old_text', '')
     new_text = request.form.get('new_text', '')
     tab = request.form.get('tab', 'all')
+    section = request.form.get('section', 'projects')
 
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -224,7 +396,7 @@ def update_task_name():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
+    return redirect(url_for('index', section=section, tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_task_detail', methods=['POST'])
@@ -239,6 +411,7 @@ def update_task_detail():
     due = request.form.get('due', '')
     opinion = request.form.get('opinion', '')
     tab = request.form.get('tab', 'all')
+    section = request.form.get('section', 'projects')
 
     for p in data.get(group, []):
         if p.get('id') == project_id:
@@ -252,7 +425,7 @@ def update_task_detail():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
+    return redirect(url_for('index', section=section, tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 # ==================== 每日任务模块 API ====================
@@ -429,6 +602,11 @@ def add_project():
             'createdAt': datetime.now().strftime('%Y-%m-%d')
         })
 
+    # 计算 sort_order = 当前最大值+1
+    existing_orders = [p.get('sort_order', 0) for p in data[group]]
+    max_order = max(existing_orders) if existing_orders else -1
+    new_sort_order = max_order + 1
+
     new_project = {
         'id': project_id,
         'name': html.escape(name),
@@ -438,11 +616,12 @@ def add_project():
         'issues': html.escape(issues),
         'tasks': tasks,
         'status_text': status,
-        'status_color': ''
+        'status_color': '',
+        'sort_order': new_sort_order
     }
     data[group].insert(0, new_project)
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f'#project-{project_id}')
+    return redirect(url_for('index', section='projects', tab=valid_tab(tab, data)) + f'#project-{project_id}')
 
 
 @app.route('/delete_project', methods=['POST'])
@@ -457,7 +636,7 @@ def delete_project():
         data[group] = [p for p in data[group] if p.get('id') != project_id]
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)))
+    return redirect(url_for('index', section='projects', tab=valid_tab(tab, data)))
 
 
 @app.route('/add_task', methods=['POST'])
@@ -491,7 +670,7 @@ def add_task():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f'#project-{project_id}')
+    return redirect(url_for('index', section='projects', tab=valid_tab(tab, data)) + f'#project-{project_id}')
 
 
 @app.route('/delete_task', methods=['POST'])
@@ -510,7 +689,7 @@ def delete_task():
                 break
 
     save_data(data)
-    return redirect(url_for('index', tab=valid_tab(tab, data)) + f'#project-{project_id}')
+    return redirect(url_for('index', section='projects', tab=valid_tab(tab, data)) + f'#project-{project_id}')
 
 
 # ==================== 每日任务统计 API ====================
@@ -542,7 +721,7 @@ def daily_tasks_stats():
 
 if __name__ == '__main__':
     print("=" * 50)
-    print("📋 项目跟踪系统 v2.0")
+    print("📋 项目跟踪系统 v3.0")
     print("=" * 50)
     print("🌐 访问地址: http://localhost:8765")
     print("📝 按 Ctrl+C 停止服务")
