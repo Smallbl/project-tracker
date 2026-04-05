@@ -126,6 +126,14 @@
   .status-gray { background: rgba(110,118,129,0.2); color: #8b949e; }
   .status-auto { font-size: 12px; padding: 3px 12px; }
 
+  /* ===== 任务折叠 ===== */
+  .task-toggle-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: var(--inner-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--accent-2); margin-top: 10px; transition: background 0.2s, border-color 0.2s; user-select: none; }
+  .task-toggle-bar:hover { background: rgba(6,182,212,0.1); border-color: var(--accent-2); }
+  .task-toggle-bar .toggle-icon { font-size: 12px; transition: transform 0.2s; }
+  .task-toggle-bar.expanded .toggle-icon { transform: rotate(90deg); }
+  .task-table-wrap { overflow: hidden; transition: max-height 0.3s ease, opacity 0.3s ease; max-height: 0; opacity: 0; }
+  .task-table-wrap.open { max-height: 2000px; opacity: 1; }
+
   @media (max-width: 768px) {
     .header { padding: 16px 20px; }
     .container { padding: 16px; }
@@ -160,8 +168,8 @@
   {% else %}
     {% set groups = projects.keys() | reject('equalto', 'meetings') | list if active_tab == 'all' else [active_tab] %}
     {% for group in groups %}
+      <div class="section-title">{{ group }}项目</div>
       {% if projects.get(group) %}
-        <div class="section-title">{{ group }}项目</div>
         {% for p in projects.get(group, []) %}
           <div class="card" id="project-{{ p.id }}">
             <div class="card-header">
@@ -177,6 +185,10 @@
             {% if p.issues %}<div class="info">⚠️ 当前问题：{{ p.issues }}</div>{% endif %}
             
             {% if p.tasks %}
+            <div class="task-toggle-bar" onclick="toggleTasks(this)">
+              <span class="toggle-icon">▶</span> 展开任务 ({{ p.tasks|length }})
+            </div>
+            <div class="task-table-wrap">
             <table>
               <thead>
                 <tr>
@@ -245,17 +257,25 @@
                 {% endfor %}
               </tbody>
             </table>
+            </div>
             {% endif %}
             <div class="card-footer">
               <button class="btn-add-task" onclick="showAddTask('{{ group }}', '{{ p.id }}')">+ 添加任务</button>
             </div>
           </div>
         {% endfor %}
+      {% else %}
+        <div style="text-align:center;padding:20px;">
+          <div class="no-data" style="margin-bottom:12px;">暂无项目</div>
+          <button class="btn btn-primary" onclick="showAddProject()">+ 添加项目</button>
+        </div>
       {% endif %}
     {% endfor %}
     
-    {% if not projects.get('四建') and not projects.get('亚太') %}
-      <div class="no-data">暂无数据</div>
+    {% if active_tab != 'meetings' and active_tab != 'daily' %}
+      {% set has_any = false %}
+      {% for g in groups %}{% if projects.get(g) %}{% set has_any = true %}{% endif %}{% endfor %}
+      {% if not has_any %}<div class="no-data">暂无数据</div>{% endif %}
     {% endif %}
   {% endif %}
 </div>
@@ -693,6 +713,20 @@ function closeTaskDetailModal() {
 
 function closeAddProjectModal() {
   document.getElementById('addProjectModal').classList.remove('show');
+}
+
+function toggleTasks(btn) {
+  var wrap = btn.nextElementSibling;
+  var isOpen = wrap.classList.contains('open');
+  if (isOpen) {
+    wrap.classList.remove('open');
+    btn.classList.remove('expanded');
+    btn.innerHTML = '<span class="toggle-icon">▶</span> 展开任务 (' + (wrap.querySelectorAll('tbody tr').length) + ')';
+  } else {
+    wrap.classList.add('open');
+    btn.classList.add('expanded');
+    btn.innerHTML = '<span class="toggle-icon">▼</span> 收起任务';
+  }
 }
 
 function toggleAddTaskForm() {

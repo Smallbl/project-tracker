@@ -11,7 +11,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import html
 
 app = Flask(__name__)
-app.config['JSON_AS_ASCII'] = False
+app.config['JSON_AS_cii'] = False
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 PROJECTS_FILE = os.path.join(DATA_DIR, 'projects.json')
@@ -45,10 +45,20 @@ def save_data(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def get_valid_tabs(data):
+    """动态获取所有合法的tab值"""
+    return ['all'] + [g for g in data.keys() if g != 'meetings'] + ['meetings', 'daily']
+
+
+def valid_tab(tab, data):
+    """检查tab是否合法，不合法则返回'all'"""
+    return tab if tab in get_valid_tabs(data) else 'all'
+
+
 @app.route('/')
 def index():
     data = load_data()
-    return render_template('index.html', 
+    return render_template('index.html',
                            projects=data,
                            active_tab=request.args.get('tab', 'all'))
 
@@ -60,7 +70,7 @@ def toggle_task():
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     tab = request.form.get('tab', 'all')
-    
+
     for p in data.get(group, []):
         if p.get('id') == project_id:
             for t in p.get('tasks', []):
@@ -68,9 +78,9 @@ def toggle_task():
                     t['done'] = not t.get('done', False)
                     break
             break
-    
+
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_priority', methods=['POST'])
@@ -80,7 +90,7 @@ def update_priority():
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     tab = request.form.get('tab', 'all')
-    
+
     for p in data.get(group, []):
         if p.get('id') == project_id:
             for t in p.get('tasks', []):
@@ -91,9 +101,9 @@ def update_priority():
                     t['priority'] = priorities[(idx + 1) % 3]
                     break
             break
-    
+
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_due', methods=['POST'])
@@ -104,7 +114,7 @@ def update_due():
     task_text = request.form.get('task_text', '')
     new_due = request.form.get('due', '')
     tab = request.form.get('tab', 'all')
-    
+
     for p in data.get(group, []):
         if p.get('id') == project_id:
             for t in p.get('tasks', []):
@@ -112,10 +122,10 @@ def update_due():
                     t['due'] = new_due
                     break
             break
-    
+
     save_data(data)
     anchor = f"project-{project_id}"
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#{anchor}")
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#{anchor}")
 
 
 @app.route('/clear_due', methods=['POST'])
@@ -125,7 +135,7 @@ def clear_due():
     project_id = request.form.get('project_id', '')
     task_text = request.form.get('task_text', '')
     tab = request.form.get('tab', 'all')
-    
+
     for p in data.get(group, []):
         if p.get('id') == project_id:
             for t in p.get('tasks', []):
@@ -133,9 +143,9 @@ def clear_due():
                     t['due'] = ''
                     break
             break
-    
+
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_project', methods=['POST'])
@@ -144,7 +154,7 @@ def update_project():
     group = request.form.get('group', '')
     project_id = request.form.get('project_id', '')
     tab = request.form.get('tab', 'all')
-    
+
     for i, p in enumerate(data.get(group, [])):
         if p.get('id') == project_id:
             p['name'] = request.form.get('name', p.get('name', ''))
@@ -153,7 +163,7 @@ def update_project():
             p['node'] = request.form.get('node', p.get('node', ''))
             p['deadline'] = request.form.get('deadline', p.get('deadline', ''))
             p['issues'] = request.form.get('issues', p.get('issues', ''))
-            
+
             tasks_text = request.form.get('tasks', '')
             tasks = []
             for line in tasks_text.split('\n'):
@@ -164,9 +174,9 @@ def update_project():
                     tasks.append({'text': text, 'done': done, 'priority': 'medium', 'due': ''})
             p['tasks'] = tasks
             break
-    
+
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all'))
+    return redirect(url_for('index', tab=valid_tab(tab, data)))
 
 
 @app.route('/daily.html')
@@ -182,7 +192,7 @@ def update_task_name():
     old_text = request.form.get('old_text', '')
     new_text = request.form.get('new_text', '')
     tab = request.form.get('tab', 'all')
-    
+
     for p in data.get(group, []):
         if p.get('id') == project_id:
             for t in p.get('tasks', []):
@@ -190,9 +200,9 @@ def update_task_name():
                     t['text'] = new_text
                     break
             break
-    
+
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 @app.route('/update_task_detail', methods=['POST'])
@@ -207,7 +217,7 @@ def update_task_detail():
     due = request.form.get('due', '')
     opinion = request.form.get('opinion', '')
     tab = request.form.get('tab', 'all')
-    
+
     for p in data.get(group, []):
         if p.get('id') == project_id:
             for t in p.get('tasks', []):
@@ -218,9 +228,9 @@ def update_task_detail():
                     t['opinion'] = opinion
                     break
             break
-    
+
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f"#project-{project_id}")
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f"#project-{project_id}")
 
 
 # ==================== 每日任务模块 API ====================
@@ -410,7 +420,7 @@ def add_project():
     }
     data[group].insert(0, new_project)
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f'#project-{project_id}')
 
 
 @app.route('/delete_project', methods=['POST'])
@@ -425,7 +435,7 @@ def delete_project():
         data[group] = [p for p in data[group] if p.get('id') != project_id]
 
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all'))
+    return redirect(url_for('index', tab=valid_tab(tab, data)))
 
 
 @app.route('/add_task', methods=['POST'])
@@ -440,10 +450,9 @@ def add_task():
     createdAt = request.form.get('createdAt', '').strip()
     tab = request.form.get('tab', 'all')
 
-    if not group or not project_id or not task_name:
-        return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
-
     data = load_data()
+    if not group or not project_id or not task_name:
+        return redirect(url_for('index', tab=valid_tab(tab, data)) + f'#project-{project_id}')
     if group not in data or group == 'meetings':
         return redirect(url_for('index', tab=tab))
 
@@ -460,7 +469,7 @@ def add_task():
             break
 
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f'#project-{project_id}')
 
 
 @app.route('/delete_task', methods=['POST'])
@@ -479,7 +488,7 @@ def delete_task():
                 break
 
     save_data(data)
-    return redirect(url_for('index', tab=tab if tab in ['all', '四建', '亚太', 'meetings'] else 'all') + f'#project-{project_id}')
+    return redirect(url_for('index', tab=valid_tab(tab, data)) + f'#project-{project_id}')
 
 
 # ==================== 每日任务统计 API ====================
