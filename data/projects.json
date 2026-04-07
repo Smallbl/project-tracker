@@ -708,6 +708,22 @@
           "due": "2026-04-10",
           "opinion": "",
           "createdAt": "2026-04-07"
+        },
+        {
+          "text": "比对详情页面：右键功能缺失？无添加白名单、无百度搜索？",
+          "done": false,
+          "priority": "high",
+          "due": "2026-04-10",
+          "opinion": "",
+          "createdAt": "2026-04-07"
+        },
+        {
+          "text": "一键启动没了？",
+          "done": false,
+          "priority": "high",
+          "due": "2026-04-10",
+          "opinion": "",
+          "createdAt": "2026-04-07"
         }
       ],
       "status_text": "进行中",

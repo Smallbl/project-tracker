@@ -7,8 +7,9 @@
 import os
 import json
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_file
 import html
+import io
 
 app = Flask(__name__)
 app.config['JSON_AS_cii'] = False
@@ -715,6 +716,197 @@ def daily_tasks_stats():
         'temp_count': temp_count,
         'completion_rate': round(completed / total * 100, 1) if total > 0 else 0
     })
+
+
+# ==================== 导出功能 ====================
+
+try:
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    OPENPYXL_AVAILABLE = True
+except ImportError:
+    OPENPYXL_AVAILABLE = False
+
+
+def style_header(cell):
+    """设置表头样式"""
+    cell.font = Font(bold=True, color='FFFFFF', size=12)
+    cell.fill = PatternFill(start_color='6366F1', end_color='6366F1', fill_type='solid')
+    cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    thin = Side(style='thin', color='4B5563')
+    cell.border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+
+def style_data_cell(cell):
+    """设置数据单元格样式"""
+    cell.font = Font(size=11, color='E0E0E0')
+    cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    thin = Side(style='thin', color='374151')
+    cell.border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+
+def priority_label(p):
+    if p == 'high': return '🔴高'
+    if p == 'low': return '🟢低'
+    return '🟡中'
+
+
+@app.route('/export_projects', methods=['GET', 'POST'])
+def export_projects():
+    """导出项目任务 Excel，支持全量/按公司/按项目"""
+    if not OPENPYXL_AVAILABLE:
+        return jsonify({'error': 'openpyxl 未安装，请运行: pip install openpyxl'}), 500
+
+    data = load_data()
+    scope = request.values.get('scope', 'all')
+    scope_key = request.values.get('key', '')
+
+    # 准备数据
+    rows = []
+    header = ['公司', '项目', '任务名称', '优先级', '截止日期', '意见备注', '创建时间']
+
+    companies = [g for g in data.keys() if g != 'meetings']
+
+    if scope == 'company' and scope_key:
+        # 按公司导出
+        if scope_key in data:
+            companies = [scope_key]
+    elif scope == 'project' and scope_key:
+        # 按项目导出：scope_key 格式为 "group|id"
+        if '|' in scope_key:
+            group, proj_id = scope_key.split('|', 1)
+            for p in data.get(group, []):
+                if p.get('id') == proj_id:
+                    for t in p.get('tasks', []):
+                        rows.append([
+                            group,
+                            p.get('name', ''),
+                            t.get('text', ''),
+                            priority_label(t.get('priority', 'medium')),
+                            t.get('due', ''),
+                            t.get('opinion', ''),
+                            t.get('createdAt', ''),
+                        ])
+            companies = []  # 不再遍历所有公司
+
+    for group in companies:
+        for p in data.get(group, []):
+            for t in p.get('tasks', []):
+                rows.append([
+                    group,
+                    p.get('name', ''),
+                    t.get('text', ''),
+                    priority_label(t.get('priority', 'medium')),
+                    t.get('due', ''),
+                    t.get('opinion', ''),
+                    t.get('createdAt', ''),
+                ])
+
+    # 生成 Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = '项目任务'
+
+    # 写入表头
+    for col_idx, col_name in enumerate(header, 1):
+        cell = ws.cell(row=1, column=col_idx, value=col_name)
+        style_header(cell)
+
+    # 写入数据
+    for row_idx, row_data in enumerate(rows, 2):
+        for col_idx, val in enumerate(row_data, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=val)
+            style_data_cell(cell)
+
+    # 设置列宽
+    col_widths = [15, 20, 35, 8, 12, 20, 12]
+    for idx, width in enumerate(col_widths, 1):
+        ws.column_dimensions[ws.cell(row=1, column=idx).column_letter].width = width
+
+    # 生成文件名
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'项目任务_{ts}.xlsx'
+
+    # 保存到内存并返回
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename
+    )
+
+
+@app.route('/export_daily', methods=['GET', 'POST'])
+def export_daily():
+    """导出每日任务 Excel，支持按日期范围筛选"""
+    if not OPENPYXL_AVAILABLE:
+        return jsonify({'error': 'openpyxl 未安装，请运行: pip install openpyxl'}), 500
+
+    date_from = request.values.get('date_from', '')
+    date_to = request.values.get('date_to', '')
+
+    with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
+        raw = json.load(f)
+    tasks = raw.get('tasks', [])
+
+    # 日期筛选
+    if date_from:
+        tasks = [t for t in tasks if t.get('date', '') >= date_from]
+    if date_to:
+        tasks = [t for t in tasks if t.get('date', '') <= date_to]
+
+    # 排序：按日期升序
+    tasks.sort(key=lambda t: t.get('date', ''))
+
+    # 生成 Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = '每日任务'
+
+    header = ['日期', '任务内容', '完成状态', '创建时间']
+
+    # 表头
+    for col_idx, col_name in enumerate(header, 1):
+        cell = ws.cell(row=1, column=col_idx, value=col_name)
+        style_header(cell)
+
+    # 数据
+    for row_idx, t in enumerate(tasks, 2):
+        done = t.get('done', False) or t.get('status') == 'completed'
+        status_str = '✅已完成' if done else '☐未完成'
+        # 兼容 content/text 字段
+        content = t.get('content', '') or t.get('text', '')
+        created = t.get('created_at', '')
+        if created:
+            created = created[:10] if len(created) > 10 else created
+
+        row_data = [t.get('date', ''), content, status_str, created]
+        for col_idx, val in enumerate(row_data, 1):
+            cell = ws.cell(row=row_idx, column=col_idx, value=val)
+            style_data_cell(cell)
+
+    # 列宽
+    col_widths = [12, 40, 12, 12]
+    for idx, width in enumerate(col_widths, 1):
+        ws.column_dimensions[ws.cell(row=1, column=idx).column_letter].width = width
+
+    ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f'每日任务_{ts}.xlsx'
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename
+    )
 
 
 # ==================== 启动 ====================

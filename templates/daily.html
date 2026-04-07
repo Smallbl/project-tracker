@@ -87,6 +87,35 @@
   }
   .btn-add:hover { opacity: 0.88; }
 
+  /* 导出按钮 */
+  .btn-export {
+    background: var(--inner-bg);
+    color: #818cf8;
+    border: 1px solid #6366f1;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    margin-left: 8px;
+  }
+  .btn-export:hover {
+    background: rgba(99,102,241,0.15);
+  }
+
+  .date-range-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .date-range-wrap label {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
   /* ===== 新增表单 ===== */
   .form-section {
     background: var(--card-bg);
@@ -371,6 +400,14 @@
       <option value="done">✅ 已完成</option>
       <option value="pending">⏳ 进行中</option>
     </select>
+    <!-- 日期范围筛选 + 导出 -->
+    <div class="date-range-wrap">
+      <label>导出:</label>
+      <input type="date" class="date-picker" id="exportDateFrom" placeholder="起始日期" style="width:130px;">
+      <span style="color:#6e7681;font-size:12px">至</span>
+      <input type="date" class="date-picker" id="exportDateTo" placeholder="结束日期" style="width:130px;">
+      <button class="btn-export" id="btnExportDaily">📥 导出 Excel</button>
+    </div>
     <button class="btn-add" id="btn-add">＋ 新增任务</button>
   </div>
 
@@ -794,6 +831,23 @@
     // 筛选变化
     ['filter-source', 'filter-priority', 'filter-status'].forEach(id => {
       document.getElementById(id).addEventListener('change', renderTasks);
+    });
+
+    // 每日任务导出
+    document.getElementById('btnExportDaily').addEventListener('click', function() {
+      var dateFrom = document.getElementById('exportDateFrom').value;
+      var dateTo = document.getElementById('exportDateTo').value;
+      var url = '/export_daily';
+      var params = [];
+      if (dateFrom) params.push('date_from=' + encodeURIComponent(dateFrom));
+      if (dateTo) params.push('date_to=' + encodeURIComponent(dateTo));
+      if (params.length > 0) url += '?' + params.join('&');
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     });
   }
 

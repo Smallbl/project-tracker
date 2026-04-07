@@ -184,11 +184,14 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .toolbar-left {
     display: flex;
     gap: 6px;
+    flex-wrap: wrap;
   }
 
   .filter-btn {
@@ -205,6 +208,105 @@
     background: rgba(99,102,241,0.15);
     color: #818cf8;
     border-color: rgba(99,102,241,0.3);
+  }
+
+  /* 导出按钮组 */
+  .export-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .btn-export {
+    padding: 6px 14px;
+    background: #1a2332;
+    border: 1px solid #6366f1;
+    border-radius: 6px;
+    color: #818cf8;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+  }
+
+  .btn-export:hover {
+    background: rgba(99,102,241,0.15);
+  }
+
+  .export-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: #1e2130;
+    border: 1px solid #2a2d3a;
+    border-radius: 8px;
+    padding: 6px 0;
+    min-width: 160px;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .export-dropdown.show {
+    display: block;
+  }
+
+  .export-dropdown-item {
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #c0c4cc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+  }
+
+  .export-dropdown-item:hover {
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+  }
+
+  .export-dropdown-item.disabled {
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+
+  .export-dropdown-item.disabled:hover {
+    background: none;
+    color: #6b7280;
+  }
+
+  .export-submenu {
+    display: none;
+    position: absolute;
+    left: calc(100%);
+    top: 0;
+    background: #1e2130;
+    border: 1px solid #2a2d3a;
+    border-radius: 8px;
+    padding: 6px 0;
+    min-width: 180px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .export-dropdown-item.has-sub:hover .export-submenu {
+    display: block;
+  }
+
+  .export-submenu-item {
+    padding: 7px 14px;
+    font-size: 12px;
+    color: #c0c4cc;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .export-submenu-item:hover {
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
   }
 
   /* 项目卡片 */
@@ -1016,6 +1118,27 @@
     </div>
   </div>
   {% endif %}
+
+  <!-- 操作栏：导出按钮 -->
+  <div class="toolbar">
+    <div class="toolbar-left"></div>
+    <div class="toolbar-right">
+      <div class="export-wrap">
+        <button class="btn-export" id="btnExport" onclick="toggleExportMenu()">📥 导出 ▾</button>
+        <div class="export-dropdown" id="exportDropdown">
+          <div class="export-dropdown-item" onclick="doExport('all')">🌐 全量导出</div>
+          <div class="export-dropdown-item has-sub" id="exportByCompany">
+            🏢 按公司导出 ▸
+            <div class="export-submenu" id="companySubMenu"></div>
+          </div>
+          <div class="export-dropdown-item has-sub" id="exportByProject">
+            📁 按项目导出 ▸
+            <div class="export-submenu" id="projectSubMenu"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   {% set groups = projects.keys() | reject('equalto', 'meetings') | list if active_tab == 'all' else [active_tab] %}
   {% for group in groups %}
@@ -1895,6 +2018,89 @@ document.getElementById('addTaskModal').addEventListener('click', function(e) {
 document.getElementById('confirmModal').addEventListener('click', function(e) {
   if (e.target === this) closeConfirmModal();
 });
+
+// ===== 导出功能 =====
+function toggleExportMenu() {
+  var dd = document.getElementById('exportDropdown');
+  var isOpen = dd.classList.contains('show');
+  if (isOpen) {
+    dd.classList.remove('show');
+  } else {
+    dd.classList.add('show');
+    buildCompanySubMenu();
+    buildProjectSubMenu();
+  }
+}
+
+// 点击其他地方关闭
+document.addEventListener('click', function(e) {
+  var btn = document.getElementById('btnExport');
+  var dd = document.getElementById('exportDropdown');
+  if (dd && !dd.classList.contains('show')) return;
+  if (!btn || !dd) return;
+  if (!btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.remove('show');
+  }
+});
+
+function buildCompanySubMenu() {
+  var container = document.getElementById('companySubMenu');
+  if (!container || container.children.length > 0) return;
+  var companies = Object.keys(projectData).filter(function(k) { return k !== 'meetings'; });
+  if (companies.length === 0) {
+    container.innerHTML = '<div class="export-submenu-item disabled">暂无可导出公司</div>';
+    return;
+  }
+  container.innerHTML = companies.map(function(c) {
+    return '<div class="export-submenu-item" onclick="doExport(\'company\', \'' + escHtml(c) + '\')">' + escHtml(c) + '</div>';
+  }).join('');
+}
+
+function buildProjectSubMenu() {
+  var container = document.getElementById('projectSubMenu');
+  if (!container) return;
+  // 每次打开都重建
+  container.innerHTML = '';
+  var companies = Object.keys(projectData).filter(function(k) { return k !== 'meetings'; });
+  if (companies.length === 0) {
+    container.innerHTML = '<div class="export-submenu-item disabled">暂无可导出项目</div>';
+    return;
+  }
+  companies.forEach(function(group) {
+    var projects = projectData[group] || [];
+    if (projects.length === 0) return;
+    var groupDiv = document.createElement('div');
+    groupDiv.style.cssText = 'padding:4px 14px;font-size:11px;color:#6366f1;font-weight:600;';
+    groupDiv.textContent = '— ' + group;
+    container.appendChild(groupDiv);
+    projects.forEach(function(p) {
+      var item = document.createElement('div');
+      item.className = 'export-submenu-item';
+      item.textContent = (p.name || '').substring(0, 20);
+      item.onclick = (function(g, pid) {
+        return function() { doExport('project', g + '|' + pid); };
+      })(group, p.id);
+      container.appendChild(item);
+    });
+  });
+  if (container.children.length === 0) {
+    container.innerHTML = '<div class="export-submenu-item disabled">暂无可导出项目</div>';
+  }
+}
+
+function doExport(scope, key) {
+  var url = '/export_projects?scope=' + encodeURIComponent(scope || 'all');
+  if (key) url += '&key=' + encodeURIComponent(key);
+  // 用隐藏的 a 标签触发下载
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // 关闭下拉
+  document.getElementById('exportDropdown').classList.remove('show');
+}
 
 function escHtml(str) {
   if (!str) return '';
