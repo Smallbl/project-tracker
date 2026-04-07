@@ -692,6 +692,22 @@
           "due": "待定",
           "opinion": "整合到word、无水印",
           "createdAt": "2026-04-03"
+        },
+        {
+          "text": "查重为去除招标文件内容",
+          "done": false,
+          "priority": "high",
+          "due": "2026-04-10",
+          "opinion": "",
+          "createdAt": "2026-04-07"
+        },
+        {
+          "text": "查重bug无法准确查出图片重复内容",
+          "done": false,
+          "priority": "high",
+          "due": "2026-04-10",
+          "opinion": "",
+          "createdAt": "2026-04-07"
         }
       ],
       "status_text": "进行中",
@@ -874,6 +890,22 @@
           "due": "",
           "opinion": "放开套打节点、身份证号改编号年龄",
           "createdAt": "2026-04-03"
+        },
+        {
+          "text": "专家库语音通知功能完善",
+          "done": false,
+          "priority": "medium",
+          "due": "",
+          "opinion": "目前专家库自动语音通知功能不好用，导致业务员经常误操作乱打专家语音电话， 目前功能已关闭，待功能完善后再开启",
+          "createdAt": "2026-04-07"
+        },
+        {
+          "text": "专家短信通知，手动触发，仅通知",
+          "done": false,
+          "priority": "medium",
+          "due": "",
+          "opinion": "参照老OA仅手动发送短信通知",
+          "createdAt": "2026-04-07"
         }
       ],
       "sort_order": 6
@@ -967,6 +999,18 @@
     }
   ],
   "公司对外服务": [
+    {
+      "id": "公司对外服务-001",
+      "name": "供应商客户跟踪使用情况",
+      "status": "进行中",
+      "node": "",
+      "deadline": "2026-04-10",
+      "issues": "钱总使用情况跟踪",
+      "tasks": [],
+      "status_text": "进行中",
+      "status_color": "",
+      "sort_order": 1
+    },
     {
       "id": "wufang-hangzhou-001",
       "name": "五处杭州航天私有化部署项目",

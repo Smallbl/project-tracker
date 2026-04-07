@@ -1557,6 +1557,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var rect = el.getBoundingClientRect();
         var offsetTop = rect.top + window.pageYOffset - headerHeight - 20;
         window.scrollTo({ top: Math.max(0, offsetTop), behavior: 'instant' });
+        // 如果是项目卡片，自动展开任务列表
+        if (hash.startsWith('#project-')) {
+          var toggleBtn = el.querySelector('.task-toggle-bar');
+          if (toggleBtn && !toggleBtn.classList.contains('expanded')) {
+            toggleTasks(toggleBtn);
+          }
+        }
       });
     }
   }
