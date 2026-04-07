@@ -107,7 +107,25 @@
       "created_at": "2026-04-07 21:44:42.089637",
       "completed_at": null,
       "done": false
+    },
+    {
+      "id": 99,
+      "content": "确认中招联合给到的报价费用",
+      "date": "2026-04-08",
+      "status": "pending",
+      "source": "temp",
+      "source_dept": "中招联合",
+      "priority": "medium",
+      "notes": "",
+      "tags": [
+        "本周",
+        "跟进"
+      ],
+      "project": "",
+      "created_at": "2026-04-07 21:59:35.735697",
+      "completed_at": null,
+      "done": false
     }
   ],
-  "last_id": 98
+  "last_id": 99
 }

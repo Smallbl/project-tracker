@@ -955,8 +955,7 @@
   <div class="header-left">
     <div class="logo">📋 <span>项目跟踪</span> v3.0</div>
     <div class="sec-nav">
-      <a class="{% if active_section == 'projects' and active_tab != '公司对外服务' %}active{% endif %}" href="/?section=projects&tab={{ active_tab | urlencode if active_tab else 'all' }}">📁 项目</a>
-      <a class="{% if active_tab == '公司对外服务' %}active{% endif %}" href="/?section=projects&tab=公司对外服务">🏢 公司对外服务</a>
+      <a class="{% if active_section == 'projects' %}active{% endif %}" href="/?section=projects&tab={{ active_tab | urlencode if active_tab else 'all' }}">📁 项目</a>
       <a class="{% if active_section == 'meetings' %}active{% endif %}" href="/?section=meetings">📅 会议</a>
       <a href="/daily.html">📌 每日任务</a>
     </div>
