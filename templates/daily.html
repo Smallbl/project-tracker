@@ -409,6 +409,7 @@
       <button class="btn-export" id="btnExportDaily">📥 导出 Excel</button>
     </div>
     <button class="btn-add" id="btn-add">＋ 新增任务</button>
+    <button class="btn-export" id="btn-export-config" onclick="showDailyExportModal()">📥 导出配置</button>
   </div>
 
   <!-- 新增表单 -->
@@ -473,6 +474,28 @@
   <!-- 任务列表 -->
   <div class="task-list" id="taskList">
     <div class="loading">加载中...</div>
+  </div>
+</div>
+
+<!-- 每日任务导出配置弹窗 -->
+<div class="modal" id="dailyExportModal">
+  <div class="modal-content">
+    <h2>导出每日任务</h2>
+    <form id="dailyExportForm">
+      <div class="form-group">
+        <label>起始日期（可选）</label>
+        <input type="date" id="dailyExportDateFrom" placeholder="留空则从最早开始导出">
+      </div>
+      <div class="form-group">
+        <label>结束日期（可选）</label>
+        <input type="date" id="dailyExportDateTo" placeholder="留空则导出到最新">
+      </div>
+      <div style="font-size:12px;color:#6e7681;margin-bottom:8px">💡 留空日期则导出全部任务</div>
+      <div class="modal-btns">
+        <button type="button" class="btn-cancel" onclick="closeDailyExportModal()">取消</button>
+        <button type="button" class="btn-submit" onclick="submitDailyExport()">导出</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -833,7 +856,7 @@
       document.getElementById(id).addEventListener('change', renderTasks);
     });
 
-    // 每日任务导出
+    // 每日任务导出（旧入口保留）
     document.getElementById('btnExportDaily').addEventListener('click', function() {
       var dateFrom = document.getElementById('exportDateFrom').value;
       var dateTo = document.getElementById('exportDateTo').value;
@@ -880,6 +903,38 @@
     toast.className = 'toast ' + type + ' show';
     setTimeout(() => { toast.classList.remove('show'); }, 2500);
   }
+
+  function showDailyExportModal() {
+    document.getElementById('dailyExportDateFrom').value = '';
+    document.getElementById('dailyExportDateTo').value = '';
+    document.getElementById('dailyExportModal').classList.add('show');
+  }
+
+  function closeDailyExportModal() {
+    document.getElementById('dailyExportModal').classList.remove('show');
+  }
+
+  function submitDailyExport() {
+    var dateFrom = document.getElementById('dailyExportDateFrom').value;
+    var dateTo = document.getElementById('dailyExportDateTo').value;
+    var url = '/export_daily';
+    var params = [];
+    if (dateFrom) params.push('date_from=' + encodeURIComponent(dateFrom));
+    if (dateTo) params.push('date_to=' + encodeURIComponent(dateTo));
+    if (params.length > 0) url += '?' + params.join('&');
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    closeDailyExportModal();
+  }
+
+  // 点击背景关闭导出弹窗
+  document.getElementById('dailyExportModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDailyExportModal();
+  });
 
   // ===== 示例数据（API未就绪时使用） =====
   function getMockTasks() {
