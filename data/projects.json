@@ -76,6 +76,27 @@
   ],
   "亚太": [
     {
+      "id": "亚太-001",
+      "name": "在线购标系统",
+      "status": "进行中",
+      "node": "",
+      "deadline": "",
+      "issues": "",
+      "tasks": [
+        {
+          "text": "在线购标支付成功，支付状态未生效问题",
+          "done": false,
+          "priority": "high",
+          "due": "2026-04-17",
+          "opinion": "",
+          "createdAt": "2026-04-08"
+        }
+      ],
+      "status_text": "进行中",
+      "status_color": "",
+      "sort_order": 7
+    },
+    {
       "id": "yatai-001",
       "name": "数字化综合管理平台信创升级",
       "status": "本周上线",
@@ -694,7 +715,7 @@
           "createdAt": "2026-04-03"
         },
         {
-          "text": "查重为去除招标文件内容",
+          "text": "查重未去除招标文件内容",
           "done": false,
           "priority": "high",
           "due": "2026-04-10",
@@ -724,6 +745,14 @@
           "due": "2026-04-10",
           "opinion": "",
           "createdAt": "2026-04-07"
+        },
+        {
+          "text": "生成的查重报告里的图片重复显示了",
+          "done": false,
+          "priority": "medium",
+          "due": "2026-04-10",
+          "opinion": "",
+          "createdAt": "2026-04-08"
         }
       ],
       "status_text": "进行中",

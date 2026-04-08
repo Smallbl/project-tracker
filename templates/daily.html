@@ -62,6 +62,83 @@
     cursor: pointer;
   }
   .date-picker:focus { outline: none; border-color: var(--accent-2); }
+
+  /* ===== 快速日期导航 ===== */
+  .quick-nav { display: flex; align-items: center; gap: 4px; }
+  .quick-nav .btn-nav {
+    background: var(--inner-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 30px; height: 34px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .quick-nav .btn-nav:hover { border-color: var(--accent-2); color: var(--accent-2); }
+  .quick-nav .btn-today {
+    background: var(--inner-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0 10px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .quick-nav .btn-today:hover { border-color: var(--accent-2); color: var(--accent-2); }
+  .quick-nav .btn-today.active {
+    background: var(--gradient);
+    border-color: transparent;
+    color: white;
+    cursor: default;
+  }
+
+  /* ===== 近期有任务日期下拉 ===== */
+  .recent-dates-wrap { position: relative; }
+  .recent-dates-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 130px;
+    text-align: left;
+    transition: border-color 0.2s;
+  }
+  .recent-dates-btn:hover { border-color: var(--accent-2); }
+  .recent-dates-btn .arrow { float: right; color: var(--text-muted); }
+  .recent-dates-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    min-width: 160px;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+  }
+  .recent-dates-dropdown.show { display: block; }
+  .recent-dates-dropdown .dropdown-item {
+    padding: 9px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+    color: var(--text);
+  }
+  .recent-dates-dropdown .dropdown-item:hover { background: var(--inner-bg); }
+  .recent-dates-dropdown .dropdown-item .count { color: var(--text-muted); font-size: 11px; margin-left: 6px; }
+  .recent-dates-dropdown .dropdown-empty { padding: 10px 14px; font-size: 12px; color: var(--text-muted); text-align: center; }
   .filter-select {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -222,6 +299,43 @@
     color: white;
   }
 
+  /* ===== 批量选择复选框 ===== */
+  .task-batch-check {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: transparent;
+    background: transparent;
+  }
+  .task-batch-check:hover { border-color: var(--accent-2); }
+  .task-batch-check.checked {
+    background: var(--accent-1);
+    border-color: var(--accent-1);
+    color: white;
+  }
+  .task-item.selected {
+    border-color: var(--accent-2) !important;
+    box-shadow: 0 0 0 2px rgba(6,182,212,0.25) !important;
+  }
+  .task-item.deferred {
+    opacity: 0.5;
+  }
+  .task-item.deferred .task-content {
+    text-decoration: line-through;
+    color: var(--text-muted);
+  }
+  .task-item.deferred .task-check,
+  .task-item.deferred .task-seq,
+  .task-item.deferred .task-body,
+  .task-item.deferred .task-actions button:not(.btn-icon.danger) {
+    pointer-events: none;
+  }
+
   .task-seq {
     width: 28px;
     text-align: center;
@@ -331,6 +445,72 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* ===== 批量操作工具栏 ===== */
+  .batch-toolbar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    padding: 14px 24px;
+    z-index: 500;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .batch-toolbar.show { display: flex; }
+  .batch-toolbar .batch-info { font-size: 13px; color: var(--text-secondary); }
+  .batch-toolbar .batch-info strong { color: var(--accent-2); }
+  .batch-toolbar .batch-actions { display: flex; gap: 10px; }
+  .batch-toolbar .batch-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--inner-bg);
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .batch-toolbar .batch-btn:hover { border-color: var(--accent-2); color: var(--accent-2); }
+  .batch-toolbar .batch-btn.danger:hover { border-color: #f87171; color: #f87171; }
+  .batch-toolbar .batch-btn.primary {
+    background: var(--gradient);
+    border-color: transparent;
+    color: white;
+  }
+  .batch-toolbar .batch-btn.primary:hover { opacity: 0.88; }
+
+  /* ===== 批量移动弹窗 ===== */
+  .batch-move-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1100;
+    justify-content: center;
+    align-items: center;
+  }
+  .batch-move-modal.show { display: flex; }
+  .batch-move-content {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 28px;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    animation: slideDown 0.25s ease;
+  }
+  .batch-move-content h3 { font-size: 16px; margin-bottom: 16px; }
+  .batch-move-content .form-group { margin-bottom: 16px; }
+  .batch-move-content label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .batch-move-content .batch-move-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
   /* Loading */
   .loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
 
@@ -380,9 +560,22 @@
 
   <!-- 工具栏 -->
   <div class="toolbar">
+    <!-- 快速日期导航按钮 -->
+    <div class="quick-nav">
+      <button class="btn-nav" id="btn-prev-day" title="前一天">‹</button>
+      <button class="btn-today" id="btn-today">今天</button>
+      <button class="btn-nav" id="btn-next-day" title="后一天">›</button>
+    </div>
     <div class="date-picker-wrap">
       <label>📅</label>
       <input type="date" class="date-picker" id="datePicker">
+    </div>
+    <!-- 近期有任务日期下拉 -->
+    <div class="recent-dates-wrap">
+      <button class="recent-dates-btn" id="recentDatesBtn">
+        近期有任务 <span class="arrow">▾</span>
+      </button>
+      <div class="recent-dates-dropdown" id="recentDatesDropdown"></div>
     </div>
     <select class="filter-select" id="filter-source">
       <option value="all">全部来源</option>
@@ -400,14 +593,14 @@
       <option value="done">✅ 已完成</option>
       <option value="pending">⏳ 进行中</option>
     </select>
-    <!-- 日期范围筛选 + 导出 -->
-    <div class="date-range-wrap">
-      <label>导出:</label>
-      <input type="date" class="date-picker" id="exportDateFrom" placeholder="起始日期" style="width:130px;">
+    <!-- 统一日期范围选择器：始终显示起始和结束日期 -->
+    <div class="date-range-wrap" id="rangeInputsWrap">
+      <input type="date" class="date-picker" id="exportDateFrom" placeholder="起始" style="width:130px;">
       <span style="color:#6e7681;font-size:12px">至</span>
-      <input type="date" class="date-picker" id="exportDateTo" placeholder="结束日期" style="width:130px;">
-      <button class="btn-export" id="btnExportDaily">📥 导出 Excel</button>
+      <input type="date" class="date-picker" id="exportDateTo" placeholder="结束" style="width:130px;">
+      <button class="btn-export" id="btnQueryRange">🔍 查询</button>
     </div>
+    <button class="btn-export" id="btnExportDaily">📥 导出</button>
     <button class="btn-add" id="btn-add">＋ 新增任务</button>
     <button class="btn-export" id="btn-export-config" onclick="showDailyExportModal()">📥 导出配置</button>
   </div>
@@ -474,6 +667,31 @@
   <!-- 任务列表 -->
   <div class="task-list" id="taskList">
     <div class="loading">加载中...</div>
+  </div>
+</div>
+
+<!-- 批量操作工具栏 -->
+<div class="batch-toolbar" id="batchToolbar">
+  <div class="batch-info">已选中 <strong id="batchCount">0</strong> 条任务</div>
+  <div class="batch-actions">
+    <button class="batch-btn primary" id="btn-batch-move">📋 移动到</button>
+    <button class="batch-btn" id="btn-batch-done">✓ 标记完成</button>
+    <button class="batch-btn danger" id="btn-batch-delete">🗑 删除</button>
+  </div>
+</div>
+
+<!-- 批量移动日期选择弹窗 -->
+<div class="batch-move-modal" id="batchMoveModal">
+  <div class="batch-move-content">
+    <h3>📋 批量移动任务</h3>
+    <div class="form-group">
+      <label>选择目标日期</label>
+      <input type="date" class="date-picker" id="batchMoveDate" style="width:100%">
+    </div>
+    <div class="batch-move-btns">
+      <button type="button" class="btn-cancel" id="btn-batch-move-cancel">取消</button>
+      <button type="button" class="btn-submit" id="btn-batch-move-confirm">确认移动</button>
+    </div>
   </div>
 </div>
 
@@ -571,21 +789,117 @@
   const TAG_COLORS = ['blue', 'green', 'orange', 'red', 'cyan', 'purple'];
   let tasks = [];
   let editingId = null;
+  let selectedIds = new Set();
+  let currentDate = new Date().toISOString().split('T')[0];
 
   // ===== 初始化 =====
   function init() {
     const today = new Date().toISOString().split('T')[0];
+    currentDate = today;
+    // 统一日期选择器默认值：起始=今天，结束=今天
+    document.getElementById('exportDateFrom').value = today;
+    document.getElementById('exportDateTo').value = today;
     document.getElementById('datePicker').value = today;
     document.getElementById('f-date').value = today;
     loadTasks();
     bindEvents();
+    updateTodayBtn(today);
+    loadRecentDates();
+  }
+
+  // ===== 更新今天按钮状态 =====
+  function updateTodayBtn(date) {
+    const today = new Date().toISOString().split('T')[0];
+    const btn = document.getElementById('btn-today');
+    if (date === today) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  }
+
+  // ===== 加载近期有任务的日期 =====
+  async function loadRecentDates() {
+    try {
+      const resp = await fetch(API + '/dates_with_tasks');
+      if (!resp.ok) throw new Error();
+      const data = await resp.json();
+      renderRecentDatesDropdown(data.dates || []);
+    } catch {
+      // API未就绪，静默不显示
+      renderRecentDatesDropdown([]);
+    }
+  }
+
+  // ===== 渲染近期日期下拉 =====
+  function renderRecentDatesDropdown(dates) {
+    const dropdown = document.getElementById('recentDatesDropdown');
+    if (!dates || dates.length === 0) {
+      dropdown.innerHTML = '<div class="dropdown-empty">暂无数据</div>';
+      return;
+    }
+    dropdown.innerHTML = dates.map(d => {
+      const dt = new Date(d.date);
+      const month = dt.getMonth() + 1;
+      const day = dt.getDate();
+      const weekday = ['日','一','二','三','四','五','六'][dt.getDay()];
+      const label = `${month}月${day}日(${weekday})`;
+      return `<div class="dropdown-item" data-date="${d.date}">${label}<span class="count">${d.count}条</span></div>`;
+    }).join('');
+  }
+
+  // ===== 快速切换日期 =====
+  function navigateDate(delta) {
+    const dateFrom = document.getElementById('exportDateFrom');
+    const dateTo = document.getElementById('exportDateTo');
+    // 始终在单日模式切换
+    const d = new Date(dateFrom.value);
+    d.setDate(d.getDate() + delta);
+    const newDate = d.toISOString().split('T')[0];
+    dateFrom.value = newDate;
+    dateTo.value = newDate;
+    document.getElementById('datePicker').value = newDate;
+    updateQuickNavState();
+    loadTasks(newDate);
   }
 
   // ===== 加载任务 =====
-  async function loadTasks() {
-    const date = document.getElementById('datePicker').value;
+  // 根据起始/结束日期判断是否是范围模式
+  function isRangeMode() {
+    const dateFrom = document.getElementById('exportDateFrom').value;
+    const dateTo = document.getElementById('exportDateTo').value;
+    return dateFrom && dateTo && dateFrom !== dateTo;
+  }
+
+  // 更新快捷按钮状态（范围模式时禁用）
+  function updateQuickNavState() {
+    const disabled = isRangeMode();
+    document.getElementById('btn-prev-day').disabled = disabled;
+    document.getElementById('btn-next-day').disabled = disabled;
+    document.getElementById('btn-today').disabled = disabled;
+  }
+
+  // ===== 加载任务 =====
+  async function loadTasks(targetDate) {
+    const dateFrom = document.getElementById('exportDateFrom').value;
+    const dateTo = document.getElementById('exportDateTo').value;
+
+    // 范围模式：调用范围查询
+    if (isRangeMode()) {
+      await queryRangeTasks();
+      return;
+    }
+
+    // 单日模式：使用单日 API
+    const date = targetDate || dateFrom;
+    if (!date) return;
+
+    currentDate = date;
+    updateTodayBtn(date);
     const listEl = document.getElementById('taskList');
     listEl.innerHTML = '<div class="loading">加载中...</div>';
+    selectedIds.clear();
+    updateBatchToolbar();
 
     try {
       const resp = await fetch(API + '?date=' + date);
@@ -608,6 +922,7 @@
     const sourceFilter = document.getElementById('filter-source').value;
     const priorityFilter = document.getElementById('filter-priority').value;
     const statusFilter = document.getElementById('filter-status').value;
+    const today = new Date().toISOString().split('T')[0];
 
     let filtered = tasks.filter(t => {
       if (sourceFilter !== 'all' && t.source !== sourceFilter) return false;
@@ -616,6 +931,15 @@
       if (statusFilter === 'pending' && t.done) return false;
       return true;
     });
+
+    // 未选中时清空批量选择
+    if (selectedIds.size > 0) {
+      const hasAnySelected = filtered.some(t => selectedIds.has(String(t.id)));
+      if (!hasAnySelected) {
+        selectedIds.clear();
+        updateBatchToolbar();
+      }
+    }
 
     if (filtered.length === 0) {
       listEl.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>暂无任务</p></div>';
@@ -637,8 +961,22 @@
       const checkIcon = t.done ? '✓' : '';
       const doneClass = t.done ? 'done' : '';
 
+      // 延期任务：原本地日期不等于当前查看日期，且任务已完成（被移动过）
+      const isDeferred = t.status === 'delayed';
+      const deferredClass = isDeferred ? 'deferred' : '';
+      const batchChecked = selectedIds.has(String(t.id)) ? 'checked' : '';
+      const selectedClass = selectedIds.has(String(t.id)) ? 'selected' : '';
+      const batchCheckIcon = selectedIds.has(String(t.id)) ? '✓' : '';
+
+      // 延期任务不可编辑（只能删除）
+      const editAttr = isDeferred ? '' : `onclick="editTask('${t.id}')"`;
+      const editBtn = isDeferred
+        ? '<button class="btn-icon" style="opacity:0.3;cursor:not-allowed" title="延期任务不可编辑" disabled>✏️</button>'
+        : `<button class="btn-icon" onclick="editTask('${t.id}')" title="编辑">✏️</button>`;
+
       return `
-      <div class="task-item ${doneClass}" data-id="${t.id}">
+      <div class="task-item ${doneClass} ${deferredClass} ${selectedClass}" data-id="${t.id}">
+        <div class="task-batch-check ${batchChecked}" onclick="toggleBatchSelect('${t.id}')">${batchCheckIcon}</div>
         <div class="task-check ${doneClass}" onclick="toggleTask('${t.id}')">${checkIcon}</div>
         <div class="task-seq">${idx + 1}</div>
         <div class="task-body">
@@ -649,14 +987,169 @@
             ${sourceLabel}
             ${t.project ? `<span class="tag cyan">📁 ${escapeHtml(t.project)}</span>` : ''}
             ${t.notes ? `<span class="tag purple" data-notes="${escapeHtml(t.notes)}">💬</span>` : ''}
+            ${isDeferred ? `<span class="tag red">📌 延期</span>` : ''}
           </div>
         </div>
         <div class="task-actions">
-          <button class="btn-icon" onclick="editTask('${t.id}')" title="编辑">✏️</button>
+          ${editBtn}
           <button class="btn-icon danger" onclick="deleteTask('${t.id}')" title="删除">🗑️</button>
         </div>
       </div>`;
     }).join('');
+  }
+
+  // ===== 日期范围查询 =====
+  async function queryRangeTasks() {
+    const dateFrom = document.getElementById('exportDateFrom').value;
+    const dateTo = document.getElementById('exportDateTo').value;
+    if (!dateFrom || !dateTo) {
+      showToast('请先选择起始和结束日期', 'error');
+      return;
+    }
+    if (dateFrom > dateTo) {
+      showToast('起始日期不能晚于结束日期', 'error');
+      return;
+    }
+    try {
+      const resp = await fetch(API + '?date_from=' + dateFrom + '&date_to=' + dateTo);
+      if (!resp.ok) throw new Error('API unavailable');
+      const data = await resp.json();
+      tasks = (data.tasks || []).sort((a, b) => {
+        const dateA = a.date || '';
+        const dateB = b.date || '';
+        return dateB.localeCompare(dateA); // 倒序，最晚在前
+      });
+    } catch {
+      showToast('查询失败，请重试', 'error');
+      return;
+    }
+    selectedIds.clear();
+    updateBatchToolbar();
+    renderRangeTasks();
+    updateQuickNavState();
+    showToast('查询到 ' + tasks.length + ' 条任务', 'success');
+  }
+
+  // ===== 渲染范围视图 =====
+  function renderRangeTasks() {
+    if (!Array.isArray(tasks)) { tasks = []; }
+    const listEl = document.getElementById('taskList');
+    const sourceFilter = document.getElementById('filter-source').value;
+    const priorityFilter = document.getElementById('filter-priority').value;
+    const statusFilter = document.getElementById('filter-status').value;
+
+    let filtered = tasks.filter(t => {
+      if (sourceFilter !== 'all' && t.source !== sourceFilter) return false;
+      if (priorityFilter !== 'all' && t.priority !== priorityFilter) return false;
+      if (statusFilter === 'done' && !t.done) return false;
+      if (statusFilter === 'pending' && t.done) return false;
+      return true;
+    });
+
+    if (selectedIds.size > 0) {
+      const hasAnySelected = filtered.some(t => selectedIds.has(String(t.id)));
+      if (!hasAnySelected) {
+        selectedIds.clear();
+        updateBatchToolbar();
+      }
+    }
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>暂无任务</p></div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map((t, idx) => {
+      const tagHtml = (t.tags || []).map((tag, i) =>
+        '<span class="tag ' + TAG_COLORS[i % TAG_COLORS.length] + '">' + escapeHtml(tag) + '</span>'
+      ).join('');
+
+      const sourceLabel = t.source === 'planned'
+        ? '<span class="source-badge plan">📌 计划任务</span>'
+        : '<span class="source-badge temp">⚡ 临时' + (t.source_dept ? '-来自' + escapeHtml(t.source_dept) : '任务') + '</span>';
+
+      const priorityLabel = { high: '🔴高', medium: '🟡中', low: '🟢低' }[t.priority || 'medium'];
+      const priorityClass = t.priority || 'medium';
+
+      const checkIcon = t.done ? '✓' : '';
+      const doneClass = t.done ? 'done' : '';
+
+      const isDeferred = t.status === 'delayed';
+      const deferredClass = isDeferred ? 'deferred' : '';
+      const batchChecked = selectedIds.has(String(t.id)) ? 'checked' : '';
+      const selectedClass = selectedIds.has(String(t.id)) ? 'selected' : '';
+      const batchCheckIcon = selectedIds.has(String(t.id)) ? '✓' : '';
+
+      const editBtn = isDeferred
+        ? '<button class="btn-icon" style="opacity:0.3;cursor:not-allowed" title="延期任务不可编辑" disabled>✏️</button>'
+        : '<button class="btn-icon" onclick="editTask(\'' + t.id + '\')" title="编辑">✏️</button>';
+
+      // 日期标签（行内显示，不换行）
+      let dateLabel = '';
+      if (t.date) {
+        const dt = new Date(t.date);
+        const month = dt.getMonth() + 1;
+        const day = dt.getDate();
+        dateLabel = '<span class="tag cyan" style="font-size:12px;display:inline">[' + month + '月' + day + '日]</span>';
+      }
+
+      return '<div class="task-item ' + doneClass + ' ' + deferredClass + ' ' + selectedClass + '" data-id="' + t.id + '">' +
+        '<div class="task-batch-check ' + batchChecked + '" onclick="toggleBatchSelect(\'' + t.id + '\')">' + batchCheckIcon + '</div>' +
+        '<div class="task-check ' + doneClass + '" onclick="toggleTask(\'' + t.id + '\')">' + checkIcon + '</div>' +
+        '<div class="task-seq">' + dateLabel + '</div>' +
+        '<div class="task-body">' +
+          '<div class="task-content">' + escapeHtml(t.text || t.content || '') + '</div>' +
+          '<div class="task-meta">' +
+            tagHtml +
+            '<span class="priority-badge ' + priorityClass + '">' + priorityLabel + '</span>' +
+            sourceLabel +
+            (t.project ? '<span class="tag cyan">📁 ' + escapeHtml(t.project) + '</span>' : '') +
+            (t.notes ? '<span class="tag purple" data-notes="' + escapeHtml(t.notes) + '">💬</span>' : '') +
+            (isDeferred ? '<span class="tag red">📌 延期</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<div class="task-actions">' +
+          editBtn +
+          '<button class="btn-icon danger" onclick="deleteTask(\'' + t.id + '\')" title="删除">🗑️</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // 更新统计为范围模式（显示查询结果数）
+    const total = filtered.length;
+    const done = filtered.filter(t => t.done).length;
+    const pending = total - done;
+    const temp = filtered.filter(t => t.source === 'temp').length;
+    const rate = total > 0 ? Math.round(done / total * 100) + '%' : '-';
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-pending').textContent = pending;
+    document.getElementById('stat-temp').textContent = temp;
+    document.getElementById('stat-rate').textContent = rate;
+  }
+
+  // ===== 批量选择 =====
+  function toggleBatchSelect(id) {
+    id = String(id);
+    if (selectedIds.has(id)) {
+      selectedIds.delete(id);
+    } else {
+      selectedIds.add(id);
+    }
+    renderTasks();
+    updateBatchToolbar();
+  }
+
+  // ===== 更新批量工具栏 =====
+  function updateBatchToolbar() {
+    const toolbar = document.getElementById('batchToolbar');
+    const countEl = document.getElementById('batchCount');
+    countEl.textContent = selectedIds.size;
+    if (selectedIds.size > 0) {
+      toolbar.classList.add('show');
+    } else {
+      toolbar.classList.remove('show');
+    }
   }
 
   // ===== 统计 =====
@@ -848,12 +1341,103 @@
       }
     });
 
-    // 日期切换
-    document.getElementById('datePicker').addEventListener('change', loadTasks);
+    // 日期切换（同步到统一选择器，单日模式立即加载）
+    document.getElementById('datePicker').addEventListener('change', () => {
+      const date = document.getElementById('datePicker').value;
+      document.getElementById('exportDateFrom').value = date;
+      document.getElementById('exportDateTo').value = date;
+      updateQuickNavState();
+      if (!isRangeMode()) {
+        loadTasks(date);
+      }
+    });
+
+    // 快速导航
+    document.getElementById('btn-prev-day').addEventListener('click', () => navigateDate(-1));
+    document.getElementById('btn-next-day').addEventListener('click', () => navigateDate(1));
+    document.getElementById('btn-today').addEventListener('click', () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('datePicker').value = today;
+      document.getElementById('exportDateFrom').value = today;
+      document.getElementById('exportDateTo').value = today;
+      updateQuickNavState();
+      loadTasks(today);
+    });
+
+    // 近期日期下拉
+    document.getElementById('recentDatesBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('recentDatesDropdown').classList.toggle('show');
+    });
+    document.getElementById('recentDatesDropdown').addEventListener('click', (e) => {
+      const item = e.target.closest('.dropdown-item');
+      if (!item) return;
+      const date = item.dataset.date;
+      document.getElementById('datePicker').value = date;
+      document.getElementById('exportDateFrom').value = date;
+      document.getElementById('exportDateTo').value = date;
+      updateQuickNavState();
+      loadTasks(date);
+      document.getElementById('recentDatesDropdown').classList.remove('show');
+    });
+    document.addEventListener('click', () => {
+      document.getElementById('recentDatesDropdown').classList.remove('show');
+    });
+
+    // 批量操作
+    document.getElementById('btn-batch-move').addEventListener('click', () => {
+      document.getElementById('batchMoveDate').value = currentDate;
+      document.getElementById('batchMoveModal').classList.add('show');
+    });
+    document.getElementById('btn-batch-move-cancel').addEventListener('click', () => {
+      document.getElementById('batchMoveModal').classList.remove('show');
+    });
+    document.getElementById('btn-batch-move-confirm').addEventListener('click', batchMove);
+    document.getElementById('batchMoveModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('batchMoveModal')) {
+        document.getElementById('batchMoveModal').classList.remove('show');
+      }
+    });
+    document.getElementById('btn-batch-done').addEventListener('click', batchMarkDone);
+    document.getElementById('btn-batch-delete').addEventListener('click', batchDelete);
+
+    // 范围模式下日期选择器变化也要更新快捷按钮状态
+    document.getElementById('exportDateFrom').addEventListener('change', () => {
+      updateQuickNavState();
+      if (!isRangeMode()) {
+        const date = document.getElementById('exportDateFrom').value;
+        document.getElementById('datePicker').value = date;
+        loadTasks(date);
+      }
+    });
+    document.getElementById('exportDateTo').addEventListener('change', () => {
+      updateQuickNavState();
+      if (!isRangeMode()) {
+        const date = document.getElementById('exportDateTo').value;
+        document.getElementById('datePicker').value = date;
+        loadTasks(date);
+      }
+    });
 
     // 筛选变化
     ['filter-source', 'filter-priority', 'filter-status'].forEach(id => {
-      document.getElementById(id).addEventListener('change', renderTasks);
+      document.getElementById(id).addEventListener('change', () => {
+        if (isRangeMode()) {
+          renderRangeTasks();
+        } else {
+          renderTasks();
+        }
+      });
+    });
+
+    // 日期范围查询按钮
+    document.getElementById('btnQueryRange').addEventListener('click', () => {
+      if (!isRangeMode()) {
+        const date = document.getElementById('exportDateFrom').value;
+        document.getElementById('datePicker').value = date;
+      }
+      updateQuickNavState();
+      queryRangeTasks();
     });
 
     // 每日任务导出（旧入口保留）
@@ -936,6 +1520,71 @@
     if (e.target === this) closeDailyExportModal();
   });
 
+  // ===== 批量移动 =====
+  async function batchMove() {
+    const targetDate = document.getElementById('batchMoveDate').value;
+    if (!targetDate) { showToast('请选择目标日期', 'error'); return; }
+    const ids = Array.from(selectedIds);
+    document.getElementById('batchMoveModal').classList.remove('show');
+    try {
+      await fetch(API + '/batch_update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task_ids: ids, new_date: targetDate })
+      });
+    } catch {}
+    const targetDt = new Date(targetDate);
+    const toastMsg = `已移动 ${ids.length} 条任务到 ${targetDt.getMonth()+1}月${targetDt.getDate()}日`;
+    selectedIds.clear();
+    updateBatchToolbar();
+    // 重新加载：单日模式用loadTasks，范围模式重新查询
+    if (isRangeMode()) {
+      await queryRangeTasks();
+    } else {
+      await loadTasks();
+    }
+    showToast(toastMsg, 'success');
+  }
+
+  // ===== 批量标记完成 =====
+  async function batchMarkDone() {
+    const ids = Array.from(selectedIds);
+    try {
+      await fetch(API + '/batch_update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, done: true })
+      });
+    } catch {}
+    tasks.forEach(t => {
+      if (selectedIds.has(String(t.id))) t.done = true;
+    });
+    selectedIds.clear();
+    updateBatchToolbar();
+    renderTasks();
+    updateStats();
+    showToast(`已将 ${ids.length} 条任务标记为完成`, 'success');
+  }
+
+  // ===== 批量删除 =====
+  async function batchDelete() {
+    const ids = Array.from(selectedIds);
+    if (!confirm(`确定删除选中的 ${ids.length} 条任务吗？`)) return;
+    try {
+      await fetch(API + '/batch_delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids })
+      });
+    } catch {}
+    tasks = tasks.filter(t => !selectedIds.has(String(t.id)));
+    selectedIds.clear();
+    updateBatchToolbar();
+    renderTasks();
+    updateStats();
+    showToast(`已删除 ${ids.length} 条任务`, 'success');
+  }
+
   // ===== 示例数据（API未就绪时使用） =====
   function getMockTasks() {
     const today = new Date().toISOString().split('T')[0];
@@ -952,6 +1601,9 @@
   window.toggleTask = toggleTask;
   window.editTask = editTask;
   window.deleteTask = deleteTask;
+  window.toggleBatchSelect = toggleBatchSelect;
+  window.showDailyExportModal = showDailyExportModal;
+  window.closeDailyExportModal = closeDailyExportModal;
 
   init();
 })();

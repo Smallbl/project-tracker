@@ -668,12 +668,12 @@
 
   .btn-secondary {
     background: #1a2332;
-    color: #888;
+    color: #9ca3af;
     border: 1px solid #2a2d3a;
   }
 
   .btn-secondary:hover {
-    border-color: #888;
+    border-color: #9ca3af;
     color: #fff;
   }
 
@@ -925,7 +925,7 @@
   .form-group label {
     display: block;
     font-size: 13px;
-    color: #888;
+    color: #c4c9d4;
     margin-bottom: 6px;
   }
 
@@ -1036,6 +1036,58 @@
   /* Hidden */
   .hidden {
     display: none !important;
+  }
+
+  /* ===== 导出弹窗样式 ===== */
+  .export-option {
+    padding: 12px 0;
+    border-bottom: 1px solid #2a2d3a;
+  }
+  .export-option:last-of-type {
+    border-bottom: none;
+  }
+  .export-option-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+  .export-icon {
+    font-size: 16px;
+  }
+  .export-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #c4c9d4;
+  }
+  .export-desc {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-left: 24px;
+    padding-left: 24px;
+  }
+  .export-select-row {
+    margin-top: 8px;
+    margin-left: 24px;
+  }
+  .export-select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #1a2332;
+    color: #c4c9d4;
+    transition: border-color 0.2s;
+  }
+  .export-select:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+  .export-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   /* Responsive */
@@ -1514,33 +1566,28 @@
   <div class="modal-content">
     <h2>导出项目任务</h2>
     <form id="exportForm">
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+      <div class="export-option">
+        <label class="export-option-label">
           <input type="radio" name="export_scope" value="all" checked id="exportAll">
-          <span>🌐 全量导出</span>
-          <span style="color:#6b7280;font-size:12px;margin-left:4px">所有公司 + 所有项目 + 所有任务</span>
+          <span class="export-icon">🌐</span>
+          <span class="export-title">全量导出</span>
         </label>
+        <p class="export-desc">所有公司 + 所有项目 + 所有任务</p>
       </div>
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+      <div class="export-option">
+        <label class="export-option-label">
           <input type="radio" name="export_scope" value="company" id="exportByCompany">
-          <span>🏢 按公司导出</span>
+          <span class="export-icon">🏢</span>
+          <span class="export-title">按公司导出</span>
         </label>
-        <select id="exportCompanySelect" style="margin-top:8px;display:none" disabled>
-          <option value="">请先选择导出方式</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="radio" name="export_scope" value="project" id="exportByProject">
-          <span>📁 按项目导出</span>
-        </label>
-        <div id="exportProjectSelects" style="margin-top:8px;display:none">
-          <select id="exportProjectCompany" style="margin-bottom:8px" disabled>
-            <option value="">请先选择公司</option>
+        <div class="export-select-row" id="exportCompanySelects">
+          <select id="exportCompanySelect" class="export-select" disabled>
+            <option value="">请选择公司</option>
           </select>
-          <select id="exportProjectSelect" disabled>
-            <option value="">请先选择项目</option>
+        </div>
+        <div class="export-select-row" id="exportCompanyProjectSelectWrapper" style="display:none">
+          <select id="exportCompanyProjectSelect" class="export-select">
+            <option value="">全部项目</option>
           </select>
         </div>
       </div>
@@ -2058,9 +2105,7 @@ function showExportModal() {
   document.getElementById('exportAll').checked = true;
   document.getElementById('exportCompanySelect').style.display = 'none';
   document.getElementById('exportCompanySelect').disabled = true;
-  document.getElementById('exportProjectSelects').style.display = 'none';
-  document.getElementById('exportProjectCompany').disabled = true;
-  document.getElementById('exportProjectSelect').disabled = true;
+  document.getElementById('exportCompanyProjectSelectWrapper').style.display = 'none';
   document.getElementById('exportModal').classList.add('show');
 }
 
@@ -2071,12 +2116,9 @@ function closeExportModal() {
 function populateExportCompanySelect() {
   var companies = Object.keys(projectData).filter(function(k) { return k !== 'meetings'; });
   var sel1 = document.getElementById('exportCompanySelect');
-  var sel2 = document.getElementById('exportProjectCompany');
   sel1.innerHTML = '<option value="">请选择公司</option>';
-  sel2.innerHTML = '<option value="">请选择公司</option>';
   companies.forEach(function(c) {
     sel1.appendChild(new Option(c, c));
-    sel2.appendChild(new Option(c, c));
   });
 }
 
@@ -2084,54 +2126,54 @@ function populateExportCompanySelect() {
 document.addEventListener('DOMContentLoaded', function() {
   var radioAll = document.getElementById('exportAll');
   var radioCompany = document.getElementById('exportByCompany');
-  var radioProject = document.getElementById('exportByProject');
   var companySelect = document.getElementById('exportCompanySelect');
-  var projectSelects = document.getElementById('exportProjectSelects');
-  var projectCompany = document.getElementById('exportProjectCompany');
-  var projectSel = document.getElementById('exportProjectSelect');
 
   function onRadioChange() {
+    var companyProjectSel = document.getElementById('exportCompanyProjectSelect');
+    var projectWrapper = document.getElementById('exportCompanyProjectSelectWrapper');
     if (radioAll.checked) {
-      companySelect.style.display = 'none';
       companySelect.disabled = true;
-      projectSelects.style.display = 'none';
-      projectCompany.disabled = true;
-      projectSel.disabled = true;
+      companySelect.value = '';
+      companyProjectSel.disabled = true;
+      companyProjectSel.value = '';
+      companyProjectSel.innerHTML = '<option value="">全部项目</option>';
+      projectWrapper.style.display = 'none';
     } else if (radioCompany.checked) {
-      companySelect.style.display = 'block';
       companySelect.disabled = false;
-      projectSelects.style.display = 'none';
-      projectCompany.disabled = true;
-      projectSel.disabled = true;
-    } else if (radioProject.checked) {
-      companySelect.style.display = 'none';
-      companySelect.disabled = true;
-      projectSelects.style.display = 'block';
-      projectCompany.disabled = false;
-      projectSel.disabled = true;
-      // 监听公司切换以更新项目下拉
+      companySelect.style.display = '';
+      document.getElementById('exportCompanySelects').style.display = '';
+      companyProjectSel.disabled = true;
+      companyProjectSel.value = '';
+      companyProjectSel.innerHTML = '<option value="">全部项目</option>';
+      projectWrapper.style.display = 'none';
     }
   }
 
   radioAll.addEventListener('change', onRadioChange);
   radioCompany.addEventListener('change', onRadioChange);
-  radioProject.addEventListener('change', onRadioChange);
 
-  // 公司下拉联动——按项目导出时切换公司刷新项目列表
-  projectCompany.addEventListener('change', function() {
-    var group = projectCompany.value;
-    projectSel.innerHTML = '<option value="">请选择项目</option>';
-    if (!group) { projectSel.disabled = true; return; }
+  // 公司下拉联动——按公司导出时切换公司刷新项目列表
+  companySelect.addEventListener('change', function() {
+    var group = companySelect.value;
+    var companyProjectSel = document.getElementById('exportCompanyProjectSelect');
+    var projectWrapper = document.getElementById('exportCompanyProjectSelectWrapper');
+    companyProjectSel.innerHTML = '<option value="">全部项目</option>';
+    if (!group) {
+      companyProjectSel.disabled = true;
+      projectWrapper.style.display = 'none';
+      return;
+    }
+    projectWrapper.style.display = '';
     var projects = projectData[group] || [];
     if (projects.length === 0) {
-      projectSel.innerHTML = '<option value="">该公司暂无项目</option>';
-      projectSel.disabled = true;
+      companyProjectSel.innerHTML = '<option value="">该公司暂无项目</option>';
+      companyProjectSel.disabled = true;
       return;
     }
     projects.forEach(function(p) {
-      projectSel.appendChild(new Option(p.name, p.id));
+      companyProjectSel.appendChild(new Option(p.name, p.id));
     });
-    projectSel.disabled = false;
+    companyProjectSel.disabled = false;
   });
 });
 
@@ -2141,13 +2183,14 @@ function submitExport() {
   if (scope === 'company') {
     var company = document.getElementById('exportCompanySelect').value;
     if (!company) { alert('请选择公司'); return; }
-    url += '&key=' + encodeURIComponent(company);
-  } else if (scope === 'project') {
-    var company = document.getElementById('exportProjectCompany').value;
-    var projectId = document.getElementById('exportProjectSelect').value;
-    if (!company || !projectId) { alert('请选择公司和项目'); return; }
-    url += '&key=' + encodeURIComponent(company + '|' + projectId);
+    var companyProjectId = document.getElementById('exportCompanyProjectSelect').value;
+    if (companyProjectId) {
+      url += '&key=' + encodeURIComponent(company + '|' + companyProjectId);
+    } else {
+      url += '&key=' + encodeURIComponent(company);
+    }
   }
+
   var a = document.createElement('a');
   a.href = url;
   a.download = '';

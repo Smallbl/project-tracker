@@ -441,12 +441,16 @@ TASK_PRIORITIES = ['low', 'medium', 'high']
 
 @app.route('/api/daily_tasks', methods=['GET'])
 def get_daily_tasks():
-    date_filter = request.args.get('date')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
     with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
     tasks = data.get('tasks', [])
-    if date_filter:
-        tasks = [t for t in tasks if t.get('date') == date_filter]
+    if date_from:
+        tasks = [t for t in tasks if t.get('date', '') >= date_from]
+    if date_to:
+        tasks = [t for t in tasks if t.get('date', '') <= date_to]
+    tasks.sort(key=lambda t: t.get('date', ''), reverse=True)
     return json_response({'tasks': tasks})
 
 
@@ -532,6 +536,117 @@ def toggle_daily_task(task_id):
     with open('data/daily_tasks.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     return json_response({'task': task})
+
+
+# ==================== 每日任务批量操作 API ====================
+
+@app.route('/api/daily_tasks/batch_update', methods=['POST'])
+def batch_update_daily_tasks():
+    """批量更新任务日期：将原任务标记为延期，在新日期创建新任务"""
+    req = request.get_json()
+    task_ids = req.get('task_ids', [])
+    new_date = req.get('new_date', '')
+
+    if not task_ids:
+        return jsonify({'error': 'task_ids 不能为空'}), 400
+    if not new_date:
+        return jsonify({'error': 'new_date 不能为空'}), 400
+    try:
+        datetime.strptime(new_date, '%Y-%m-%d')
+    except ValueError:
+        return jsonify({'error': '日期格式错误，应为 YYYY-MM-DD'}), 400
+
+    with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    moved = 0
+    for task_id in task_ids:
+        task_id_str = str(task_id)
+        for task in data['tasks']:
+            if str(task['id']) == task_id_str:
+                # 原任务标记为延期
+                task['status'] = 'delayed'
+                task['original_date'] = task.get('date', '')
+
+                # 创建新任务，继承原任务属性
+                data['last_id'] += 1
+                new_task = {
+                    'id': data['last_id'],
+                    'content': task.get('content', ''),
+                    'date': new_date,
+                    'status': 'pending',
+                    'source': task.get('source', 'planned'),
+                    'source_dept': task.get('source_dept', ''),
+                    'priority': task.get('priority', 'medium'),
+                    'notes': task.get('notes', ''),
+                    'tags': task.get('tags', []),
+                    'project': task.get('project', ''),
+                    'created_at': str(datetime.now()),
+                    'completed_at': None,
+                    'done': False,
+                    'original_task_id': task_id_str  # 关联原任务ID
+                }
+                data['tasks'].append(new_task)
+                moved += 1
+                break
+
+    with open('data/daily_tasks.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    return jsonify({'success': True, 'moved': moved, 'new_date': new_date})
+
+
+@app.route('/api/daily_tasks/batch_delete', methods=['POST'])
+def batch_delete_daily_tasks():
+    """批量删除任务"""
+    req = request.get_json()
+    task_ids = req.get('task_ids', [])
+
+    if not task_ids:
+        return jsonify({'error': 'task_ids 不能为空'}), 400
+
+    with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    task_ids_str = [str(tid) for tid in task_ids]
+    original_count = len(data['tasks'])
+    data['tasks'] = [t for t in data['tasks'] if str(t['id']) not in task_ids_str]
+    deleted = original_count - len(data['tasks'])
+
+    with open('data/daily_tasks.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+    return jsonify({'success': True, 'deleted': deleted})
+
+
+@app.route('/api/daily_tasks/dates_with_tasks', methods=['GET'])
+def get_dates_with_tasks():
+    """获取近14天有任务的日期列表"""
+    today = datetime.now()
+    days_ago_14 = today.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    with open('data/daily_tasks.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    # 统计每天的任务数量（排除已延期和已完成的）
+    date_counts = {}
+    for task in data.get('tasks', []):
+        task_date = task.get('date', '')
+        task_status = task.get('status', '')
+        # 只统计未延期的任务
+        if task_date and task_status != 'delayed':
+            try:
+                task_dt = datetime.strptime(task_date, '%Y-%m-%d')
+                if task_dt >= days_ago_14:
+                    date_counts[task_date] = date_counts.get(task_date, 0) + 1
+            except ValueError:
+                pass
+
+    # 转换为列表并按日期排序
+    result = [{'date': d, 'count': c} for d, c in date_counts.items()]
+    result.sort(key=lambda x: x['date'], reverse=True)
+
+    return jsonify(result)
 
 
 # ==================== 项目管理 API（表单提交） ====================
@@ -739,7 +854,7 @@ def style_header(cell):
 
 def style_data_cell(cell):
     """设置数据单元格样式"""
-    cell.font = Font(size=11, color='E0E0E0')
+    cell.font = Font(size=11, color='3F3F3F')
     cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
     thin = Side(style='thin', color='374151')
     cell.border = Border(left=thin, right=thin, top=thin, bottom=thin)
