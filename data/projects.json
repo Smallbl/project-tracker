@@ -90,6 +90,22 @@
           "due": "2026-04-17",
           "opinion": "",
           "createdAt": "2026-04-08"
+        },
+        {
+          "text": "附件下载问题：根据业务员反馈IOS下载默认浏览器不支持，使用qq浏览器可以，附件为压缩包",
+          "done": false,
+          "priority": "medium",
+          "due": "2026-04-16",
+          "opinion": "",
+          "createdAt": "2026-04-09"
+        },
+        {
+          "text": "成套在线购标缺少重开发票功能",
+          "done": false,
+          "priority": "medium",
+          "due": "2026-04-16",
+          "opinion": "",
+          "createdAt": "2026-04-09"
         }
       ],
       "status_text": "进行中",
@@ -106,7 +122,7 @@
       "tasks": [
         {
           "text": "项目实施计划/满意度/其他 → 本周上线，需尽快提供手册给综合出通知后上线：已提供操作手册，综合确认暂定下周4与7日出通知，晚上系统更新上线",
-          "done": false,
+          "done": true,
           "due": "2026-04-07",
           "priority": "high",
           "createdAt": "2026-03-23"
@@ -121,16 +137,17 @@
         {
           "text": "音视频归档通知功能",
           "done": false,
-          "due": "2026-04-03",
+          "due": "2026-04-13",
           "priority": "medium",
           "createdAt": "2026-03-23"
         },
         {
           "text": "专家聘费报税打款（OCR识别发票）",
           "done": false,
-          "due": "2026-04-03",
+          "due": "2026-06-30",
           "priority": "medium",
-          "createdAt": "2026-03-23"
+          "createdAt": "2026-03-23",
+          "opinion": "新增针对异常情况处理需求\r\n如何计算税金额规则未定"
         },
         {
           "text": "财务需求（培训费/分成权限/统计/外币等）→ 需开会",
@@ -243,7 +260,7 @@
         },
         {
           "text": "[9] 收费统计分析（应收实收、标书费、保证金等）",
-          "done": false,
+          "done": true,
           "priority": "medium",
           "due": "部分完成",
           "opinion": "处长配置业务员查看权限",
@@ -355,7 +372,7 @@
         },
         {
           "text": "[30] 归档无纸化、实施计划线上审批",
-          "done": false,
+          "done": true,
           "priority": "high",
           "due": "待上线",
           "opinion": "支持批量审批",
@@ -379,7 +396,7 @@
         },
         {
           "text": "[33] 其他项目模块开发",
-          "done": false,
+          "done": true,
           "priority": "low",
           "due": "待上线",
           "opinion": "",
@@ -427,7 +444,7 @@
         },
         {
           "text": "[47] 项目管理中增加'项目费用统计'",
-          "done": false,
+          "done": true,
           "priority": "high",
           "due": "",
           "opinion": "",
@@ -451,7 +468,7 @@
         },
         {
           "text": "[51-1] 预览水印过于密集优化",
-          "done": false,
+          "done": true,
           "priority": "medium",
           "due": "",
           "opinion": "",
@@ -990,7 +1007,7 @@
       "name": "和综合部沟通",
       "remark": "财务需求、坚果云、综合部需求",
       "id": "meet-004",
-      "completed": false,
+      "completed": true,
       "createdAt": ""
     },
     {
@@ -999,7 +1016,7 @@
       "date": "2026-04-08",
       "time": "09:30",
       "remark": "",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-04-06"
     },
     {
@@ -1008,8 +1025,35 @@
       "date": "2026-04-08",
       "time": "14:00",
       "remark": "",
-      "completed": false,
+      "completed": true,
       "createdAt": "2026-04-06"
+    },
+    {
+      "id": "meet-007",
+      "name": "安全厂商会议",
+      "date": "2026-04-10",
+      "time": "09:30",
+      "remark": "申报项目安测、软测",
+      "completed": false,
+      "createdAt": "2026-04-09"
+    },
+    {
+      "id": "meet-008",
+      "name": "四建、亚太例会",
+      "date": "2026-04-13",
+      "time": "09:30",
+      "remark": "",
+      "completed": false,
+      "createdAt": "2026-04-09"
+    },
+    {
+      "id": "meet-009",
+      "name": "中招联合例会",
+      "date": "2026-04-14",
+      "time": "14:00",
+      "remark": "",
+      "completed": false,
+      "createdAt": "2026-04-09"
     }
   ],
   "中招联合": [
@@ -1033,9 +1077,33 @@
           "text": "测试服务器申请3台",
           "done": false,
           "priority": "medium",
-          "due": "2026-04-13",
+          "due": "2026-04-10",
           "opinion": "",
           "createdAt": "2026-04-06"
+        },
+        {
+          "text": "确认各页面中的logo 和 文案这些平台专属标志替换",
+          "done": true,
+          "priority": "medium",
+          "due": "2026-04-09",
+          "opinion": "",
+          "createdAt": "2026-04-09"
+        },
+        {
+          "text": "官网准备测试环境及测试接口联测推送公告",
+          "done": false,
+          "priority": "medium",
+          "due": "2026-04-10",
+          "opinion": "",
+          "createdAt": "2026-04-09"
+        },
+        {
+          "text": "平安银行相关对接工作推进",
+          "done": false,
+          "priority": "medium",
+          "due": "",
+          "opinion": "",
+          "createdAt": "2026-04-09"
         }
       ],
       "status_text": "进行中",
@@ -1069,7 +1137,8 @@
           "done": false,
           "priority": "medium",
           "due": "",
-          "createdAt": "2026-04-07"
+          "createdAt": "2026-04-07",
+          "opinion": "风险预警系统私有化部署成本评估\r\n招标文件审核私有化部署成本评估\r\n需考虑：件配置+定制开发+运维+升级迭代+人员出差"
         }
       ],
       "status_text": "待跟进",

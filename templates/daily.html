@@ -22,15 +22,15 @@
     --radius-sm: 8px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
 
-  .header { background: var(--gradient); padding: 20px 28px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px; }
+  .header { position: sticky; top: 0; left: 0; right: 0; z-index: 100; background: var(--gradient); padding: 20px 28px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px; }
   .header h1 { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
   .header p { font-size: 12px; opacity: 0.8; }
   .header .back-link { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; border: 1px solid rgba(255,255,255,0.4); padding: 4px 12px; border-radius: 6px; transition: background 0.2s; white-space: nowrap; }
   .header .back-link:hover { background: rgba(255,255,255,0.15); }
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px; min-height: calc(100vh - 100px - 80px); }
 
   /* ===== 统计卡片 ===== */
   .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -50,8 +50,6 @@
 
   /* ===== 工具栏 ===== */
   .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .date-picker-wrap { display: flex; align-items: center; gap: 8px; }
-  .date-picker-wrap label { font-size: 13px; color: var(--text-secondary); }
   .date-picker {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -566,10 +564,6 @@
       <button class="btn-today" id="btn-today">今天</button>
       <button class="btn-nav" id="btn-next-day" title="后一天">›</button>
     </div>
-    <div class="date-picker-wrap">
-      <label>📅</label>
-      <input type="date" class="date-picker" id="datePicker">
-    </div>
     <!-- 近期有任务日期下拉 -->
     <div class="recent-dates-wrap">
       <button class="recent-dates-btn" id="recentDatesBtn">
@@ -602,7 +596,7 @@
     </div>
     <button class="btn-export" id="btnExportDaily">📥 导出</button>
     <button class="btn-add" id="btn-add">＋ 新增任务</button>
-    <button class="btn-export" id="btn-export-config" onclick="showDailyExportModal()">📥 导出配置</button>
+
   </div>
 
   <!-- 新增表单 -->
@@ -695,27 +689,7 @@
   </div>
 </div>
 
-<!-- 每日任务导出配置弹窗 -->
-<div class="modal" id="dailyExportModal">
-  <div class="modal-content">
-    <h2>导出每日任务</h2>
-    <form id="dailyExportForm">
-      <div class="form-group">
-        <label>起始日期（可选）</label>
-        <input type="date" id="dailyExportDateFrom" placeholder="留空则从最早开始导出">
-      </div>
-      <div class="form-group">
-        <label>结束日期（可选）</label>
-        <input type="date" id="dailyExportDateTo" placeholder="留空则导出到最新">
-      </div>
-      <div style="font-size:12px;color:#6e7681;margin-bottom:8px">💡 留空日期则导出全部任务</div>
-      <div class="modal-btns">
-        <button type="button" class="btn-cancel" onclick="closeDailyExportModal()">取消</button>
-        <button type="button" class="btn-submit" onclick="submitDailyExport()">导出</button>
-      </div>
-    </form>
-  </div>
-</div>
+
 
 <!-- 编辑弹窗 -->
 <div class="modal" id="editModal">
@@ -799,7 +773,6 @@
     // 统一日期选择器默认值：起始=今天，结束=今天
     document.getElementById('exportDateFrom').value = today;
     document.getElementById('exportDateTo').value = today;
-    document.getElementById('datePicker').value = today;
     document.getElementById('f-date').value = today;
     loadTasks();
     bindEvents();
@@ -824,7 +797,8 @@
       const resp = await fetch(API + '/dates_with_tasks');
       if (!resp.ok) throw new Error();
       const data = await resp.json();
-      renderRecentDatesDropdown(data.dates || []);
+      // 后端直接返回数组 [{date, count}, ...]
+      renderRecentDatesDropdown(Array.isArray(data) ? data : (data.dates || []));
     } catch {
       // API未就绪，静默不显示
       renderRecentDatesDropdown([]);
@@ -840,6 +814,7 @@
     }
     dropdown.innerHTML = dates.map(d => {
       const dt = new Date(d.date);
+      if (isNaN(dt.getTime())) return '';
       const month = dt.getMonth() + 1;
       const day = dt.getDate();
       const weekday = ['日','一','二','三','四','五','六'][dt.getDay()];
@@ -858,7 +833,6 @@
     const newDate = d.toISOString().split('T')[0];
     dateFrom.value = newDate;
     dateTo.value = newDate;
-    document.getElementById('datePicker').value = newDate;
     updateQuickNavState();
     loadTasks(newDate);
   }
@@ -902,7 +876,7 @@
     updateBatchToolbar();
 
     try {
-      const resp = await fetch(API + '?date=' + date);
+      const resp = await fetch(API + '?date_from=' + encodeURIComponent(date) + '&date_to=' + encodeURIComponent(date));
       if (!resp.ok) throw new Error('API unavailable');
       tasks = (await resp.json()).tasks;
     } catch {
@@ -969,10 +943,21 @@
       const batchCheckIcon = selectedIds.has(String(t.id)) ? '✓' : '';
 
       // 延期任务不可编辑（只能删除）
-      const editAttr = isDeferred ? '' : `onclick="editTask('${t.id}')"`;
       const editBtn = isDeferred
         ? '<button class="btn-icon" style="opacity:0.3;cursor:not-allowed" title="延期任务不可编辑" disabled>✏️</button>'
         : `<button class="btn-icon" onclick="editTask('${t.id}')" title="编辑">✏️</button>`;
+
+      // 日期标签（inline，不换行）
+      let dateLabel = '';
+      if (t.date) {
+        const dt = new Date(t.date);
+        // 仅在有效日期时渲染标签，防止 Invalid Date 显示 NaN
+        if (!isNaN(dt.getTime())) {
+          const month = dt.getMonth() + 1;
+          const day = dt.getDate();
+          dateLabel = '<span class="tag cyan" style="font-size:10px;display:inline">[' + dt.getFullYear() + '年' + month + '月' + day + '日]</span>';
+        }
+      }
 
       return `
       <div class="task-item ${doneClass} ${deferredClass} ${selectedClass}" data-id="${t.id}">
@@ -980,10 +965,9 @@
         <div class="task-check ${doneClass}" onclick="toggleTask('${t.id}')">${checkIcon}</div>
         <div class="task-seq">${idx + 1}</div>
         <div class="task-body">
-          <div class="task-content">${escapeHtml(t.text || t.content || '')}</div>
+          <div class="task-content">${dateLabel} <span class="priority-badge ${priorityClass}">${priorityLabel}</span> ${escapeHtml(t.text || t.content || '')}</div>
           <div class="task-meta">
             ${tagHtml}
-            <span class="priority-badge ${priorityClass}">${priorityLabel}</span>
             ${sourceLabel}
             ${t.project ? `<span class="tag cyan">📁 ${escapeHtml(t.project)}</span>` : ''}
             ${t.notes ? `<span class="tag purple" data-notes="${escapeHtml(t.notes)}">💬</span>` : ''}
@@ -1088,20 +1072,21 @@
       let dateLabel = '';
       if (t.date) {
         const dt = new Date(t.date);
-        const month = dt.getMonth() + 1;
-        const day = dt.getDate();
-        dateLabel = '<span class="tag cyan" style="font-size:12px;display:inline">[' + month + '月' + day + '日]</span>';
+        if (!isNaN(dt.getTime())) {
+          const month = dt.getMonth() + 1;
+          const day = dt.getDate();
+          dateLabel = '<span class="tag cyan" style="font-size:10px;display:inline">[' + dt.getFullYear() + '年' + month + '月' + day + '日]</span>';
+        }
       }
 
-      return '<div class="task-item ' + doneClass + ' ' + deferredClass + ' ' + selectedClass + '" data-id="' + t.id + '">' +
+      return '<div class="task-item ' + doneClass + ' ' + deferredClass + ' ' + selectedClass + ' data-id="' + t.id + '">' +
         '<div class="task-batch-check ' + batchChecked + '" onclick="toggleBatchSelect(\'' + t.id + '\')">' + batchCheckIcon + '</div>' +
         '<div class="task-check ' + doneClass + '" onclick="toggleTask(\'' + t.id + '\')">' + checkIcon + '</div>' +
-        '<div class="task-seq">' + dateLabel + '</div>' +
+        '<div class="task-seq">' + (idx + 1) + '</div>' +
         '<div class="task-body">' +
-          '<div class="task-content">' + escapeHtml(t.text || t.content || '') + '</div>' +
+          '<div class="task-content">' + dateLabel + '<span class="priority-badge ' + priorityClass + '">' + priorityLabel + '</span> ' + escapeHtml(t.text || t.content || '') + '</div>' +
           '<div class="task-meta">' +
             tagHtml +
-            '<span class="priority-badge ' + priorityClass + '">' + priorityLabel + '</span>' +
             sourceLabel +
             (t.project ? '<span class="tag cyan">📁 ' + escapeHtml(t.project) + '</span>' : '') +
             (t.notes ? '<span class="tag purple" data-notes="' + escapeHtml(t.notes) + '">💬</span>' : '') +
@@ -1183,6 +1168,16 @@
     updateStats();
   }
 
+  // 校验 yyyy-MM-dd 格式，非法则返回空字符串
+  function validDateVal(val) {
+    if (!val) return '';
+    // 必须是 yyyy-MM-dd 格式，且为有效日期
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) return '';
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return '';
+    return val;
+  }
+
   // ===== 打开编辑弹窗 =====
   function editTask(id) {
     id = String(id);
@@ -1191,7 +1186,7 @@
     editingId = id;
 
     document.getElementById('e-content').value = t.text || t.content || '';
-    document.getElementById('e-date').value = t.date || '';
+    document.getElementById('e-date').value = validDateVal(t.date);
     document.getElementById('e-priority').value = t.priority || 'medium';
     document.getElementById('e-project').value = t.project || '';
     document.getElementById('e-tags').value = (t.tags || []).join(', ');
@@ -1307,7 +1302,6 @@
         tasks = tasks.filter(t => String(t.id) !== editingId);
         // 切换到新日期视图并重新加载
         const newDate = data.date;
-        document.getElementById('datePicker').value = newDate;
         // 重新加载新日期的任务列表（包含刚移动过来的任务）
         loadTasks();
       } else {
@@ -1341,23 +1335,11 @@
       }
     });
 
-    // 日期切换（同步到统一选择器，单日模式立即加载）
-    document.getElementById('datePicker').addEventListener('change', () => {
-      const date = document.getElementById('datePicker').value;
-      document.getElementById('exportDateFrom').value = date;
-      document.getElementById('exportDateTo').value = date;
-      updateQuickNavState();
-      if (!isRangeMode()) {
-        loadTasks(date);
-      }
-    });
-
     // 快速导航
     document.getElementById('btn-prev-day').addEventListener('click', () => navigateDate(-1));
     document.getElementById('btn-next-day').addEventListener('click', () => navigateDate(1));
     document.getElementById('btn-today').addEventListener('click', () => {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('datePicker').value = today;
       document.getElementById('exportDateFrom').value = today;
       document.getElementById('exportDateTo').value = today;
       updateQuickNavState();
@@ -1373,7 +1355,6 @@
       const item = e.target.closest('.dropdown-item');
       if (!item) return;
       const date = item.dataset.date;
-      document.getElementById('datePicker').value = date;
       document.getElementById('exportDateFrom').value = date;
       document.getElementById('exportDateTo').value = date;
       updateQuickNavState();
@@ -1406,7 +1387,6 @@
       updateQuickNavState();
       if (!isRangeMode()) {
         const date = document.getElementById('exportDateFrom').value;
-        document.getElementById('datePicker').value = date;
         loadTasks(date);
       }
     });
@@ -1414,7 +1394,6 @@
       updateQuickNavState();
       if (!isRangeMode()) {
         const date = document.getElementById('exportDateTo').value;
-        document.getElementById('datePicker').value = date;
         loadTasks(date);
       }
     });
@@ -1432,10 +1411,6 @@
 
     // 日期范围查询按钮
     document.getElementById('btnQueryRange').addEventListener('click', () => {
-      if (!isRangeMode()) {
-        const date = document.getElementById('exportDateFrom').value;
-        document.getElementById('datePicker').value = date;
-      }
       updateQuickNavState();
       queryRangeTasks();
     });
@@ -1488,37 +1463,7 @@
     setTimeout(() => { toast.classList.remove('show'); }, 2500);
   }
 
-  function showDailyExportModal() {
-    document.getElementById('dailyExportDateFrom').value = '';
-    document.getElementById('dailyExportDateTo').value = '';
-    document.getElementById('dailyExportModal').classList.add('show');
-  }
 
-  function closeDailyExportModal() {
-    document.getElementById('dailyExportModal').classList.remove('show');
-  }
-
-  function submitDailyExport() {
-    var dateFrom = document.getElementById('dailyExportDateFrom').value;
-    var dateTo = document.getElementById('dailyExportDateTo').value;
-    var url = '/export_daily';
-    var params = [];
-    if (dateFrom) params.push('date_from=' + encodeURIComponent(dateFrom));
-    if (dateTo) params.push('date_to=' + encodeURIComponent(dateTo));
-    if (params.length > 0) url += '?' + params.join('&');
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = '';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    closeDailyExportModal();
-  }
-
-  // 点击背景关闭导出弹窗
-  document.getElementById('dailyExportModal').addEventListener('click', function(e) {
-    if (e.target === this) closeDailyExportModal();
-  });
 
   // ===== 批量移动 =====
   async function batchMove() {
@@ -1526,11 +1471,20 @@
     if (!targetDate) { showToast('请选择目标日期', 'error'); return; }
     const ids = Array.from(selectedIds);
     document.getElementById('batchMoveModal').classList.remove('show');
+    let delayedTasks = [];
     try {
-      await fetch(API + '/batch_update', {
+      const resp = await fetch(API + '/batch_update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task_ids: ids, new_date: targetDate })
+      });
+      const result = await resp.json();
+      // 后端返回的延期任务列表，标记原任务为 delayed 状态
+      delayedTasks = result.delayed_tasks || [];
+      // 将被延期（原）的任务在本地标记为 delayed
+      delayedTasks.forEach(dt => {
+        const t = tasks.find(x => String(x.id) === String(dt.id));
+        if (t) t.status = 'delayed';
       });
     } catch {}
     const targetDt = new Date(targetDate);
@@ -1602,8 +1556,7 @@
   window.editTask = editTask;
   window.deleteTask = deleteTask;
   window.toggleBatchSelect = toggleBatchSelect;
-  window.showDailyExportModal = showDailyExportModal;
-  window.closeDailyExportModal = closeDailyExportModal;
+
 
   init();
 })();

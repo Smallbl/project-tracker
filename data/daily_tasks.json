@@ -4,7 +4,7 @@
       "id": "92",
       "done": true,
       "priority": "high",
-      "date": "2026-04-07",
+      "date": "2026-04-10",
       "content": "客户满意度等综合通知上线",
       "status": "completed",
       "completed_at": "2026-04-07 21:16:53.753860",
@@ -13,20 +13,6 @@
       "notes": "",
       "tags": [],
       "project": ""
-    },
-    {
-      "id": "93",
-      "done": true,
-      "priority": "high",
-      "date": "2026-04-03",
-      "content": "三处分成项目清单",
-      "source": "temp",
-      "source_dept": "招标三处",
-      "status": "completed",
-      "notes": "",
-      "tags": [],
-      "project": "数字化综合管理平台信创升级",
-      "completed_at": "2026-04-03 15:55:07.746698"
     },
     {
       "id": "94",
@@ -114,7 +100,7 @@
     {
       "id": 99,
       "content": "确认中招联合给到的报价费用",
-      "date": "2026-04-09",
+      "date": "2026-04-10",
       "status": "pending",
       "source": "temp",
       "source_dept": "中招联合",
@@ -130,45 +116,9 @@
       "done": false
     },
     {
-      "id": 101,
-      "content": "预开票数据处理",
-      "date": "2026-04-11",
-      "status": "pending",
-      "source": "planned",
-      "source_dept": "",
-      "priority": "medium",
-      "notes": "",
-      "tags": [
-        "重要"
-      ],
-      "project": "数字化综合管理平台信创升级",
-      "created_at": "2026-04-08 22:19:42.710610",
-      "completed_at": null,
-      "done": false,
-      "original_task_id": "97"
-    },
-    {
-      "id": 102,
-      "content": "预开票数据处理",
-      "date": "2026-04-09",
-      "status": "pending",
-      "source": "planned",
-      "source_dept": "",
-      "priority": "medium",
-      "notes": "",
-      "tags": [
-        "重要"
-      ],
-      "project": "数字化综合管理平台信创升级",
-      "created_at": "2026-04-08 22:21:26.757400",
-      "completed_at": null,
-      "done": false,
-      "original_task_id": "97"
-    },
-    {
       "id": 103,
       "content": "排查风险预警系统报错问题",
-      "date": "2026-04-09",
+      "date": "2026-04-10",
       "status": "pending",
       "source": "temp",
       "source_dept": "招标五处",
@@ -184,27 +134,9 @@
       "original_task_id": "96"
     },
     {
-      "id": 104,
-      "content": "排查风险预警系统报错问题",
-      "date": "2026-04-09",
-      "status": "pending",
-      "source": "temp",
-      "source_dept": "招标五处",
-      "priority": "high",
-      "notes": "",
-      "tags": [
-        "跟进"
-      ],
-      "project": "风险预警系统",
-      "created_at": "2026-04-08 22:21:57.044668",
-      "completed_at": null,
-      "done": false,
-      "original_task_id": "96"
-    },
-    {
       "id": 105,
       "content": "预开票数据处理",
-      "date": "2026-04-09",
+      "date": "2026-04-10",
       "status": "pending",
       "source": "planned",
       "source_dept": "",
@@ -299,7 +231,7 @@
       "id": 111,
       "content": "项目实施计划及其他项目权限问题修复",
       "date": "2026-04-09",
-      "status": "pending",
+      "status": "completed",
       "source": "temp",
       "source_dept": "技术中心",
       "priority": "medium",
@@ -307,8 +239,8 @@
       "tags": [],
       "project": "",
       "created_at": "2026-04-08 22:39:17.813849",
-      "completed_at": null,
-      "done": false,
+      "completed_at": "2026-04-09 22:33:19.317185",
+      "done": true,
       "original_task_id": "108"
     },
     {
@@ -346,7 +278,7 @@
     {
       "id": 114,
       "content": "商飞数据对接需求评估反馈：核对对接要求",
-      "date": "2026-04-12",
+      "date": "2026-04-10",
       "status": "pending",
       "source": "temp",
       "source_dept": "总经理",
@@ -396,7 +328,7 @@
       "id": 117,
       "content": "语音双通道问题测试",
       "date": "2026-04-09",
-      "status": "pending",
+      "status": "completed",
       "source": "temp",
       "source_dept": "技术中心",
       "priority": "high",
@@ -404,15 +336,15 @@
       "tags": [],
       "project": "",
       "created_at": "2026-04-08 22:44:31.806756",
-      "completed_at": null,
-      "done": false,
+      "completed_at": "2026-04-09 22:33:21.803717",
+      "done": true,
       "original_task_id": "116"
     },
     {
       "id": 118,
       "content": "官网测试接口准备，安排联测",
       "date": "2026-04-09",
-      "status": "pending",
+      "status": "completed",
       "source": "temp",
       "source_dept": "技术中心",
       "priority": "medium",
@@ -420,8 +352,8 @@
       "tags": [],
       "project": "",
       "created_at": "2026-04-08 22:44:31.806775",
-      "completed_at": null,
-      "done": false,
+      "completed_at": "2026-04-09 22:33:25.177497",
+      "done": true,
       "original_task_id": "115"
     },
     {
@@ -440,5 +372,5 @@
       "done": true
     }
   ],
-  "last_id": 119
+  "last_id": 120
 }
